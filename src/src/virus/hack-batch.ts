@@ -1,6 +1,6 @@
 import {NS} from "@ns";
 
 export async function main(ns: NS): Promise<void> {
-    await ns.sleep(parseInt(ns.args[1].toString()));
-    await ns.hack(ns.args[0].toString());
+    await ns.sleep(ns.args[1] as number);
+    await ns.hack(ns.args[0] as string);
 }
