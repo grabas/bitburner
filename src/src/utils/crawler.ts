@@ -1,5 +1,5 @@
 import { NS } from "@ns";
-import "/src/helper/prototypes";
+import "/src/utils/prototypes";
 
 export function autocomplete(data: any): string[] {
     data.flags([['verbose', false], ['refreshRate', 200]]);

@@ -2,7 +2,7 @@ import {NS} from "@ns";
 import { getAllServers, getServerById } from '../database/server.database.js';
 import { ServerDto } from '/src/entity/server/server.dto';
 import { ServerData } from "/src/entity/server/server.interfaces";
-import "/src/helper/prototypes";
+import "/src/utils/prototypes";
 
 export function autocomplete(data: any) {
     data.flags([['verbose', false], ['refreshRate', 200]]);
