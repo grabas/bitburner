@@ -1,5 +1,5 @@
 import {HacknetNodesFormulas, NS} from "@ns";
-import {getHacknetMultipliers} from "/src/helper/hacknet-multipliers";
+import {getHacknetMultipliers} from "/src/utils/hacknet-multipliers";
 
 export interface IRates {
     index: number,

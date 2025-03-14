@@ -1,7 +1,7 @@
 import { BrokerBase } from "/src/component/broker/broker.base.js"
 import {Hacknet, HacknetNodesFormulas, NS} from "@ns";
 import {HacknetNode, IRates} from "/src/entity/hacknet/hacknet-node";
-import {getHacknetMultipliers} from "/src/helper/hacknet-multipliers";
+import {getHacknetMultipliers} from "/src/utils/hacknet-multipliers";
 
 export async function main(ns: NS) {
     ns.disableLog("ALL");
