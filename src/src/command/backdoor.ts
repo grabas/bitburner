@@ -6,9 +6,11 @@ export async function main(ns: NS): Promise<void> {
     const crawler = new Crawler(ns);
     const targets: string[] = crawler
         .getNetwork()
-            .filter((host: string) => isValidFaction(host))
-            .filter((host: string) => ns.getServerRequiredHackingLevel(host) < ns.getHackingLevel())
-            .filter((host: string) => ns.hasRootAccess(host));
+            .filter((host: string) =>
+                isValidFaction(host) &&
+                ns.getServerRequiredHackingLevel(host) < ns.getHackingLevel() &&
+                ns.hasRootAccess(host)
+            )
 
     for (const target of targets) {
         crawler
