@@ -2,10 +2,10 @@ import { NS } from "@ns";
 import { Config } from "./config";
 import { Action } from "./action";
 import { Crawler } from "/src/utils/crawler";
-import { ServerRepository } from "/src/repository/serverRepository";
-import { getProgressBar } from "/src/utils/progressBar";
+import { ServerRepository } from "/src/repository/server.repository";
+import { getProgressBar } from "/src/utils/progress-bar";
 import { uuidv4 } from "/src/utils/uuidv4";
-import { prepare } from "/src/command/prepareTarget";
+import { prepare } from "/src/command/prepare-target";
 
 export class Manager {
     private readonly ns: NS;

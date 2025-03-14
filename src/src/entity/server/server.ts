@@ -1,9 +1,9 @@
 import { NS } from "@ns";
-import {MoneyData, RamData, SecurityData} from "./serverInterfaces";
+import {MoneyData, RamData, SecurityData} from "./server.interfaces";
 
-const RAM_RESERVE = 16;
-const HACKNET_PREFIX = "hacknet-server-";
-const PURCHASED_PREFIX = "pserv-";
+export const RAM_RESERVE = 16;
+export const HACKNET_PREFIX = "hacknet-server-";
+export const PURCHASED_PREFIX = "pserv-";
 
 export class Server {
     hostname: string;

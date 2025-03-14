@@ -1,6 +1,6 @@
 import {NS} from "@ns";
-import { main as buildDatabase } from '/src/command/buildServerDatabase';
-import { main as gainAccess } from '/src/command/gainAccess';
+import { main as buildDatabase } from '/src/command/build-server-database';
+import { main as gainAccess } from '/src/command/gain-access';
 
 export async function main(ns: NS): Promise<void> {
     await buildDatabase(ns).then(() => gainAccess(ns));

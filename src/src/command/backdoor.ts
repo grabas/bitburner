@@ -1,6 +1,6 @@
 import { NS } from "@ns";
 import { Crawler } from "/src/utils/crawler";
-import { isValidFaction } from "/src/enum/factionEnum";
+import { isValidFaction } from "/src/enum/faction.enum";
 
 export async function main(ns: NS): Promise<void> {
     const crawler = new Crawler(ns);

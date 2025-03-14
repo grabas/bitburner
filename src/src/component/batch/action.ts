@@ -1,7 +1,7 @@
 import { NS } from "@ns";
 import { getHackMultipler } from "./formulas";
 import { Config } from "./config";
-import { Scripts } from "/src/enum/scripts";
+import { ScriptsEnum } from "/src/enum/scripts.enum";
 
 interface BatchScript {
     path: string;
@@ -53,19 +53,19 @@ export class Action {
         const targetAmount = ns.getServerMaxMoney(target) * hackMultiplier;
 
         this.action = [{
-            script: Scripts.HACK_BATCH,
+            script: ScriptsEnum.HACK_BATCH,
             sleepTime: weakenTime - Config.TICK - ns.getHackTime(target),
             threads: Math.ceil(ns.hackAnalyzeThreads(target, targetAmount))
         }, {
-            script: Scripts.GROW_BATCH,
+            script: ScriptsEnum.GROW_BATCH,
             sleepTime: weakenTime + Config.TICK - ns.getGrowTime(target),
             threads: growThreads
         }, {
-            script: Scripts.WEAKEN_BATCH,
+            script: ScriptsEnum.WEAKEN_BATCH,
             sleepTime: 0,
             threads: weakenThreads
         }, {
-            script: Scripts.WEAKEN_BATCH,
+            script: ScriptsEnum.WEAKEN_BATCH,
             sleepTime: (2 * Config.TICK),
             threads: weakenThreads,
         }]

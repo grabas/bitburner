@@ -1,0 +1,30 @@
+volumes:
+  bitburner-sync-code:
+
+services:
+  bitburner-sync:
+    build:
+      context: ./
+      dockerfile: Dockerfile
+    volumes:
+      - bitburner-sync-code:/app
+    ports:
+      - '12525:12525'
+
+x-mutagen:
+  sync:
+    defaults:
+      ignore:
+        vcs: true
+    bitburner-sync-code:
+      alpha: './'
+      beta: 'volume://bitburner-sync-code'
+      mode: 'two-way-resolved'
+      ignore:
+        vcs: true
+        paths:
+          - 'out'
+          - '.git'
+      permissions:
+        defaultFileMode: 0644
+        defaultDirectoryMode: 0755

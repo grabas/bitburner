@@ -1,5 +1,4 @@
 import { NS } from "@ns";
-import {forwardRef} from "react";
 
 const PROGRAMS: string[] = [
     "BruteSSH.exe",

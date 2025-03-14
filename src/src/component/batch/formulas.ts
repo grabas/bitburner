@@ -1,6 +1,6 @@
 import {NS} from "@ns";
 import { Config } from "./config";
-import { Scripts } from "/src/enum/scripts";
+import { ScriptsEnum } from "/src/enum/scripts.enum";
 
 export const getHackMultipler = (ns: NS, target: string): number => {
     const entries = Array.from({ length: 299 }, (_, i) => ({
@@ -31,9 +31,9 @@ export function getBatchIncomePerSecond(ns: NS, target: string, hackMultiplier: 
     const growThreads = Math.ceil(ns.growthAnalyze(target, growMultiplier));
 
     const ramPerBatch =
-        hackThreads * Scripts.HACK_BATCH.size +
-        growThreads * Scripts.GROW_BATCH.size +
-        Math.ceil(growThreads * Config.WEAKEN_BUFFER) * Scripts.GROW_BATCH.size * 2;
+        hackThreads * ScriptsEnum.HACK_BATCH.size +
+        growThreads * ScriptsEnum.GROW_BATCH.size +
+        Math.ceil(growThreads * Config.WEAKEN_BUFFER) * ScriptsEnum.GROW_BATCH.size * 2;
 
     const maxBatchesByRam = Math.floor(availableRam / ramPerBatch);
     const maxBatchesByTime = Math.ceil(duration / Config.BATCH_SEPARATION);

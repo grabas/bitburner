@@ -1,102 +1,53 @@
-# Typescript template for Bitburner's Remote File API
-
-The official template for synchronizing Typescript/Javascript from your computer to the game.
-
-[Step by step install](BeginnersGuide.md)
-
-[Docker install guide](DockerGuide.md) (optional) 
-
-[Learn more about Typescript](https://www.typescriptlang.org/docs/)
-
 ## About
+This repository is basically a fork of the [Official Typescript Template](https://github.com/bitburner-official/typescript-template) that uses the Typescript compiler and the Remote File API system to synchronize Typescript to your game.
 
-This template uses the Typescript compiler and the Remote File API system to synchronize Typescript to your game.
-Due to the usage of the RFA system, it works with Web and Electron (Steam) versions of the game.
+I also took the liberty to implement dockerized environment using [Mutagen](https://mutagen.io) for Linux and Mac users.
+
+If you are a Windows user or you don't want to run in docker, please refer to this [setup guide](https://github.com/bitburner-official/typescript-template).
 
 ## Prerequisites
+[Mutagen](https://mutagen.io) is needed for syncing files between the container and your local machine.
 
-[Node.js](https://nodejs.org/en/download/) is needed for compiling typescript and installing dependencies.
+You can install it using [homebrew](https://brew.sh)
 
-[See here for step by step installation](BeginnersGuide.md) if you'd like help with installing Node and/or connecting to the game.
+```
+    brew install mutagen-io/mutagen/mutagen
+```
 
-Alternatively see [Docker install guide](DockerGuide.md) (optional) that installs nodejs and the Remote File API in an isolated container.
+
 
 ## Quick start
 
-Download the template to your computer and install everything it requires:
 ```
-git clone https://github.com/bitburner-official/typescript-template
-cd typescript-template
-npm i
-```
-
-### How to use this template
-
-Write all your typescript source code in the `/src` directory
-
-To autocompile and send changed files as you save, run `npm run watch` in a terminal.
-Have it running in the background so that it all happens automatically.
-
-For Bitburner to receive any files, you need to enter the port `npm run watch` logs to the terminal
-in the Remote API section of the game settings, and press the connect button.
-
-[See here for step by step installation](BeginnersGuide.md) if you'd like help with installing Node and/or connecting to the game.
-
-Alternatively see [Docker install guide](DockerGuide.md) (optional) that installs nodejs and the Remote File API in an isolated container.
-
-## Advanced
-### Imports
-
-To ensure both the game and typescript have no issues with import paths, your import statements should follow a few formatting rules:
-
-- Paths must be absolute from the root of `src/`, which will be equivalent to the root directory of your home drive
-- Paths must contain no leading slash
-- Paths must end with no file extension
-
-#### Examples:
-
-To import `helperFunction` from the file `helpers.ts` located in the directory `src/lib/`:
-
-```js
-import { helperFunction } from "lib/helpers";
+    git clone https://github.com/grabas/bitburner
+    cd bitburner
+    mutagen-compose up -d --build
 ```
 
-To import all functions from the file `helpers.ts` located in the `src/lib/` directory as the namespace `helpers`:
+You can monitor the logs using the following command:
 
-```js
-import * as helpers from "lib/helpers";
+```
+    mutagen-compose logs -f bitburner-sync
 ```
 
-To import `someFunction` from the file `main.ts` located in the `src/` directory:
+#### Then in game, go to Options -> Remote API -> type in the port: `12525` -> click connect. The icon should turn green and say it's online.
 
-```js
-import { someFunction } from "main";
+## Aliases
+You can use the following aliases to make your life easier:
+
+Execute in the game console
+
 ```
-
-### Debugging
-
-For debugging bitburner on Steam you will need to enable a remote debugging port. This can be done by rightclicking bitburner in your Steam library and selecting properties. There you need to add `--remote-debugging-port=9222` [Thanks @DarkMio]
-
-### Using React
-Some `ns` functions, like [`ns.printRaw()`](https://github.com/bitburner-official/bitburner-src/blob/dev/markdown/bitburner.ns.printraw.md) allows you to render React components into the game interface. 
-
-The game already exposes the `React` and `ReactDOM` objects globally, but in order to work with strongly typed versions in `.ts` files, you can use the included typings. To do this, use the following import:
-
-`import React, { ReactDOM } from '@react'`
-
-Support for jsx is also included, so if you use the `.tsx` file ending, you can do something like:
-
-```ts
-import { NS } from '@ns';
-import React from '@react';
-
-interface IMyContentProps {
-  name: string
-}
-
-const MyContent = ({name}: IMyContentProps) => <span>Hello {name}</span>;
-
-export default async function main(ns: NS){
-  ns.printRaw(<MyContent name="Your name"></MyContent>);
-}
+    alias cc="clear";
+    alias init="run /init.js";
+    alias play="run /play.js";
+    alias access="run /src/command/gainAccess.js";
+    alias get-server="run /src/repository/serverRepository.js";
+    alias path="run /src/utils/crawler.js";
+    alias solve="run /src/command/solveContracts.js";
+    alias monitor="run /src/utils/monitor.js";
+    alias attack="run /src/command/batchAttack.js";
+    alias batch-analyze="run /src/component/batch/analyze.js";
+    alias dw="connect darkweb; buy -a; home";
+    alias prep="run /src/command/prepareTarget.js";
 ```
