@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class MergeOverlappingIntervals implements ContractSolverInterface<number[][], number[][]> {
+export class MergeOverlappingIntervals implements SolverInterface<number[][], number[][]> {
     solve(intervals: number[][]): number[][] {
         intervals.sort((firstInterval, secondInterval) => firstInterval[0] - secondInterval[0]);
         const mergedIntervals: number[][] = [];

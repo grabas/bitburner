@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class GenerateIpAddresses implements ContractSolverInterface<string, string[]> {
+export class GenerateIpAddresses implements SolverInterface<string, string[]> {
     solve(data: string): string[] {
         const result: string[] = [];
         this.backtrack(data, 0, [], result);

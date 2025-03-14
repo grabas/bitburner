@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class LzDecompression implements ContractSolverInterface<string, string> {
+export class LzDecompression implements SolverInterface<string, string> {
     solve(encoded: string): string {
         let decoded = "";
         let pointer = 0;

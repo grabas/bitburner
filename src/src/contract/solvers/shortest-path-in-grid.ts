@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class ShortestPathInGrid implements ContractSolverInterface<number[][], string> {
+export class ShortestPathInGrid implements SolverInterface<number[][], string> {
     solve(grid: number[][]): string {
         const totalRows = grid.length;
         if (totalRows === 0) return "";

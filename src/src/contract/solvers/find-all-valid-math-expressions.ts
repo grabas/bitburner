@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class FindAllValidMathExpressions implements ContractSolverInterface<[string, number], string[]> {
+export class FindAllValidMathExpressions implements SolverInterface<[string, number], string[]> {
     solve([digits, target]: [string, number]): string[] {
         const results: string[] = [];
         const backtrack = (index: number, expression: string, currentValue: number, lastOperand: number) => {

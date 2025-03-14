@@ -1,14 +1,13 @@
 import {NS} from "@ns";
 import {Crawler} from "/src/utils/crawler";
-import {getSolver} from "/src/contract/master-solver";
+import {getSolver} from "/src/contract/solver.registry";
 
 export async function main(ns: NS) {
     ns.disableLog("ALL");
     ns.ui.openTail()
     const loop = ns.args[0] === "-l";
     const servers = (new Crawler(ns)).getNetwork()
-
-
+    
     do {
         servers
             .forEach(server => {

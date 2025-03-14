@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class SanitizeParenthesesInExpression implements ContractSolverInterface<string, string[]> {
+export class SanitizeParenthesesInExpression implements SolverInterface<string, string[]> {
     solve(expression: string): string[] {
         const isValid = (exp: string): boolean => {
             let balance = 0;

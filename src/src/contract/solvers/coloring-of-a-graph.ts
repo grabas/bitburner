@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class ColoringOfAGraph implements ContractSolverInterface<[number, number[][]], number[]> {
+export class ColoringOfAGraph implements SolverInterface<[number, number[][]], number[]> {
     solve(data: [number, number[][]]): number[] {
         const [numVertices, edges] = data;
         const adjacencyList: number[][] = Array.from({ length: numVertices }, () => []);

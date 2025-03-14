@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class AlgorithmicStockTrader implements ContractSolverInterface<number[], number> {
+export class AlgorithmicStockTrader implements SolverInterface<number[], number> {
     solve(data: number[]): number {
         let min = data[0];
         let maxProfit = 0;

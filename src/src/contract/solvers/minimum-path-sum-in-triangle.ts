@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class MinimumPathSumInTriangle implements ContractSolverInterface<number[][], number> {
+export class MinimumPathSumInTriangle implements SolverInterface<number[][], number> {
     solve(data: number[][]): number {
         const dp = data[data.length - 1].slice();
         for (let row = data.length - 2; row >= 0; row--) {

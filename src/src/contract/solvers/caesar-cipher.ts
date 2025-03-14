@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class CaesarCipher implements ContractSolverInterface<[string, number], string> {
+export class CaesarCipher implements SolverInterface<[string, number], string> {
     solve(data: [string, number]): string {
         const [s, k] = data;
         const alphabet = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase();

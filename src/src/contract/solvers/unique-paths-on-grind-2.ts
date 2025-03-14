@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class UniquePathsOnGrind2 implements ContractSolverInterface<number[][], number> {
+export class UniquePathsOnGrind2 implements SolverInterface<number[][], number> {
     solve(obstacleGrid: number[][]): number {
         if (obstacleGrid.length === 0 || obstacleGrid[0].length === 0) {
             return 0;

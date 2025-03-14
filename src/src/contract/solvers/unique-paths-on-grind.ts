@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class UniquePathsOnGrind implements ContractSolverInterface<[number, number], number> {
+export class UniquePathsOnGrind implements SolverInterface<[number, number], number> {
     solve(data: [number, number]): number {
         const [rows, columns] = data;
         let totalPaths = 1;

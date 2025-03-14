@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class TotalWaysSum2 implements ContractSolverInterface<[number, number[]], number> {
+export class TotalWaysSum2 implements SolverInterface<[number, number[]], number> {
     solve(data: [number, number[]]): number {
         const [targetSum, availableIntegers] = data;
         const waysToFormSum: number[] = Array(targetSum + 1).fill(0);

@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class LargestPrimeFactor implements ContractSolverInterface<number, number> {
+export class LargestPrimeFactor implements SolverInterface<number, number> {
     solve(inputNumber: number): number {
         let remainingNumber = inputNumber;
         let largestPrimeFactorFound = 1;

@@ -1,10 +1,10 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
 function isPowerOfTwo(n: number): boolean {
     return n > 0 && (n & (n - 1)) === 0;
 }
 
-export class IntegerToEncodedBinary implements ContractSolverInterface<number, string> {
+export class IntegerToEncodedBinary implements SolverInterface<number, string> {
     solve(decimalValue: number): string {
         const binaryString = decimalValue.toString(2);
         const dataLength = binaryString.length;

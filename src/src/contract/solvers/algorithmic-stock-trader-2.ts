@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class AlgorithmicStockTrader2 implements ContractSolverInterface<number[], number> {
+export class AlgorithmicStockTrader2 implements SolverInterface<number[], number> {
     solve(data: number[]): number {
         let maxProfit = 0;
         data.forEach((value, index) => {

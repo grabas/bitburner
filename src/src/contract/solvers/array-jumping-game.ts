@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class ArrayJumpingGame implements ContractSolverInterface<number[], number> {
+export class ArrayJumpingGame implements SolverInterface<number[], number> {
     solve(data: number[]): number {
         const n = data.length;
         let i = 0;

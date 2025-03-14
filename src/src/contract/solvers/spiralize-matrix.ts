@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class SpiralizeMatrix implements ContractSolverInterface<number[][], number[]> {
+export class SpiralizeMatrix implements SolverInterface<number[][], number[]> {
     solve(matrix: number[][]): number[] {
         const spiralOrder: number[] = [];
         let topBoundary = 0;

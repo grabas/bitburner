@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class VigenereCipher implements ContractSolverInterface<[string, string], string> {
+export class VigenereCipher implements SolverInterface<[string, string], string> {
     solve(data: [string, string]): string {
         const [s, k] = data;
         const key = k.repeat(Math.ceil(s.length / k.length)).slice(0, s.length);

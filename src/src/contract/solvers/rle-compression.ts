@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class RleCompression implements ContractSolverInterface<string, string> {
+export class RleCompression implements SolverInterface<string, string> {
     solve(input: string): string {
         if (input.length === 0) return "";
         let result = "";

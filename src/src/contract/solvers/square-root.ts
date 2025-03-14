@@ -1,6 +1,6 @@
-import { ContractSolverInterface } from '../contract-solver.interface.js';
+import { SolverInterface } from '../solver.interface.js';
 
-export class SquareRoot implements ContractSolverInterface<bigint, string> {
+export class SquareRoot implements SolverInterface<bigint, string> {
     solve(val: bigint): string {
         if (val < 0n) throw new Error("Negative input not allowed");
         const k = 2n;
