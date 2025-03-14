@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class SanitizeParenthesesInExpression implements SolverInterface<string, string[]> {
+export class SanitizeParenthesesInExpression implements ISolver<string, string[]> {
     solve(expression: string): string[] {
         const isValid = (exp: string): boolean => {
             let balance = 0;

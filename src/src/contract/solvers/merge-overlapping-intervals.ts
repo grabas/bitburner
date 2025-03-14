@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class MergeOverlappingIntervals implements SolverInterface<number[][], number[][]> {
+export class MergeOverlappingIntervals implements ISolver<number[][], number[][]> {
     solve(intervals: number[][]): number[][] {
         intervals.sort((firstInterval, secondInterval) => firstInterval[0] - secondInterval[0]);
         const mergedIntervals: number[][] = [];

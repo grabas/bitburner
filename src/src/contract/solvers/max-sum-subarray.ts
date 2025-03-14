@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class MaxSumSubarray implements SolverInterface<number[], number> {
+export class MaxSumSubarray implements ISolver<number[], number> {
     solve(data: number[]): number {
         let max = 0
         for (let i = 0; i < data.length; i++) {

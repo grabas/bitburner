@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class UniquePathsOnGrind2 implements SolverInterface<number[][], number> {
+export class UniquePathsOnGrind2 implements ISolver<number[][], number> {
     solve(obstacleGrid: number[][]): number {
         if (obstacleGrid.length === 0 || obstacleGrid[0].length === 0) {
             return 0;

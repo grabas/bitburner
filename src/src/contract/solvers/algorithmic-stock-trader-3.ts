@@ -1,7 +1,7 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 import { AlgorithmicStockTrader } from './algorithmic-stock-trader.js';
 
-export class AlgorithmicStockTrader3 implements SolverInterface<number[], number> {
+export class AlgorithmicStockTrader3 implements ISolver<number[], number> {
     solve(data: number[]): number {
         const solver = new AlgorithmicStockTrader();
 

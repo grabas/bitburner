@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class ArrayJumpingGame implements SolverInterface<number[], number> {
+export class ArrayJumpingGame implements ISolver<number[], number> {
     solve(data: number[]): number {
         const n = data.length;
         let i = 0;

@@ -7,7 +7,7 @@ export async function main(ns: NS) {
     ns.ui.openTail()
     const loop = ns.args[0] === "-l";
     const servers = (new Crawler(ns)).getNetwork()
-    
+
     do {
         servers
             .forEach(server => {

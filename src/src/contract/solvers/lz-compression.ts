@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class LzCompression implements SolverInterface<string, string> {
+export class LzCompression implements ISolver<string, string> {
     solve(plain: string): string {
         const create2DArray = (): (string | null)[][] =>
             Array.from({ length: 10 }, () => Array(10).fill(null));

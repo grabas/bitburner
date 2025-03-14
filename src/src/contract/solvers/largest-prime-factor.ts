@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class LargestPrimeFactor implements SolverInterface<number, number> {
+export class LargestPrimeFactor implements ISolver<number, number> {
     solve(inputNumber: number): number {
         let remainingNumber = inputNumber;
         let largestPrimeFactorFound = 1;

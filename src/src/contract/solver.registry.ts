@@ -1,4 +1,4 @@
-import { SolverInterface } from './solver.interface';
+import { ISolver } from './solver.interface';
 import { AlgorithmicStockTrader } from './solvers/algorithmic-stock-trader';
 import { AlgorithmicStockTrader2 } from "./solvers/algorithmic-stock-trader-2";
 import { AlgorithmicStockTrader3 } from "./solvers/algorithmic-stock-trader-3";
@@ -59,7 +59,7 @@ const solvers = [
     new LzCompression()
 ];
 
-const solverMap = new Map<string, SolverInterface<unknown, unknown>>();
-solvers.forEach(solver => solverMap.set(solver.getType(), solver as SolverInterface<unknown, unknown>))
+const solverMap = new Map<string, ISolver<unknown, unknown>>();
+solvers.forEach(solver => solverMap.set(solver.getType(), solver as ISolver<unknown, unknown>))
 
-export const getSolver = (solver: string):  SolverInterface<unknown, unknown> | undefined => solverMap.get(solver);
+export const getSolver = (solver: string):  ISolver<unknown, unknown> | undefined => solverMap.get(solver);

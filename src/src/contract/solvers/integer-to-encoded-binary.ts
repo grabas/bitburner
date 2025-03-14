@@ -1,10 +1,10 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
 function isPowerOfTwo(n: number): boolean {
     return n > 0 && (n & (n - 1)) === 0;
 }
 
-export class IntegerToEncodedBinary implements SolverInterface<number, string> {
+export class IntegerToEncodedBinary implements ISolver<number, string> {
     solve(decimalValue: number): string {
         const binaryString = decimalValue.toString(2);
         const dataLength = binaryString.length;

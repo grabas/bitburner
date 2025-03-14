@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class LzDecompression implements SolverInterface<string, string> {
+export class LzDecompression implements ISolver<string, string> {
     solve(encoded: string): string {
         let decoded = "";
         let pointer = 0;

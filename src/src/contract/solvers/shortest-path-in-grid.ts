@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class ShortestPathInGrid implements SolverInterface<number[][], string> {
+export class ShortestPathInGrid implements ISolver<number[][], string> {
     solve(grid: number[][]): string {
         const totalRows = grid.length;
         if (totalRows === 0) return "";

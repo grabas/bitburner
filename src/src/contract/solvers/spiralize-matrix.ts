@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class SpiralizeMatrix implements SolverInterface<number[][], number[]> {
+export class SpiralizeMatrix implements ISolver<number[][], number[]> {
     solve(matrix: number[][]): number[] {
         const spiralOrder: number[] = [];
         let topBoundary = 0;

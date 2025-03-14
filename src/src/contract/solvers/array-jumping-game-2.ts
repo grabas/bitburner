@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class ArrayJumpingGame2 implements SolverInterface<number[], number> {
+export class ArrayJumpingGame2 implements ISolver<number[], number> {
     solve(data: number[]): number {
         const totalPositions = data.length;
         if (totalPositions <= 1) return 0;

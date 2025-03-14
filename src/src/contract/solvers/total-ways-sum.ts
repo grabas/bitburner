@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class TotalWaysSum implements SolverInterface<number, number> {
+export class TotalWaysSum implements ISolver<number, number> {
     solve(inputNumber: number): number {
         const targetNumber = inputNumber;
         const waysToSum: number[] = new Array(targetNumber + 1).fill(0);

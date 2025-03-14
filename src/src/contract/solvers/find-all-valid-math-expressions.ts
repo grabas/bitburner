@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class FindAllValidMathExpressions implements SolverInterface<[string, number], string[]> {
+export class FindAllValidMathExpressions implements ISolver<[string, number], string[]> {
     solve([digits, target]: [string, number]): string[] {
         const results: string[] = [];
         const backtrack = (index: number, expression: string, currentValue: number, lastOperand: number) => {

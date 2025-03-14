@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class RleCompression implements SolverInterface<string, string> {
+export class RleCompression implements ISolver<string, string> {
     solve(input: string): string {
         if (input.length === 0) return "";
         let result = "";

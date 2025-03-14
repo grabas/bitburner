@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class UniquePathsOnGrind implements SolverInterface<[number, number], number> {
+export class UniquePathsOnGrind implements ISolver<[number, number], number> {
     solve(data: [number, number]): number {
         const [rows, columns] = data;
         let totalPaths = 1;

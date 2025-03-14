@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class GenerateIpAddresses implements SolverInterface<string, string[]> {
+export class GenerateIpAddresses implements ISolver<string, string[]> {
     solve(data: string): string[] {
         const result: string[] = [];
         this.backtrack(data, 0, [], result);

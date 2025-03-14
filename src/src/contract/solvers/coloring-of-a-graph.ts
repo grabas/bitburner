@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class ColoringOfAGraph implements SolverInterface<[number, number[][]], number[]> {
+export class ColoringOfAGraph implements ISolver<[number, number[][]], number[]> {
     solve(data: [number, number[][]]): number[] {
         const [numVertices, edges] = data;
         const adjacencyList: number[][] = Array.from({ length: numVertices }, () => []);

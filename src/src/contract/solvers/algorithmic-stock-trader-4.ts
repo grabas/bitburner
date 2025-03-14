@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class AlgorithmicStockTrader4 implements SolverInterface<[number, number[]], number> {
+export class AlgorithmicStockTrader4 implements ISolver<[number, number[]], number> {
     solve(data: [number, number[]]): number {
         const [k, prices] = data;
         const n = prices.length;

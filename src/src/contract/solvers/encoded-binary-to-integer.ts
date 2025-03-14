@@ -1,6 +1,6 @@
-import { SolverInterface } from '../solver.interface.js';
+import { ISolver } from '../solver.interface.js';
 
-export class EncodedBinaryToInteger implements SolverInterface<string, string> {
+export class EncodedBinaryToInteger implements ISolver<string, string> {
     solve(encoded: string): string {
         const bits: number[] = encoded.split("").map(ch => Number(ch));
         let errorIndex = 0;
