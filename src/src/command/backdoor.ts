@@ -1,13 +1,13 @@
 import { NS } from "@ns";
 import { Crawler } from "/src/utils/crawler";
-import { isValidFaction } from "/src/enum/faction.enum";
+import { isSpecialServer } from "/src/enum/faction.enum";
 
 export async function main(ns: NS): Promise<void> {
     const crawler = new Crawler(ns);
     const targets: string[] = crawler
         .getNetwork()
             .filter((host: string) =>
-                isValidFaction(host) &&
+                isSpecialServer(host) &&
                 ns.getServerRequiredHackingLevel(host) < ns.getHackingLevel() &&
                 ns.hasRootAccess(host)
             )

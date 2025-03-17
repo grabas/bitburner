@@ -1,22 +1,22 @@
 import { ISolver } from '../solver.interface.js';
-import { CodingContractName } from "@ns";
+import {CodingContractName} from "/src/enum/contract-names.enum";
 
 export class VigenereCipher implements ISolver<CodingContractName.EncryptionIIVigenereCipher> {
-    solve([k, s]: [string, string]): string {
+    solve([s, k]: [string, string]): string {
         const key = k.repeat(Math.ceil(s.length / k.length)).slice(0, s.length);
-        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-        const vigenereSquare = alphabet.split('').map((_, index) => {
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase()
+        const vinegereSquare = alphabet.split('').map((_, index) => {
             return alphabet.slice(index) + alphabet.slice(0, index);
-        });
+        })
 
         const result = s.split("").map((char, index) => {
             const rowIndex = alphabet.indexOf(key[index]);
-            const colIndex = alphabet.indexOf(char);
-            return rowIndex !== -1 && colIndex !== -1 ? vigenereSquare[rowIndex][colIndex] : char;
+            return vinegereSquare[rowIndex][alphabet.indexOf(char)];
         });
 
         return result.join('');
+
     }
 
     getType(): CodingContractName {

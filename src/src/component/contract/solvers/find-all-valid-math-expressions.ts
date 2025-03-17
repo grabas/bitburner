@@ -1,5 +1,5 @@
 import { ISolver } from '../solver.interface.js';
-import { CodingContractName } from "@ns";
+import {CodingContractName} from "/src/enum/contract-names.enum";
 
 export class FindAllValidMathExpressions implements ISolver<CodingContractName.FindAllValidMathExpressions> {
     solve([digits, target]: [string, number]): string[] {

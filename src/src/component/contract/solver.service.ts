@@ -1,6 +1,7 @@
 import {CodingContractObject, NS} from "@ns";
 import {Crawler} from "/src/utils/crawler";
 import {getSolver} from "/src/component/contract/solver.registry";
+import {CodingContractName} from "/src/enum/contract-names.enum";
 
 export async function solve(ns: NS, loop = false) {
     ns.ui.openTail()
@@ -26,7 +27,7 @@ export const solveContract = (ns: NS, contract: CodingContractObject): void => {
     const solver = getSolver(contract.type);
     if (!solver) return;
 
-    const result: string = contract.submit(`${solver.solve(contract.data)}`);
+    const result: string = contract.submit((solver.solve(contract.data)).toString());
     const message = result.length ? result : `Failed to solve contract ${contract.type}`
 
     ns.print(message);

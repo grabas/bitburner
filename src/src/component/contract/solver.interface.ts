@@ -1,4 +1,4 @@
-import {CodingContractAnswer, CodingContractData, CodingContractName, CodingContractSignatures} from "@ns";
+import {CodingContractName, CodingContractSignatures, CodingContractData, CodingContractAnswer} from "/src/enum/contract-names.enum";
 
 export interface ISolver<T extends keyof CodingContractSignatures> {
     solve(data: CodingContractData<T>): CodingContractAnswer<T>;

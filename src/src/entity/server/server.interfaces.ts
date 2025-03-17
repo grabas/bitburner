@@ -23,6 +23,7 @@ export interface ServerData {
     hostname: string;
     isHome: boolean;
     purchased: boolean;
+    cores: number;
     ram: RamData;
     security: SecurityData;
     money: MoneyData;

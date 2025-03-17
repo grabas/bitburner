@@ -1,5 +1,5 @@
 import { ISolver } from '../solver.interface.js';
-import { CodingContractName } from "@ns";
+import {CodingContractName} from "/src/enum/contract-names.enum";
 
 export class MinimumPathSumInTriangle implements ISolver<CodingContractName.MinimumPathSumInATriangle> {
     solve(triangle: number[][]): number {

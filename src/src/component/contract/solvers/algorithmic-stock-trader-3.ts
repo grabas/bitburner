@@ -1,6 +1,6 @@
 import { ISolver } from '../solver.interface.js';
 import { AlgorithmicStockTrader } from './algorithmic-stock-trader.js';
-import { CodingContractName } from "@ns";
+import {CodingContractName} from "/src/enum/contract-names.enum";
 
 export class AlgorithmicStockTrader3 implements ISolver<CodingContractName.AlgorithmicStockTraderIII> {
     solve(prices: number[]): number {

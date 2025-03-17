@@ -1,18 +1,31 @@
 import { NS } from "@ns";
 import { ServerRepository } from "/src/repository/server.repository";
-import { ScriptsEnum } from "/src/enum/scripts.enum";
+import {uuidv4} from "/src/utils/uuidv4";
+import {Action} from "/src/component/batch/action";
+
 
 export async function prepare(ns: NS, targetHostname: string): Promise<boolean> {
     const repository = new ServerRepository(ns);
-    const home = await repository.getById("home");
+    const host = await repository.getById("home");
     const target = await repository.getById(targetHostname);
-    ns.run(
-        ScriptsEnum.PREPARATOR.path,
-        Math.floor(home.getRamAvailable() / ScriptsEnum.PREPARATOR.size),
-        target.hostname,
-        target.security.min,
-        target.money.max
-    );
+
+    const batch = await Action.createPrepareActions(ns, target, host);
+
+    let part = 0;
+    const operationId = uuidv4();
+    batch.action.forEach((action) => {
+        ns.run(
+            action.script.path,
+            action.threads,
+            part++,
+            target.hostname,
+            action.sleepTime,
+            target.security.min,
+            action.duration ?? 0,
+            operationId
+        );
+    });
+
 
     while (!target.isPrepared()) {
         await ns.sleep(100);

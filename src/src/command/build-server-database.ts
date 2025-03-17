@@ -1,6 +1,6 @@
 import { NS } from "@ns";
 import { Crawler } from "/src/utils/crawler";
-import { Server } from "/src/entity/server/server";
+import { ServerEntity } from "/src/entity/server/server.entity";
 
 import {DATABASE_NAME, STORE_NAME} from "/src/database/server.database";
 
@@ -9,8 +9,7 @@ export async function main(ns: NS) {
 
     const servers = (new Crawler(ns))
         .getNetwork()
-        .map((hostname: string) => new Server(ns, hostname));
-    servers.push(new Server(ns, "home"));
+        .map((hostname: string) => new ServerEntity(ns.getServer(hostname)));
 
     const request = indexedDB.open(DATABASE_NAME, 1);
 
@@ -28,7 +27,7 @@ export async function main(ns: NS) {
             const store = txn.objectStore(STORE_NAME);
 
             store.clear().onsuccess = () => {
-                servers.forEach((server: Server) => store.put(server));
+                servers.forEach((server: ServerEntity) => store.put(server));
             };
 
             txn.oncomplete = () => ns.tprint("Database built!");

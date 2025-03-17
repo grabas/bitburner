@@ -1,11 +1,13 @@
 import { NS } from "@ns";
 import {MoneyData, RamData, SecurityData, ServerData} from "./server.interfaces";
+import {ServerConstants} from "/src/enum/server-constants.enum";
 
 export class ServerDto {
     #ns: NS;
     hostname: string;
     isHome: boolean;
     purchased: boolean;
+    cores: number;
     ram: RamData;
     security: SecurityData;
     money: MoneyData;
@@ -15,6 +17,7 @@ export class ServerDto {
         this.hostname = data.hostname;
         this.isHome = data.isHome;
         this.purchased = data.purchased;
+        this.cores = data.cores;
         this.ram = data.ram;
         this.security = data.security;
         this.money = data.money;
@@ -27,8 +30,8 @@ export class ServerDto {
         this.security.level = this.#ns.getServerSecurityLevel(this.hostname);
         this.money.available = this.#ns.getServerMoneyAvailable(this.hostname);
         this.ram.used = this.#ns.getServerUsedRam(this.hostname);
-        this.ram.max = this.#ns.getServerMaxRam(this.hostname);
-        this.ram.free = this.ram.max - this.ram.used;
+        this.ram.max = Math.max(this.#ns.getServerMaxRam(this.hostname) - (this.isHome ? ServerConstants.HomeComputerRamReselve : 0));
+        this.ram.free = Math.max(this.ram.max - this.ram.used, 0);
     }
 
     getSecurityLevel(): number {
