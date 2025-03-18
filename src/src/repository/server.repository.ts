@@ -61,7 +61,7 @@ export class ServerRepository {
 
     public async getMonetaryServers(): Promise<ServerDto[]> {
         const network = await this.getNetwork();
-        return network.filter(server => server.money.max > 0);
+        return network.filter(server => server.money.max > 0).sortBy("money.max");
     }
 
     public async getTargetableServers(): Promise<ServerDto[]> {

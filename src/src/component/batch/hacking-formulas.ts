@@ -13,9 +13,8 @@ export class HackingFormulas {
         this.ns = ns;
     }
 
-    public getWeakenTime = async (target: ServerDto): Promise<number> => {
-        const hackTime = await this.getHackTime(target);
-        return hackTime * 4;
+    public getWeakenTime = (target: ServerDto): number => {
+        return this.ns.getWeakenTime(target.hostname);
     }
 
     public getWeakenSleepTime = (multiplier = 0): number => {
@@ -28,22 +27,24 @@ export class HackingFormulas {
         return Math.max(Math.ceil(decrease / multiplier), 1);
     }
 
-    public getGrowTime = async (target: ServerDto): Promise<number> => {
-        const hackTime = await this.getHackTime(target);
-        return hackTime * 3.2;
+    public getGrowTime = (target: ServerDto): number => {
+        return this.ns.getGrowTime(target.hostname);
     }
 
-    public getGrowSleepTime = async (target: ServerDto): Promise<number> => {
-        return (await this.getWeakenTime(target)) + Config.TICK - (await this.getGrowTime(target));
+    public getGrowSleepTime = (target: ServerDto): number => {
+        return this.getWeakenTime(target) + Config.TICK - this.getGrowTime(target);
     }
 
     public getGrowSecurity = (growThreads: number): number => {
         return 2 * ServerConstants.ServerFortifyAmount * growThreads;
     }
 
-    public getHackSleepTime = async (target: ServerDto): Promise<number> => {
-        const hacktime = await this.getHackTime(target);
-        return (await this.getWeakenTime(target)) - Config.TICK - hacktime;
+    public getHackTime = (target: ServerDto): number => {
+        return this.ns.getHackTime(target.hostname);
+    }
+
+    public getHackSleepTime = (target: ServerDto): number => {
+        return this.getWeakenTime(target) - Config.TICK - this.getHackTime(target);
     }
 
     public getHackThreads = (target: ServerDto, multiplier: number): number => {
@@ -60,10 +61,11 @@ export class HackingFormulas {
     }
 
     public getHackMoney = (target: ServerDto, threads: number): number => {
-        return this.ns.hackAnalyze(target.hostname) * threads;
+        const percentMoneyHacked = this.ns.hackAnalyze(target.hostname) * threads;
+        return target.money.max * percentMoneyHacked;
     }
 
-    public getHackTime = async (target: ServerDto, playerHackingSkill?: number): Promise<number> => {
+    public hackTimeTest = async (target: ServerDto, playerHackingSkill?: number): Promise<number> => {
         const player = await getPlayerDto();
         const hackDifficulty = target.security.level;
         const requiredHackingSkill = target.security.levelRequired;
@@ -77,12 +79,10 @@ export class HackingFormulas {
         skillFactor /= (playerHackingSkill ?? player.skills.hacking) + baseSkill;
 
         const hackTimeMultiplier = 5;
-        const result = (hackTimeMultiplier * skillFactor) /
+        return (hackTimeMultiplier * skillFactor) /
                (player.mults.hacking_speed *
                     player.bitnode.multipliers.HackingSpeedMultiplier *
                     this.calculateIntelligenceBonus(player));
-
-        return result * 1000;
     }
 
     public calculateIntelligenceBonus = (player: PlayerDto, weight = 1): number => {
@@ -93,7 +93,14 @@ export class HackingFormulas {
         return 1 + (weight * Math.pow(effectiveIntelligence, 0.8)) / 600;
     }
 
-    public getGrowThreads = async (server: ServerDto, home: ServerDto, startMoney: number, minSecLevel = true): Promise<number> => {
+    public getGrowThreads = (target: ServerDto, home: ServerDto, hackMultiplier: number): number => {
+        const growthMultiplier = 1 / (1 - hackMultiplier);
+        const threads = this.ns.growthAnalyze(target.hostname, growthMultiplier, home.cores);
+
+        return Math.ceil(threads);
+    }
+
+    public getGrowThreadsTest = async (server: ServerDto, home: ServerDto, startMoney: number, minSecLevel = true): Promise<number> => {
         const cores = home.cores;
         const targetMoney = server.money.max;
 
@@ -137,7 +144,7 @@ export class HackingFormulas {
         }
 
         const serverGrowthPercentage = server.money.growth / 100;
-        const serverGrowthPercentageAdjusted = p.bitnode.multipliers.ServerGrowthRate * serverGrowthPercentage;
+        const serverGrowthPercentageAdjusted = serverGrowthPercentage * p.bitnode.multipliers.ServerGrowthRate;
 
         const coreBonus = 1 + (cores - 1) * (1 / 16);
         return adjGrowthLog * serverGrowthPercentageAdjusted * p.mults.hacking_grow * coreBonus * numServerGrowthCycles;
@@ -156,24 +163,24 @@ export class HackingFormulas {
         return best.multiplier;
     };
 
-    public getBatchIncomePerSecond = async (
+    public getBatchIncomePerSecond = (
         target: ServerDto,
         host: ServerDto,
         hackMultiplier: number
-    ): Promise<number | null> => {
+    ): number | null => {
         const availableRam = host.getRamAvailable();
         const targetAmount = target.money.max * hackMultiplier;
         const hackThreads = this.getHackThreads(target, hackMultiplier);
 
         if (hackThreads === -1) return null;
 
-        const growThreads = await this.getGrowThreads(
+        const growThreads = this.getGrowThreads(
             target,
             host,
-            this.getHackMoney(target, hackThreads)
+            hackMultiplier
         );
 
-        const weakenTime = await this.getWeakenTime(target);
+        const weakenTime = this.getWeakenTime(target);
         const duration = weakenTime + 2 * Config.TICK;
         const hackRam = hackThreads * ScriptsEnum.HACK_BATCH.size;
         const growRam = growThreads * ScriptsEnum.GROW_BATCH.size;

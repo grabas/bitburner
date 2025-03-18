@@ -35,187 +35,75 @@ export class Action {
     public readonly income: Income;
     public readonly moneyCapacity: number;
 
-    private constructor(
-        target: ServerDto,
-        host: ServerDto,
-        hackingFormulas: HackingFormulas,
-        actionSteps: BatchActionStep[],
-        duration: number,
-        ramPerBatch: number,
-        batchSize: number,
-        totalRam: number,
-        cycleDuration: number,
-        targetAmount: number,
-        income: Income,
-        moneyCapacity: number
-    ) {
+    constructor(ns: NS, target: ServerDto, host: ServerDto) {
+        const hackingFormulas = new HackingFormulas(ns);
+
         this.target = target;
         this.host = host;
         this.hackChance = hackingFormulas.getHackChance(target);
-        this.action = actionSteps;
-        this.duration = duration;
-        this.ramPerBatch = ramPerBatch;
-        this.batchSize = batchSize;
-        this.totalRam = totalRam;
-        this.cycleDuration = cycleDuration;
-        this.targetAmount = targetAmount;
-        this.income = income;
-        this.moneyCapacity = moneyCapacity;
-    }
 
-    static async create(ns: NS, target: ServerDto, host: ServerDto): Promise<Action> {
-        const hackingFormulas = new HackingFormulas(ns);
 
         const multiplier = hackingFormulas.getHackMultiplier(target, host);
         const targetAmount = target.money.max * multiplier;
 
         const hackingThreads = hackingFormulas.getHackThreads(target, multiplier);
-        const growThreads = await hackingFormulas.getGrowThreads(
-            target,
-            host,
-            hackingFormulas.getHackMoney(target, hackingThreads)
-        );
-        const weakenTime = await hackingFormulas.getWeakenTime(target);
+        const growThreads = hackingFormulas.getGrowThreads(target, host, multiplier);
+        const weakenTime = hackingFormulas.getWeakenTime(target);
 
-        const actionSteps: BatchActionStep[] = [
-            {
-                script: ScriptsEnum.HACK_BATCH,
-                sleepTime: await hackingFormulas.getHackSleepTime(target),
-                threads: hackingThreads,
-                duration: await hackingFormulas.getHackTime(target),
-            },
-            {
-                script: ScriptsEnum.GROW_BATCH,
-                sleepTime: await hackingFormulas.getGrowSleepTime(target),
-                threads: growThreads,
-                duration: await hackingFormulas.getGrowTime(target),
-            },
-            {
-                script: ScriptsEnum.WEAKEN_BATCH,
-                sleepTime: hackingFormulas.getWeakenSleepTime(),
-                threads: hackingFormulas.getWeakenThreads(
-                    target,
-                    host,
-                    hackingFormulas.getHackSecurity(hackingThreads)
-                ),
-                duration: weakenTime,
-            },
-            {
-                script: ScriptsEnum.WEAKEN_BATCH,
-                sleepTime: hackingFormulas.getWeakenSleepTime(2),
-                threads: hackingFormulas.getWeakenThreads(
-                    target,
-                    host,
-                    hackingFormulas.getGrowSecurity(growThreads)
-                ),
-                duration: weakenTime,
-            },
-        ];
+        this.action = [{
+            script: ScriptsEnum.HACK_BATCH,
+            sleepTime: hackingFormulas.getHackSleepTime(target),
+            threads: hackingThreads,
+            duration: hackingFormulas.getHackTime(target)
+        }, {
+            script: ScriptsEnum.GROW_BATCH,
+            sleepTime: hackingFormulas.getGrowSleepTime(target),
+            threads: growThreads,
+            duration: hackingFormulas.getGrowTime(target)
+        }, {
+            script: ScriptsEnum.WEAKEN_BATCH,
+            sleepTime: hackingFormulas.getWeakenSleepTime(),
+            threads: hackingFormulas.getWeakenThreads(
+                target,
+                host,
+                hackingFormulas.getHackSecurity(hackingThreads)
+            ),
+            duration: weakenTime
+        }, {
+            script: ScriptsEnum.WEAKEN_BATCH,
+            sleepTime: hackingFormulas.getWeakenSleepTime(2),
+            threads: hackingFormulas.getWeakenThreads(
+                target,
+                host,
+                hackingFormulas.getGrowSecurity(growThreads)
+            ),
+            duration: weakenTime
+        }]
 
-        const duration = weakenTime + 2 * Config.TICK;
-        const ramPerBatch = parseFloat(
-            actionSteps.reduce((acc, action) => acc + action.script.size * action.threads, 0).toFixed(2)
+        this.duration = weakenTime + 2 * Config.TICK;
+        this.ramPerBatch = parseFloat(this.action.reduce((acc, action) => {
+            return acc + action.script.size * action.threads;
+        }, 0).toFixed(2));
+
+        this.batchSize = Math.min(
+            Math.floor(this.getAvailableRam() / this.ramPerBatch),
+            Math.ceil(this.duration / Config.BATCH_SEPARATION)
         );
 
-        const batchSize = Math.min(
-            Math.floor((host.ram.max - Config.SERVER_RESERVE) / ramPerBatch),
-            Math.ceil(duration / Config.BATCH_SEPARATION)
-        );
+        this.totalRam = parseFloat((this.ramPerBatch * this.batchSize).toFixed(2));
+        this.cycleDuration = (this.batchSize - 1) * Config.BATCH_SEPARATION + this.duration + Config.TIME_BUFFER
 
-        const totalRam = parseFloat((ramPerBatch * batchSize).toFixed(2));
-        const cycleDuration = (batchSize - 1) * Config.BATCH_SEPARATION + duration + Config.TIME_BUFFER;
+        this.targetAmount = targetAmount
+        this.moneyCapacity = target.getMoneyAvailable() / target.money.max * 100
 
-        const moneyCapacity = (target.getMoneyAvailable() / target.money.max) * 100;
-        const incomePerCycle = batchSize * targetAmount;
-        const income: Income = {
+        const incomePerCycle = this.batchSize * targetAmount
+        this.income = {
             perCycle: incomePerCycle,
-            perSecond: incomePerCycle / (cycleDuration / 1000),
-        };
-
-        return new Action(
-            target,
-            host,
-            hackingFormulas,
-            actionSteps,
-            duration,
-            ramPerBatch,
-            batchSize,
-            totalRam,
-            cycleDuration,
-            targetAmount,
-            income,
-            moneyCapacity
-        );
+            perSecond: incomePerCycle / (this.cycleDuration / 1000)
+        }
     }
 
-    static async createPrepareActions(ns: NS, target: ServerDto, host: ServerDto): Promise<Action> {
-        const hackingFormulas = new HackingFormulas(ns);
-
-        const growThreads = await hackingFormulas.getGrowThreads(target, host, target.getMoneyAvailable());
-        const weakenTime = await hackingFormulas.getWeakenTime(target);
-
-        let actionSteps: BatchActionStep[] = [];
-        if (growThreads === 0) {
-            actionSteps = [{
-                script: ScriptsEnum.WEAKEN_BATCH,
-                sleepTime: hackingFormulas.getWeakenSleepTime(),
-                threads: hackingFormulas.getWeakenThreads(target, host) * 2,
-                duration: weakenTime
-            }]
-        } else {
-            actionSteps = [{
-                script: ScriptsEnum.GROW_BATCH,
-                sleepTime: await hackingFormulas.getGrowSleepTime(target),
-                threads: growThreads,
-                duration: await hackingFormulas.getGrowTime(target)
-            }, {
-                script: ScriptsEnum.WEAKEN_BATCH,
-                sleepTime: hackingFormulas.getWeakenSleepTime(),
-                threads: hackingFormulas.getWeakenThreads(target, host) * 2,
-                duration: weakenTime
-            }, {
-                script: ScriptsEnum.WEAKEN_BATCH,
-                sleepTime: hackingFormulas.getWeakenSleepTime(2),
-                threads: hackingFormulas.getWeakenThreads(
-                    target,
-                    host,
-                    hackingFormulas.getGrowSecurity(growThreads)
-                ) ,
-                duration: weakenTime
-            }]
-        }
-
-        const duration = weakenTime + 2 * Config.TICK;
-        const ramPerBatch = parseFloat(
-            actionSteps.reduce((acc, action) => acc + action.script.size * action.threads, 0).toFixed(2)
-        );
-
-        const batchSize = Math.min(
-            Math.floor((host.ram.max - Config.SERVER_RESERVE) / ramPerBatch),
-            Math.ceil(duration / Config.BATCH_SEPARATION)
-        );
-
-        const totalRam = parseFloat((ramPerBatch * batchSize).toFixed(2));
-        const cycleDuration = (batchSize - 1) * Config.BATCH_SEPARATION + duration + Config.TIME_BUFFER;
-
-        const moneyCapacity = (target.getMoneyAvailable() / target.money.max) * 100;
-
-        return new Action(
-            target,
-            host,
-            hackingFormulas,
-            actionSteps,
-            duration,
-            ramPerBatch,
-            batchSize,
-            totalRam,
-            cycleDuration,
-            0,
-            {
-                perCycle: 0,
-                perSecond: 0,
-            },
-            moneyCapacity
-        );
+    private getAvailableRam(): number {
+        return this.host.ram.max - Config.SERVER_RESERVE;
     }
 }

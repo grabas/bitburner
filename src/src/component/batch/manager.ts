@@ -28,7 +28,7 @@ export class Manager {
         do {
             await this.prepareTarget(this.ns, target);
 
-            const batch = await Action.create(this.ns, await this.repository.getById(target), host);
+            const batch = new Action(this.ns, await this.repository.getById(target), host);
             this.#printLog(batch, true);
             for (let i = 0; i < batch.batchSize; i++) {
                 batch.action.forEach((action) => {
@@ -54,7 +54,7 @@ export class Manager {
         const server = await this.repository.getById(target);
         const host = await this.repository.getById(this.ns.getHostname());
         if (!server.isPrepared()) {
-            this.#printLog(await Action.create(this.ns, await this.repository.getById(target), host), false, true);
+            this.#printLog(new Action(this.ns, await this.repository.getById(target), host), false, true);
             await prepare(ns, target);
         }
     }
