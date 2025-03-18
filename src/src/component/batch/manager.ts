@@ -20,9 +20,9 @@ export class Manager {
         const host = await this.repository.getById(this.ns.getHostname());
         const operationId = uuidv4();
 
-        this.ns.run("/src/utils/monitor-batch-desync.js", 1, "grow", operationId);
-        this.ns.run("/src/utils/monitor-batch-desync.js", 1, "hack", operationId);
-        this.ns.run("/src/utils/monitor-batch-desync.js", 1, "weaken", operationId);
+        //this.ns.run("/src/utils/monitor-batch-desync.js", 1, "grow", operationId);
+        //this.ns.run("/src/utils/monitor-batch-desync.js", 1, "hack", operationId);
+        //this.ns.run("/src/utils/monitor-batch-desync.js", 1, "weaken", operationId);
 
         let batchId = 0
         do {

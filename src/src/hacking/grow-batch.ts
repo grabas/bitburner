@@ -3,26 +3,26 @@ import {FileLogger} from "/src/logger/file.logger";
 import {LoggerPrefixes} from "/src/enum/logger-prefixes.enum";
 
 export async function main(ns: NS): Promise<void> {
-    const scriptStart = Date.now();
+    //const scriptStart = Date.now();
 
-    const id = ns.args[0] as number;
+    //const id = ns.args[0] as number;
     const target = ns.args[1] as string;
     const sleepTime = ns.args[2] as number;
     const minSecLevel = ns.args[3] as number;
 
     await ns.sleep(sleepTime);
 
+    //const serverSecurity = ns.getServerSecurityLevel(target) - ns.getServerMinSecurityLevel(target);
     while(ns.getServerSecurityLevel(target) !== minSecLevel) {
         await ns.sleep(1)
     }
 
-    const operationsStart = Date.now();
+    //const operationsStart = Date.now();
     await ns.grow(target);
-    const duration = Date.now() - operationsStart;
+    //const duration = Date.now() - operationsStart;
 
-    const serverSecurity = ns.getServerSecurityLevel(target) - ns.getServerMinSecurityLevel(target);
 
-    (new FileLogger(ns))
+    /*(new FileLogger(ns))
         .log(LoggerPrefixes.BATCHATTACK + ns.args[5] as string,
             "," + JSON.stringify({
                 id: id,
@@ -34,5 +34,5 @@ export async function main(ns: NS): Promise<void> {
                 actualDuration: duration,
                 totalDuration: Date.now() - scriptStart,
                 scriptStart: scriptStart,
-            }, null, 2));
+            }, null, 2));*/
 }

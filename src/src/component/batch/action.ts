@@ -34,6 +34,7 @@ export class Action {
     public readonly targetAmount: number;
     public readonly income: Income;
     public readonly moneyCapacity: number;
+    public readonly multiplier: number;
 
     constructor(ns: NS, target: ServerDto, host: ServerDto) {
         const hackingFormulas = new HackingFormulas(ns);
@@ -44,6 +45,7 @@ export class Action {
 
 
         const multiplier = hackingFormulas.getHackMultiplier(target, host);
+        this.multiplier = multiplier;
         const targetAmount = target.money.max * multiplier;
 
         const hackingThreads = hackingFormulas.getHackThreads(target, multiplier);
