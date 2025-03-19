@@ -1,10 +1,8 @@
 import {CodingContractObject, NS} from "@ns";
 import {Crawler} from "/src/utils/crawler";
 import {getSolver} from "/src/component/contract/solver.registry";
-import {CodingContractName} from "/src/enum/contract-names.enum";
 
 export async function solve(ns: NS, loop = false) {
-    ns.ui.openTail()
     ns.disableLog("ALL");
 
     do {
@@ -23,13 +21,32 @@ const getContracts = (ns: NS): CodingContractObject[] => {
         ).flat();
 }
 
-export const solveContract = (ns: NS, contract: CodingContractObject): void => {
+export const solveContract = (ns: NS, contract: CodingContractObject, safe = true, verbose = true): boolean => {
     const solver = getSolver(contract.type);
-    if (!solver) return;
+    if (!solver) return false;
 
-    const result: string = contract.submit((solver.solve(contract.data)).toString());
-    const message = result.length ? result : `Failed to solve contract ${contract.type}`
+    if (safe && contract.numTriesRemaining() <= 2) {
+        if (verbose) {
+            ns.print(`Skipping contract ${contract.type} with ${contract.numTriesRemaining()} tries remaining`);
+        }
+        return false;
+    }
 
-    ns.print(message);
-    ns.toast(message, result.length ? "success" : "error");
+    const result: string = contract.submit(serialize(solver.solve(contract.data)));
+    const success = result.length > 0;
+    const message = success? result : `Failed to solve contract ${contract.type}`
+
+    if (verbose) {
+        ns.print(message);
+        ns.toast(message, success ? "success" : "error");
+    }
+
+    return success;
+}
+
+const serialize = (data: any): string => {
+    const type = typeof data;
+    if (type === "string") return data;
+    if (type === "number" || type === "bigint" || type === "boolean") return data.toString();
+    return JSON.stringify(data);
 }

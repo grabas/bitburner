@@ -3,7 +3,7 @@ import {MoneyData, RamData, SecurityData, ServerData} from "./server.interfaces"
 import {ServerConstants} from "/src/enum/server-constants.enum";
 
 export class ServerDto {
-    #ns: NS;
+    ns: NS;
     hostname: string;
     isHome: boolean;
     purchased: boolean;
@@ -13,7 +13,7 @@ export class ServerDto {
     money: MoneyData;
 
     constructor(ns: NS, data: ServerData) {
-        this.#ns = ns;
+        this.ns = ns;
         this.hostname = data.hostname;
         this.isHome = data.isHome;
         this.purchased = data.purchased;
@@ -25,13 +25,15 @@ export class ServerDto {
         this.refresh();
     }
 
-    refresh(): void {
-        this.security.access = this.#ns.hasRootAccess(this.hostname);
-        this.security.level = this.#ns.getServerSecurityLevel(this.hostname);
-        this.money.available = this.#ns.getServerMoneyAvailable(this.hostname);
-        this.ram.used = this.#ns.getServerUsedRam(this.hostname);
-        this.ram.max = Math.max(this.#ns.getServerMaxRam(this.hostname) - (this.isHome ? ServerConstants.HomeComputerRamReselve : 0));
+    refresh(): ServerDto {
+        this.security.access = this.ns.hasRootAccess(this.hostname);
+        this.security.level = this.ns.getServerSecurityLevel(this.hostname);
+        this.money.available = this.ns.getServerMoneyAvailable(this.hostname);
+        this.ram.used = this.ns.getServerUsedRam(this.hostname);
+        this.ram.max = Math.max(this.ns.getServerMaxRam(this.hostname) - (this.isHome ? ServerConstants.HomeComputerRamReselve : 0), 0);
         this.ram.free = Math.max(this.ram.max - this.ram.used, 0);
+
+        return this;
     }
 
     getSecurityLevel(): number {
@@ -62,6 +64,6 @@ export class ServerDto {
     }
 
     print(): void {
-        this.#ns.tprint(JSON.stringify(this, null, 2));
+        this.ns.tprint(JSON.stringify(this, null, 2));
     }
 }

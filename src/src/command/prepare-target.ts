@@ -11,11 +11,17 @@ export async function prepare(ns: NS, targetHostname: string): Promise<boolean> 
     const target = await repository.getById(targetHostname);
 
     const hackingFormulas = new HackingFormulas(ns);
-    const growThreads = hackingFormulas.getGrowThreads(target, host, target.getMoneyAvailable());
+
+    let growThreads = hackingFormulas.getGrowThreads(target, host, target.getMoneyAvailable());
+
+    if (growThreads * ScriptsEnum.GROW_BATCH.size > host.getRamAvailable()) {
+        growThreads = Math.floor(host.getRamAvailable() / ScriptsEnum.GROW_BATCH.size * 0.5);
+    }
+
     const weakenTime = hackingFormulas.getWeakenTime(target);
 
     let action = [];
-    if (growThreads === 0) {
+    if (target.getMoneyAvailable() === target.money.max) {
         action = [{
             script: ScriptsEnum.WEAKEN_BATCH,
             sleepTime: hackingFormulas.getWeakenSleepTime(),
@@ -31,7 +37,7 @@ export async function prepare(ns: NS, targetHostname: string): Promise<boolean> 
         }, {
             script: ScriptsEnum.WEAKEN_BATCH,
             sleepTime: hackingFormulas.getWeakenSleepTime(),
-            threads: hackingFormulas.getWeakenThreads(target, host) * 2,
+            threads: hackingFormulas.getWeakenThreads(target, host),
             duration: weakenTime
         }, {
             script: ScriptsEnum.WEAKEN_BATCH,
@@ -40,15 +46,17 @@ export async function prepare(ns: NS, targetHostname: string): Promise<boolean> 
                 target,
                 host,
                 hackingFormulas.getGrowSecurity(growThreads)
-            ) * 2,
+            ),
             duration: weakenTime
         }]
     }
 
     let part = 0;
     const operationId = uuidv4();
+
+    const pids: number[] = []
     action.forEach((action) => {
-        ns.run(
+        const pid = ns.run(
             action.script.path,
             action.threads,
             part++,
@@ -56,12 +64,21 @@ export async function prepare(ns: NS, targetHostname: string): Promise<boolean> 
             action.sleepTime,
             target.security.min,
             action.duration ?? 0,
-            operationId
+            operationId,
+            0
         );
+
+        pids.push(pid);
     });
 
 
     while (!target.isPrepared()) {
+        const allScriptsFinished = pids.map((pid) => ns.isRunning(pid)).every((isRunning) => !isRunning);
+
+        if (allScriptsFinished) {
+            await main(ns);
+        }
+
         await ns.sleep(100);
     }
 

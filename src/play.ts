@@ -1,14 +1,19 @@
 import {NS} from "@ns";
 import {ServerRepository} from "/src/repository/server.repository";
-import {Action} from "/src/component/batch/action";
 import {getSave} from "/src/database/save.database";
-import {HackingFormulas} from "/src/component/batch/hacking-formulas";
-import {HackingFormulasNew} from "/src/component/batch/hacking-formulas.new";
+import {HackingFormulas} from "/src/component/batch/batch.formulas";
+import {cDocument} from "lib/react";
+import {uuidv4} from "/src/utils/uuidv4";
+import {BatchConfig} from "/src/component/batch/batch.config";
+import {prepare} from "/src/command/prepare-target";
+import {printLog} from "/src/component/batch/batch.monitor";
+import {getSolver} from "/src/component/contract/solver.registry";
+import {CodingContractName} from "/src/enum/contract-names.enum";
+import {solveContract} from "/src/component/contract/solver.service";
+import {Batch} from "/src/component/batch/batch";
+import {ServerConstants} from "/src/enum/server-constants.enum";
 
-export async function main(ns: NS): Promise<void> {
-    const repo = new ServerRepository(ns);
-
-    print(ns, (await repo.getMonetaryServers())[0])
+export async function main(ns: NS, print = (data: any) => ns.tprint(JSON.stringify(data, null, 2))): Promise<void> {
+    print(["hello", "world"]);
 }
 
-const print = (ns: NS, string: any) => ns.tprint(JSON.stringify(string, null, 2));

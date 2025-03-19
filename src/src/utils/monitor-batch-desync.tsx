@@ -42,7 +42,6 @@ export async function main(ns: NS) {
     ReactDOM.render(
         <DraggableWindow title={`${type} Desync`} containerId={graphContainer.id}>
             <LiveChart
-                title="Batch Desync Chart"
                 source={getBatchData}
                 transform={(data) => transformBatchData(data, type)}
                 refreshInterval={1000}

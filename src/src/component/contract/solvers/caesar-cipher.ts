@@ -3,11 +3,13 @@ import {CodingContractName} from "/src/enum/contract-names.enum";
 
 export class CaesarCipher implements ISolver<CodingContractName.EncryptionICaesarCipher> {
     solve([s, k]: [string, number]): string {
-        const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        const shiftedAlphabet = alphabet.slice(k % 26) + alphabet.slice(0, k % 26);
+        const alphabet = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase();
+
+        const n = alphabet.length - k;
+        const shiftedAlphabet = alphabet.slice(n) + alphabet.slice(0, n);
 
         return s.split('').map(char => {
-            const index = alphabet.indexOf(char.toUpperCase());
+            const index = alphabet.indexOf(char);
             return index === -1 ? char : shiftedAlphabet[index];
         }).join('');
     }

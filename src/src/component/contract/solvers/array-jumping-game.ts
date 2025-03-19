@@ -1,14 +1,17 @@
 import { ISolver } from '../solver.interface.js';
-import {CodingContractName} from "/src/enum/contract-names.enum";
+import { CodingContractName } from "/src/enum/contract-names.enum";
 
 export class ArrayJumpingGame implements ISolver<CodingContractName.ArrayJumpingGame> {
     solve(data: number[]): 1 | 0 {
         const n = data.length;
-        let i = 0;
-        for (let reach = 0; i < n && i <= reach; ++i) {
-            reach = Math.max(i + data[i], reach);
+        let reach = 0;
+
+        for (let i = 0; i < n && i <= reach; i++) {
+            reach = Math.max(reach, i + data[i]);
+            if (reach >= n - 1) return 1;
         }
-        return i === n ? 1 : 0;
+
+        return 0;
     }
 
     getType(): CodingContractName {

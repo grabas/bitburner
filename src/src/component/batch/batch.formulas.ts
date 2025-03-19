@@ -1,10 +1,11 @@
 import {NS, Player} from "@ns";
 import {ServerDto} from "/src/entity/server/server.dto";
-import {Config} from "/src/component/batch/config";
+import {BatchConfig} from "/src/component/batch/batch.config";
 import {ServerConstants} from "/src/enum/server-constants.enum";
 import {ScriptsEnum} from "/src/enum/scripts.enum";
 import {getBitnode} from "/src/repository/bitnode.repository";
 import {Bitnode} from "/src/entity/bitnode/bitnode";
+import {Batch} from "/src/component/batch/batch";
 
 export class HackingFormulas{
     protected readonly ns: NS;
@@ -15,13 +16,22 @@ export class HackingFormulas{
         this.bitnode = getBitnode();
     }
 
-    public getWeakenTime = (target: ServerDto): number => {
-        const hackTime = this.getHackTime(target);
+    public static getWaveSize(batch: Batch, host: ServerDto, maxRam = false, debug = false): number {
+        const size = Math.min(
+            Math.floor((maxRam ? host.refresh().ram.max : host.getRamAvailable()) / batch.ramCost),
+            Math.ceil(batch.duration / BatchConfig.BATCH_SEPARATION)
+        );
+
+        return debug ? Math.min(size, BatchConfig.DEBUG_LOOP) : size;
+    }
+
+    public getWeakenTime = (target: ServerDto, playerHackingExprience?: number): number => {
+        const hackTime = this.getHackTime(target, playerHackingExprience);
         return hackTime * 4;
     }
 
     public getWeakenSleepTime = (multiplier = 0): number => {
-        return Config.TICK * multiplier;
+        return BatchConfig.TICK * multiplier;
     }
 
     public getWeakenThreads = (target: ServerDto, home: ServerDto, decrease?: number): number => {
@@ -30,13 +40,13 @@ export class HackingFormulas{
         return Math.max(Math.ceil(decrease / multiplier), 1);
     }
 
-    public getGrowTime = (target: ServerDto): number => {
-        const hackTime =  this.getHackTime(target);
+    public getGrowTime = (target: ServerDto, playerHackingExprience?: number): number => {
+        const hackTime =  this.getHackTime(target, playerHackingExprience);
         return hackTime * 3.2;
     }
 
     public getGrowSleepTime = (target: ServerDto): number => {
-        return this.getWeakenTime(target) + Config.TICK - this.getGrowTime(target);
+        return this.getWeakenTime(target) + BatchConfig.TICK - this.getGrowTime(target);
     }
 
     public getGrowSecurity = (growThreads: number): number => {
@@ -45,7 +55,7 @@ export class HackingFormulas{
 
     public getHackSleepTime = (target: ServerDto): number => {
         const hacktime = this.getHackTime(target);
-        return this.getWeakenTime(target) - Config.TICK - hacktime;
+        return this.getWeakenTime(target) - BatchConfig.TICK - hacktime;
     }
 
     public getHackThreads = (target: ServerDto, multiplier: number): number => {
@@ -66,7 +76,7 @@ export class HackingFormulas{
         return target.money.max * multiplier;
     }
 
-    public getHackTime = (target: ServerDto, playerHackingSkill?: number): number => {
+    public getHackTime = (target: ServerDto, playerHackingExprience?: number): number => {
         const player = this.ns.getPlayer();
         const hackDifficulty = target.security.level;
         const requiredHackingSkill = target.security.levelRequired;
@@ -77,7 +87,10 @@ export class HackingFormulas{
         const baseSkill = 50;
         const diffFactor = 2.5;
         let skillFactor = diffFactor * difficultyMult + baseDiff;
-        skillFactor /= (playerHackingSkill ?? player.skills.hacking) + baseSkill;
+        skillFactor /= this.calculateSkill(
+            playerHackingExprience ?? player.exp.hacking,
+            player.mults.hacking * this.bitnode.multipliers.HackingLevelMultiplier
+        ) + baseSkill;
 
         const hackTimeMultiplier = 5;
         const result = (hackTimeMultiplier * skillFactor) /
@@ -164,37 +177,35 @@ export class HackingFormulas{
         host: ServerDto,
         hackMultiplier: number
     ): number | null => {
-        const availableRam = host.getRamAvailable();
-        const targetAmount = target.money.max * hackMultiplier;
-        const hackThreads = this.getHackThreads(target, hackMultiplier);
+        const weakenTime = this.getWeakenTime(target);
+        const duration =  weakenTime + 2 * BatchConfig.TICK;
 
-        if (hackThreads === -1) return null;
+        const hackingThreads = this.getHackThreads(target, hackMultiplier);
+        const targetAmount = this.getHackMoney(target, hackingThreads);
 
-        const growThreads = this.getGrowThreads(
-            target,
-            host,
-            target.money.max - this.getHackMoney(target, hackThreads)
+        const growThreads = this.getGrowThreads(target, host, target.money.max - targetAmount)
+        const weakenHackThreads = this.getWeakenThreads(target, host, this.getHackSecurity(hackingThreads));
+        const weakenGrowThreads = this.getWeakenThreads(target, host, this.getGrowSecurity(growThreads))
+
+        const totalRam =
+            (ScriptsEnum.WEAKEN_BATCH.size * weakenHackThreads + weakenGrowThreads) +
+            (ScriptsEnum.HACK_BATCH.size * hackingThreads) +
+            (ScriptsEnum.GROW_BATCH.size * growThreads);
+
+        const batchSize = Math.min(
+            Math.floor(host.refresh().ram.max / totalRam),
+            Math.ceil(duration / BatchConfig.BATCH_SEPARATION)
         );
 
-        const weakenTime = this.getWeakenTime(target);
-        const duration = weakenTime + 2 * Config.TICK;
-        const hackRam = hackThreads * ScriptsEnum.HACK_BATCH.size;
-        const growRam = growThreads * ScriptsEnum.GROW_BATCH.size;
-        const weakenRam = Math.ceil(growThreads * Config.WEAKEN_BUFFER) * ScriptsEnum.GROW_BATCH.size * 2;
-        const ramPerBatch = hackRam + growRam + weakenRam;
-
-        const maxBatchesByRam = Math.floor(availableRam / ramPerBatch);
-        const maxBatchesByTime = Math.ceil(duration / Config.BATCH_SEPARATION);
-        const batchSize = Math.min(maxBatchesByRam, maxBatchesByTime);
-
-        const cycleDuration = (batchSize - 1) * Config.BATCH_SEPARATION + duration + Config.TIME_BUFFER;
+        const cycleDuration = (batchSize - 1) * BatchConfig.BATCH_SEPARATION + duration + BatchConfig.TIME_BUFFER;
         const incomePerCycle = batchSize * targetAmount;
 
         return incomePerCycle / (cycleDuration / 1000);
     }
 
-    public calculateHackingSkillGain = (server: ServerDto): number => {
+    public getHackSkillGain = (server: ServerDto, initialExp?: number): number => {
         const player = this.ns.getPlayer();
+        initialExp = initialExp ?? player.skills.hacking;
         const baseDifficulty = server.security.min;
         if (!baseDifficulty) return 0;
         const baseExpGain = 3;
@@ -203,13 +214,10 @@ export class HackingFormulas{
         expGain += baseDifficulty * diffFactor;
         expGain = expGain * player.mults.hacking_exp * this.bitnode.multipliers.HackExpGain;
 
-        return this.calculateSkill(
-            player.exp.hacking + expGain,
-            player.mults.hacking * this.bitnode.multipliers.HackingLevelMultiplier,
-        );
+        return initialExp + expGain;
     }
 
-    private calculateSkill(exp: number, mult = 1): number {
+    public calculateSkill(exp: number, mult = 1): number {
         const value = Math.floor(mult * (32 * Math.log(exp + 534.6) - 200));
         return  Math.max(Math.min(value, Number.MAX_VALUE), 1);
     }

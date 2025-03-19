@@ -1,24 +1,28 @@
 import { ISolver } from '../solver.interface.js';
-import {CodingContractName} from "/src/enum/contract-names.enum";
+import { CodingContractName } from "/src/enum/contract-names.enum";
 
 export class MergeOverlappingIntervals implements ISolver<CodingContractName.MergeOverlappingIntervals> {
     solve(intervals: [number, number][]): [number, number][] {
-        intervals.sort((a, b) => a[0] - b[0]);
-        const mergedIntervals: [number, number][] = [];
+        if (!intervals || intervals.length === 0) return [];
 
-        for (const [start, end] of intervals) {
-            if (
-                mergedIntervals.length === 0 ||
-                mergedIntervals[mergedIntervals.length - 1][1] < start
-            ) {
-                mergedIntervals.push([start, end]);
+        intervals.sort((a, b) => a[0] - b[0]);
+
+        const mergedIntervals: [number, number][] = [];
+        let [currentStart, currentEnd] = intervals[0];
+
+        for (let i = 1; i < intervals.length; i++) {
+            const [nextStart, nextEnd] = intervals[i];
+
+            if (nextStart <= currentEnd) {
+                currentEnd = Math.max(currentEnd, nextEnd);
             } else {
-                mergedIntervals[mergedIntervals.length - 1][1] = Math.max(
-                    mergedIntervals[mergedIntervals.length - 1][1],
-                    end
-                );
+                mergedIntervals.push([currentStart, currentEnd]);
+                [currentStart, currentEnd] = [nextStart, nextEnd];
             }
         }
+
+        mergedIntervals.push([currentStart, currentEnd]);
+
         return mergedIntervals;
     }
 

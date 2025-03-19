@@ -27,7 +27,6 @@ export async function main(ns: NS) {
     ReactDOM.render(
         <DraggableWindow title="Hacking Skill Progression" containerId={graphContainer.id}>
             <LiveChart
-                title="Hacking Skill"
                 source={getStoredHackingData} // Uses the stored global data
                 transform={transformHackingData}
                 refreshInterval={1000}

@@ -60,16 +60,5 @@ export type CodingContractSignatures = {
     [CodingContractName.SquareRoot]: [bigint, bigint, [string, string]];
 };
 
-export type CodingContractObject = {
-    [T in keyof CodingContractSignatures]: {
-        type: T;
-        data: CodingContractSignatures[T][0];
-        submit: (answer: CodingContractSignatures[T][1] | string) => string;
-        description: string;
-        numTriesRemaining: () => number;
-    };
-}[keyof CodingContractSignatures];
-
-
 export type CodingContractData<T extends keyof CodingContractSignatures> = CodingContractSignatures[T][0];
 export type CodingContractAnswer<T extends keyof CodingContractSignatures> = CodingContractSignatures[T][1];

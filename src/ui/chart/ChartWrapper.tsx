@@ -1,7 +1,6 @@
 import React from "/lib/react";
 import LineChart from "./LineChart";
 import Label from "./AxisLabel";
-import ChartTitle from "./ChartTitle";
 
 interface ChartWrapperProps {
     title: string;
@@ -26,7 +25,6 @@ const styles = {
 };
 
 const ChartWrapper: React.FC<ChartWrapperProps> = ({
-                                                       title,
                                                        data,
                                                        width = 250,
                                                        height = 150,
@@ -37,7 +35,6 @@ const ChartWrapper: React.FC<ChartWrapperProps> = ({
     return (
         <div style={styles.chartComponentsContainer}>
             <div />
-            <ChartTitle text={title} />
             <Label text="" rotate />
             <div style={styles.chartWrapper}>
                 <LineChart
