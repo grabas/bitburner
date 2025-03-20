@@ -1,3 +1,3 @@
 export enum HacknetBrokerConfig {
-    BUDGET_PERCENTAGE = 20,
+    BUDGET_PERCENTAGE = 10,
 }

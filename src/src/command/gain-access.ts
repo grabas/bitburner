@@ -2,6 +2,12 @@ import {NS} from "@ns";
 import {ServerRepository} from "/src/repository/server.repository";
 import {ServerDto} from "/src/entity/server/server.dto";
 
+function parseArgs(args: (string | number | boolean)[]) {
+    return {
+        loop: args.includes("-l") || args.includes("--loop"),
+    };
+}
+
 export const attemptHacking = (ns: NS, hostname: string) => {
     if (ns.hasRootAccess(hostname)) return true;
 
@@ -17,8 +23,8 @@ export const attemptHacking = (ns: NS, hostname: string) => {
     return ns.hasRootAccess(hostname);
 };
 
-export const main = async (ns: NS): Promise<void> => {
-    while (true) {
+export const main = async (ns: NS, args= parseArgs(ns.args)): Promise<void> => {
+    do {
         let allAccessed = true;
         const servers = await (new ServerRepository(ns)).getNetwork();
         servers.forEach((server: ServerDto) => {
@@ -31,5 +37,5 @@ export const main = async (ns: NS): Promise<void> => {
 
         if (allAccessed) break;
         await ns.sleep(1000);
-    }
+    } while (args.loop);
 }
