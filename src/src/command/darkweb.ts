@@ -12,6 +12,7 @@ export async function main(ns: NS): Promise<void> {
     // eslint-disable-next-line no-constant-condition
     while (true) {
         try {
+            ns.singularity.purchaseTor()
             ns.singularity.purchaseTor();
 
             if (ns.hasTorRouter()) {

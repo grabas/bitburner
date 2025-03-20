@@ -8,8 +8,8 @@ import {Bitnode} from "/src/entity/bitnode/bitnode";
 import {Batch} from "/src/component/batch/batch";
 
 export class HackingFormulas{
-    protected readonly ns: NS;
-    protected readonly bitnode: Bitnode;
+    private readonly ns: NS;
+    private readonly bitnode: Bitnode;
 
     constructor(ns: NS) {
         this.ns = ns;
@@ -139,7 +139,7 @@ export class HackingFormulas{
         if (targetMoney <= (startMoney + ccycle) * Math.exp(k * ccycle)) {
             return ccycle;
         }
-        return ccycle + 1;
+        return (ccycle + 1) * BatchConfig.GROW_BUFFER;
     }
 
     private calculateServerGrowthLog(server: ServerDto, threads: number, p: Player, cores = 1, minSecLevel = true): number {

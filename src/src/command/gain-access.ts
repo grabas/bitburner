@@ -18,10 +18,18 @@ export const attemptHacking = (ns: NS, hostname: string) => {
 };
 
 export const main = async (ns: NS): Promise<void> => {
-    const servers = await (new ServerRepository(ns)).getNetwork();
-    servers.forEach((server: ServerDto) => {
-        if (!server.security.access && attemptHacking(ns, server.hostname)) {
-           ns.tprint("Access granted: " + server.hostname)
-        }
-    });
+    while (true) {
+        let allAccessed = true;
+        const servers = await (new ServerRepository(ns)).getNetwork();
+        servers.forEach((server: ServerDto) => {
+            server.refresh();
+            allAccessed = allAccessed && server.security.access;
+            if (!server.security.access && attemptHacking(ns, server.hostname)) {
+                ns.tprint("Access granted: " + server.hostname)
+            }
+        });
+
+        if (allAccessed) break;
+        await ns.sleep(1000);
+    }
 }

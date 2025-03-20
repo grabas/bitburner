@@ -1,6 +1,5 @@
 import {NS} from "@ns";
 import {BatchManager} from "/src/component/batch/batch.manager";
-import {getBestTarget} from "/src/component/batch/target.resolver";
 import {parseArgs} from "/src/component/batch/batch.args";
 
 export async function main(ns: NS, args = parseArgs(ns.args)): Promise<void> {

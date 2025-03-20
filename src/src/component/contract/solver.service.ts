@@ -2,13 +2,9 @@ import {CodingContractObject, NS} from "@ns";
 import {Crawler} from "/src/utils/crawler";
 import {getSolver} from "/src/component/contract/solver.registry";
 
-export async function solve(ns: NS, loop = false) {
+export async function solve(ns: NS, safe = true, verbose = true): Promise<void> {
     ns.disableLog("ALL");
-
-    do {
-        getContracts(ns).forEach((contract: CodingContractObject) => solveContract(ns, contract));
-        await ns.sleep(500);
-    } while (loop);
+    getContracts(ns).forEach((contract: CodingContractObject) => solveContract(ns, contract, safe, verbose));
 }
 
 const getContracts = (ns: NS): CodingContractObject[] => {

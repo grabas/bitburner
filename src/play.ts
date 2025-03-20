@@ -12,8 +12,10 @@ import {CodingContractName} from "/src/enum/contract-names.enum";
 import {solveContract} from "/src/component/contract/solver.service";
 import {Batch} from "/src/component/batch/batch";
 import {ServerConstants} from "/src/enum/server-constants.enum";
+import {HacknetBroker} from "/src/component/broker/hacknet/hacknet.broker";
 
 export async function main(ns: NS, print = (data: any) => ns.tprint(JSON.stringify(data, null, 2))): Promise<void> {
-    print(["hello", "world"]);
+    const broker = new HacknetBroker(ns);
+    print(await broker.test());
 }
 
