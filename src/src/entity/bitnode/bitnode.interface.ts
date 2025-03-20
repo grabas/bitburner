@@ -1,3 +1,18 @@
+export interface BitNodeOptions {
+    sourceFileOverrides: {
+        ctor: string;
+        data: any[];
+    };
+    restrictHomePCUpgrade: boolean;
+    disableGang: boolean;
+    disableCorporation: boolean;
+    disableBladeburner: boolean;
+    disable4SData: boolean;
+    disableHacknetServer: boolean;
+    disableSleeveExpAndAugmentation: boolean;
+    intelligenceOverride: number | undefined;
+}
+
 export interface BitNodeMultipliers {
     AgilityLevelMultiplier: number;
     AugmentationMoneyCost: number;

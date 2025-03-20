@@ -1,20 +1,6 @@
-import {BitNodeMultipliers} from "/src/entity/bitnode/bitnode-multipliers.interface";
+import {BitNodeMultipliers} from "/src/entity/bitnode/bitnode.interface";
 import {getBitNodeMultipliers} from "/src/enum/bitnode.enum";
-
-export interface BitNodeOptions {
-    sourceFileOverrides: {
-        ctor: string;
-        data: any[];
-    };
-    restrictHomePCUpgrade: boolean;
-    disableGang: boolean;
-    disableCorporation: boolean;
-    disableBladeburner: boolean;
-    disable4SData: boolean;
-    disableHacknetServer: boolean;
-    disableSleeveExpAndAugmentation: boolean;
-    intelligenceOverride: number | undefined;
-}
+import {BitNodeOptions} from "@ns";
 
 export class Bitnode {
     number: number

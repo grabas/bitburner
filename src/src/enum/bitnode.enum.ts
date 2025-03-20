@@ -1,4 +1,4 @@
-import {DefaultMultipliers} from "/src/entity/bitnode/bitnode-multipliers.interface";
+import {DefaultMultipliers} from "/src/src/entity/bitnode/bitnode.interface";
 
 export enum BitNodeNumber {
     BitNode1 = 1,
