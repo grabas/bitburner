@@ -25,8 +25,8 @@ export class HackingFormulas{
         return debug ? Math.min(size, BatchConfig.DEBUG_LOOP) : size;
     }
 
-    public getWeakenTime = (target: ServerDto, playerHackingExprience?: number): number => {
-        const hackTime = this.getHackTime(target, playerHackingExprience);
+    public calculateWeakenTime = (target: ServerDto, playerHackingExprience?: number): number => {
+        const hackTime = this.calculateHackTime(target, playerHackingExprience);
         return hackTime * 4;
     }
 
@@ -34,19 +34,21 @@ export class HackingFormulas{
         return BatchConfig.TICK * multiplier;
     }
 
-    public getWeakenThreads = (target: ServerDto, home: ServerDto, decrease?: number): number => {
-        const multiplier = this.ns.weakenAnalyze(1, home.cores);
+    public calculateWeakenThreads = (target: ServerDto, home: ServerDto, decrease?: number): number => {
+        const coreBonus = 1 + (home.cores - 1) / 16;
+        const multiplier = ServerConstants.ServerWeakenAmount * coreBonus * this.bitnode.multipliers.ServerWeakenRate;
+
         decrease = decrease ?? (target.getSecurityLevel() - target.security.min);
         return Math.max(Math.ceil(decrease / multiplier), 1);
     }
 
-    public getGrowTime = (target: ServerDto, playerHackingExprience?: number): number => {
-        const hackTime =  this.getHackTime(target, playerHackingExprience);
+    public calculateGrowTime = (target: ServerDto, playerHackingExprience?: number): number => {
+        const hackTime =  this.calculateHackTime(target, playerHackingExprience);
         return hackTime * 3.2;
     }
 
     public getGrowSleepTime = (target: ServerDto): number => {
-        return this.getWeakenTime(target) + BatchConfig.TICK - this.getGrowTime(target);
+        return this.calculateWeakenTime(target) + BatchConfig.TICK - this.calculateGrowTime(target);
     }
 
     public getGrowSecurity = (growThreads: number): number => {
@@ -54,13 +56,41 @@ export class HackingFormulas{
     }
 
     public getHackSleepTime = (target: ServerDto): number => {
-        const hacktime = this.getHackTime(target);
-        return this.getWeakenTime(target) - BatchConfig.TICK - hacktime;
+        const hacktime = this.calculateHackTime(target);
+        return this.calculateWeakenTime(target) - BatchConfig.TICK - hacktime;
     }
 
     public getHackThreads = (target: ServerDto, multiplier: number): number => {
         const targetMoney = target.money.max * multiplier;
-        return Math.max(Math.floor(this.ns.hackAnalyzeThreads(target.hostname, targetMoney)), 1);
+
+        if (targetMoney < 0 || targetMoney > target.money.max) {
+            return -1;
+        } else if (targetMoney === 0) {
+            return 0;
+        }
+
+        const percentHacked = this.calculatePercentMoneyHacked(target);
+
+        if (percentHacked === 0 || target.money.max === 0) {
+            return -1;
+        }
+
+        return Math.max(Math.floor(targetMoney / (target.money.max * percentHacked)), 1);
+    }
+
+    public calculatePercentMoneyHacked(target: ServerDto): number {
+        const person = this.ns.getPlayer();
+        const hackDifficulty = target.security.min ?? 100;
+        if (hackDifficulty >= 100) return 0;
+        const requiredHackingSkill = target.security.levelRequired ?? 1e9;
+        const balanceFactor = 240;
+
+        const difficultyMult = (100 - hackDifficulty) / 100;
+        const skillMult = (person.skills.hacking - (requiredHackingSkill - 1)) / person.skills.hacking;
+        const percentMoneyHacked =
+            (difficultyMult * skillMult * person.mults.hacking_money * this.bitnode.multipliers.ScriptHackMoney) / balanceFactor;
+
+        return Math.min(1, Math.max(percentMoneyHacked, 0));
     }
 
     public getHackSecurity = (hackThreads: number): number => {
@@ -68,17 +98,31 @@ export class HackingFormulas{
     }
 
     public getHackChance = (target: ServerDto): number => {
-        return this.ns.hackAnalyzeChance(target.hostname);
+        const player = this.ns.getPlayer();
+        const hackDifficulty = target.security.min ?? 100;
+        const requiredHackingSkill = target.security.levelRequired ?? 1e9;
+        if (!target.security.access || hackDifficulty >= 100) return 0;
+        const hackFactor = 1.75;
+        const difficultyMult = (100 - hackDifficulty) / 100;
+        const skillMult = Math.max(Math.min(hackFactor * player.skills.hacking, Number.MAX_VALUE), 1);
+        const skillChance = (skillMult - requiredHackingSkill) / skillMult;
+        const chance =
+            skillChance *
+            difficultyMult *
+            player.mults.hacking_chance *
+            this.calculateIntelligenceBonus(player, 1);
+
+        return Math.max(Math.min(chance, Number.MAX_VALUE), 1);
     }
 
     public getHackMoney = (target: ServerDto, threads: number): number => {
-        const multiplier = this.ns.hackAnalyze(target.hostname) * threads;
+        const multiplier = this.calculatePercentMoneyHacked(target) * threads;
         return target.money.max * multiplier;
     }
 
-    public getHackTime = (target: ServerDto, playerHackingExprience?: number): number => {
+    public calculateHackTime = (target: ServerDto, playerHackingExprience?: number): number => {
         const player = this.ns.getPlayer();
-        const hackDifficulty = target.security.level;
+        const hackDifficulty = target.security.min;
         const requiredHackingSkill = target.security.levelRequired;
 
         const difficultyMult = requiredHackingSkill * hackDifficulty;
@@ -177,15 +221,15 @@ export class HackingFormulas{
         host: ServerDto,
         hackMultiplier: number
     ): number | null => {
-        const weakenTime = this.getWeakenTime(target);
+        const weakenTime = this.calculateWeakenTime(target);
         const duration =  weakenTime + 2 * BatchConfig.TICK;
 
         const hackingThreads = this.getHackThreads(target, hackMultiplier);
         const targetAmount = this.getHackMoney(target, hackingThreads);
 
         const growThreads = this.getGrowThreads(target, host, target.money.max - targetAmount)
-        const weakenHackThreads = this.getWeakenThreads(target, host, this.getHackSecurity(hackingThreads));
-        const weakenGrowThreads = this.getWeakenThreads(target, host, this.getGrowSecurity(growThreads))
+        const weakenHackThreads = this.calculateWeakenThreads(target, host, this.getHackSecurity(hackingThreads));
+        const weakenGrowThreads = this.calculateWeakenThreads(target, host, this.getGrowSecurity(growThreads))
 
         const totalRam =
             (Scripts.WEAKEN_BATCH.size * weakenHackThreads + weakenGrowThreads) +
@@ -219,6 +263,6 @@ export class HackingFormulas{
 
     public calculateSkill(exp: number, mult = 1): number {
         const value = Math.floor(mult * (32 * Math.log(exp + 534.6) - 200));
-        return  Math.max(Math.min(value, Number.MAX_VALUE), 1);
+        return Math.max(Math.min(value, Number.MAX_VALUE), 1);
     }
 }

@@ -1,5 +1,5 @@
 import {BitNodeMultipliers} from "/src/entity/bitnode/bitnode.interface";
-import {getBitNodeMultipliers} from "/src/enum/bitnode.enum";
+import {getBitnodeMults} from "/src/enum/bitnode.enum";
 import {BitNodeOptions} from "@ns";
 
 export class Bitnode {
@@ -10,7 +10,7 @@ export class Bitnode {
 
     constructor(number: number, options: BitNodeOptions, sourceFiles: [number, number][]) {
         this.number = number;
-        this.multipliers = getBitNodeMultipliers(number);
+        this.multipliers = getBitnodeMults(number);
         this.sourceFiles = sourceFiles
         this.options = options;
     }

@@ -27,22 +27,22 @@ export class Batch {
         const hackingThreads = hackingFormulas.getHackThreads(target, multiplier);
         const targetAmount = hackingFormulas.getHackMoney(target, hackingThreads);
         const growThreads = hackingFormulas.getGrowThreads(target, host, target.money.max - targetAmount)
-        const weakenTime = hackingFormulas.getWeakenTime(target);
+        const weakenTime = hackingFormulas.calculateWeakenTime(target);
 
         this.action = [{
             script: debug ? Scripts.HACK_BATCH_DEBUG : Scripts.HACK_BATCH,
             sleepTime: hackingFormulas.getHackSleepTime(target),
             threads: hackingThreads,
-            duration: hackingFormulas.getHackTime(target)
+            duration: hackingFormulas.calculateHackTime(target)
         }, {
             script: debug ? Scripts.GROW_BATCH_DEBUG : Scripts.GROW_BATCH,
             sleepTime: hackingFormulas.getGrowSleepTime(target),
             threads: growThreads,
-            duration: hackingFormulas.getGrowTime(target)
+            duration: hackingFormulas.calculateGrowTime(target)
         }, {
             script: debug ? Scripts.WEAKEN_BATCH_DEBUG : Scripts.WEAKEN_BATCH,
             sleepTime: hackingFormulas.getWeakenSleepTime(),
-            threads: hackingFormulas.getWeakenThreads(
+            threads: hackingFormulas.calculateWeakenThreads(
                 target,
                 host,
                 hackingFormulas.getHackSecurity(hackingThreads)
@@ -51,7 +51,7 @@ export class Batch {
         }, {
             script: debug ? Scripts.WEAKEN_BATCH_DEBUG : Scripts.WEAKEN_BATCH,
             sleepTime: hackingFormulas.getWeakenSleepTime(2),
-            threads: hackingFormulas.getWeakenThreads(
+            threads: hackingFormulas.calculateWeakenThreads(
                 target,
                 host,
                 hackingFormulas.getGrowSecurity(growThreads)

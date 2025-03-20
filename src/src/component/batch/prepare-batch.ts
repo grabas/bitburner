@@ -13,12 +13,12 @@ export class PrepareBatch {
         const hackingFormulas = new HackingFormulas(ns);
         this.target = target;
         this.host = host;
-        const weakenTime = hackingFormulas.getWeakenTime(target);
+        const weakenTime = hackingFormulas.calculateWeakenTime(target);
 
         this.action = [];
 
         if (target.getSecurityLevel() > target.security.min) {
-            let weakenThreads = hackingFormulas.getWeakenThreads(target, host);
+            let weakenThreads = hackingFormulas.calculateWeakenThreads(target, host);
 
             if (weakenThreads * Scripts.WEAKEN_BATCH.size > host.getRamAvailable() * 0.5) {
                 weakenThreads = Math.floor(host.getRamAvailable() / Scripts.WEAKEN_BATCH.size * 0.20);
@@ -39,7 +39,7 @@ export class PrepareBatch {
                 growThreads = Math.floor(host.getRamAvailable() / Scripts.GROW_BATCH.size * 0.5);
             }
 
-            let weakenGrowThreads = hackingFormulas.getWeakenThreads(
+            let weakenGrowThreads = hackingFormulas.calculateWeakenThreads(
                 target,
                 host,
                 hackingFormulas.getGrowSecurity(growThreads)
@@ -53,7 +53,7 @@ export class PrepareBatch {
                     script: Scripts.GROW_BATCH,
                     sleepTime: hackingFormulas.getGrowSleepTime(target),
                     threads: Math.ceil(growThreads),
-                    duration: hackingFormulas.getGrowTime(target)
+                    duration: hackingFormulas.calculateGrowTime(target)
                 },
                 {
                     script: Scripts.WEAKEN_BATCH,

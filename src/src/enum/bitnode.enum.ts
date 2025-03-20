@@ -425,6 +425,6 @@ export const BitnodeMultipliers: Record<BitNodeNumber, Partial<typeof DefaultMul
     },
 };
 
-export function getBitNodeMultipliers(n: BitNodeNumber) {
+export function getBitnodeMults(n: BitNodeNumber) {
     return { ...DefaultMultipliers, ...BitnodeMultipliers[n] };
 }
