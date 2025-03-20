@@ -1,4 +1,9 @@
-export const ScriptsEnum = {
+export interface BatchScript {
+    path: string;
+    size: number;
+}
+
+export const Scripts: { [key: string]: BatchScript } = {
     GROW_BATCH: { path: "/src/component/batch/action/grow.action.js", size: 1.85 },
     GROW_BATCH_DEBUG: { path: "/src/component/batch/action/grow.action.debug.js", size: 2.15 },
 
@@ -9,6 +14,6 @@ export const ScriptsEnum = {
     HACK_BATCH_DEBUG: { path: "/src/component/batch/action/hack.action.debug.js", size: 2.10 },
 
     PREPARATOR: { path: "/src/hacking/preparator.js", size: 2.1 }
-} as const;
+};
 
-export type ScriptsEnum = keyof typeof ScriptsEnum;
+export type ScriptsEnum = keyof typeof Scripts;

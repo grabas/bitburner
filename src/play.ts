@@ -13,9 +13,9 @@ import {solveContract} from "/src/component/contract/solver.service";
 import {Batch} from "/src/component/batch/batch";
 import {ServerConstants} from "/src/enum/server-constants.enum";
 import {HacknetBroker} from "/src/component/broker/hacknet/hacknet.broker";
+import {getBitnode, setBitnode} from "/src/repository/bitnode.repository";
 
 export async function main(ns: NS, print = (data: any) => ns.tprint(JSON.stringify(data, null, 2))): Promise<void> {
-    const broker = new HacknetBroker(ns);
-    print(await broker.test());
+   ns.kill(420)
 }
 

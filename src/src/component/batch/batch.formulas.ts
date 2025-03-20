@@ -2,7 +2,7 @@ import {NS, Player} from "@ns";
 import {ServerDto} from "/src/entity/server/server.dto";
 import {BatchConfig} from "/src/component/batch/batch.config";
 import {ServerConstants} from "/src/enum/server-constants.enum";
-import {ScriptsEnum} from "/src/enum/scripts.enum";
+import {Scripts} from "/src/enum/scripts.enum";
 import {getBitnode} from "/src/repository/bitnode.repository";
 import {Bitnode} from "/src/entity/bitnode/bitnode";
 import {Batch} from "/src/component/batch/batch";
@@ -130,16 +130,16 @@ export class HackingFormulas{
         if (ccycle - x > 0.999999) {
             const fcycle = ccycle - 1;
             if (targetMoney <= (startMoney + fcycle) * Math.exp(k * fcycle)) {
-                return fcycle;
+                return Math.ceil((fcycle) * BatchConfig.GROW_BUFFER);
             }
         }
         if (ccycle >= x + ((diff <= 0 ? -diff : diff) + 0.000001)) {
-            return ccycle;
+            return Math.ceil((ccycle) * BatchConfig.GROW_BUFFER);
         }
         if (targetMoney <= (startMoney + ccycle) * Math.exp(k * ccycle)) {
-            return ccycle;
+            return Math.ceil((ccycle) * BatchConfig.GROW_BUFFER);
         }
-        return (ccycle + 1) * BatchConfig.GROW_BUFFER;
+        return Math.ceil((ccycle + 1) * BatchConfig.GROW_BUFFER);
     }
 
     private calculateServerGrowthLog(server: ServerDto, threads: number, p: Player, cores = 1, minSecLevel = true): number {
@@ -188,9 +188,9 @@ export class HackingFormulas{
         const weakenGrowThreads = this.getWeakenThreads(target, host, this.getGrowSecurity(growThreads))
 
         const totalRam =
-            (ScriptsEnum.WEAKEN_BATCH.size * weakenHackThreads + weakenGrowThreads) +
-            (ScriptsEnum.HACK_BATCH.size * hackingThreads) +
-            (ScriptsEnum.GROW_BATCH.size * growThreads);
+            (Scripts.WEAKEN_BATCH.size * weakenHackThreads + weakenGrowThreads) +
+            (Scripts.HACK_BATCH.size * hackingThreads) +
+            (Scripts.GROW_BATCH.size * growThreads);
 
         const batchSize = Math.min(
             Math.floor(host.refresh().ram.max / totalRam),

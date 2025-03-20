@@ -4,6 +4,7 @@ import {parseArgs} from "/src/component/broker/hacknet/hacknet.args";
 
 export async function main(ns: NS, args = parseArgs(ns.args)) {
     ns.disableLog("ALL");
+
     const broker = new HacknetBroker(ns);
 
     do {

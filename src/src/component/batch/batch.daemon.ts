@@ -15,7 +15,7 @@ export async function batchAttack(ns: NS, target: string|null|undefined, debug =
 
     ns.ui.openTail();
     ns.ui.resizeTail(360, 300);
-    ns.ui.moveTail(1200, 25);
+    ns.ui.moveTail(1180, 25);
 
     const manager = new BatchManager(ns);
     await manager.batchAttack(target, debug);

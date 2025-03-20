@@ -2,6 +2,7 @@ import {NS, Singularity} from "@ns";
 import { BrokerBase } from "/src/component/broker/broker.base"
 import {HomeUpgradeFormulas} from "/src/component/broker/home-upgrade/home-upgrade.formulas";
 import {ServerDto} from "/src/entity/server/server.dto";
+import {getBitnode} from "/src/repository/bitnode.repository";
 
 export class HomeUpgradeBroker extends BrokerBase {
     private formulas: HomeUpgradeFormulas;
@@ -9,6 +10,11 @@ export class HomeUpgradeBroker extends BrokerBase {
 
     constructor(ns: NS) {
         super(ns);
+
+        if (!getBitnode().hasAccessSingularity()) {
+            throw new Error("You need to have access to Singularity Functions to use home upgrade broker");
+        }
+
         this.singularity = ns.singularity
         this.formulas = new HomeUpgradeFormulas(ns);
     }

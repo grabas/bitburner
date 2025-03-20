@@ -1,20 +1,9 @@
 import { NS } from "@ns";
 import { BatchConfig } from "./batch.config";
-import { ScriptsEnum } from "/src/enum/scripts.enum";
+import {Scripts} from "/src/enum/scripts.enum";
 import {ServerDto} from "/src/entity/server/server.dto";
 import {HackingFormulas} from "/src/component/batch/batch.formulas";
-
-interface BatchScript {
-    path: string;
-    size: number;
-}
-
-interface BatchAction {
-    script: BatchScript;
-    sleepTime: number;
-    threads: number;
-    duration?: number;
-}
+import {BatchAction} from "/src/component/batch/batch.interface";
 
 export class Batch {
     public readonly target: ServerDto;
@@ -41,17 +30,17 @@ export class Batch {
         const weakenTime = hackingFormulas.getWeakenTime(target);
 
         this.action = [{
-            script: debug ? ScriptsEnum.HACK_BATCH_DEBUG : ScriptsEnum.HACK_BATCH,
+            script: debug ? Scripts.HACK_BATCH_DEBUG : Scripts.HACK_BATCH,
             sleepTime: hackingFormulas.getHackSleepTime(target),
             threads: hackingThreads,
             duration: hackingFormulas.getHackTime(target)
         }, {
-            script: debug ? ScriptsEnum.GROW_BATCH_DEBUG : ScriptsEnum.GROW_BATCH,
+            script: debug ? Scripts.GROW_BATCH_DEBUG : Scripts.GROW_BATCH,
             sleepTime: hackingFormulas.getGrowSleepTime(target),
             threads: growThreads,
             duration: hackingFormulas.getGrowTime(target)
         }, {
-            script: debug ? ScriptsEnum.WEAKEN_BATCH_DEBUG : ScriptsEnum.WEAKEN_BATCH,
+            script: debug ? Scripts.WEAKEN_BATCH_DEBUG : Scripts.WEAKEN_BATCH,
             sleepTime: hackingFormulas.getWeakenSleepTime(),
             threads: hackingFormulas.getWeakenThreads(
                 target,
@@ -60,7 +49,7 @@ export class Batch {
             ),
             duration: weakenTime
         }, {
-            script: debug ? ScriptsEnum.WEAKEN_BATCH_DEBUG : ScriptsEnum.WEAKEN_BATCH,
+            script: debug ? Scripts.WEAKEN_BATCH_DEBUG : Scripts.WEAKEN_BATCH,
             sleepTime: hackingFormulas.getWeakenSleepTime(2),
             threads: hackingFormulas.getWeakenThreads(
                 target,

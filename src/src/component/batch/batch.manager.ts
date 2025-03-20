@@ -2,13 +2,13 @@ import { NS } from "@ns";
 import { BatchConfig } from "./batch.config";
 import { ServerRepository } from "/src/repository/server.repository";
 import { uuidv4 } from "/src/utils/uuidv4";
-import { prepare } from "/src/command/prepare-target";
 import {ActionArgs} from "/src/component/batch/action/action.type";
 import {monitor, printLog} from "/src/component/batch/batch.monitor";
 import {Batch} from "/src/component/batch/batch";
 import {HackingFormulas} from "/src/component/batch/batch.formulas";
 import {getBestTarget} from "/src/component/batch/target.resolver";
 import {ServerDto} from "/src/entity/server/server.dto";
+import {PrepareBatch} from "/src/component/batch/prepare-batch";
 
 export class BatchManager {
     private readonly ns: NS;
@@ -79,14 +79,47 @@ export class BatchManager {
         return this.ns.run(scriptPath, threads, ...args);
     };
 
-    private async prepareTarget(target: ServerDto, host: ServerDto, processIds: number[]): Promise<void> {
+    private async prepareTarget(target: ServerDto, host: ServerDto, processIds?: number[]): Promise<void> {
         if (target.isPrepared()) return;
 
         const batch = new Batch(this.ns, target, host);
         printLog(this.ns, batch, HackingFormulas.getWaveSize(batch, host), false, true);
 
-        this.killSpawnedProcesses(processIds);
-        await prepare(this.ns, target.hostname);
+        if (processIds) {
+            this.killSpawnedProcesses(processIds);
+        }
+
+        const prepareBatch = new PrepareBatch(this.ns, target, host);
+        let actionId = 0;
+        const operationId = uuidv4();
+
+        const preparePids: number[] = []
+        for (const action of prepareBatch.action) {
+            const args: ActionArgs = [
+                actionId++,               // id
+                batch.target.hostname,    // target
+                action.sleepTime,         // sleepTime
+                batch.target.security.min,// minSecLevel
+                action.duration ?? 0,     // expectedDuration
+                operationId,              // operationId
+                0,                        // batchId
+                0,                         // waitFlag (1 means true)
+            ];
+            preparePids.push(this.runScript(action.script.path, action.threads, args));
+        }
+
+        while (!target.isPrepared()) {
+            const allScriptsFinished = preparePids.map((pid) => this.ns.isRunning(pid)).every((isRunning) => !isRunning);
+
+            if (allScriptsFinished) {
+                await this.prepareTarget(target, host);
+            }
+
+            await this.ns.sleep(100);
+        }
+
+        this.killSpawnedProcesses(preparePids);
+        this.ns.toast(target.hostname + " is prepared");
     }
 
     private killSpawnedProcesses(processIds: number[]): number {
