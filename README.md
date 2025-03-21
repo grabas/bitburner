@@ -41,13 +41,13 @@ Execute in the game console
     alias cc="clear";
     alias init="run /init.js";
     alias play="run /play.js";
-    alias access="run /src/command/gain-access.js";
-    alias get-server="run /src/repository/server-repository.js";
-    alias path="run /src/utils/crawler.js";
-    alias solve="run /src/command/solve-contracts.js";
-    alias monitor="run /src/utils/monitor.js";
-    alias attack="run /src/component/batch/batch.daemon.js";
-    alias batch-analyze="run /src/component/batch/target.resolver.js";
+    alias access="run /lib/command/gain-access.js";
+    alias get-server="run /lib/repository/server-repository.js";
+    alias path="run /lib/utils/crawler.js";
+    alias solve="run /lib/command/solve-contracts.js";
+    alias monitor="run /lib/utils/monitor.js";
+    alias attack="run /lib/component/batch/batch.daemon.js";
+    alias batch-analyze="run /lib/component/batch/target.resolver.js";
     alias dw="connect darkweb; buy -a; home";
-    alias bd="run /src/command/backdoor.js";
+    alias bd="run /lib/command/backdoor.js";
 ```
