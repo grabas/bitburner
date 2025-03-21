@@ -46,8 +46,8 @@ Execute in the game console
     alias path="run /src/utils/crawler.js";
     alias solve="run /src/command/solve-contracts.js";
     alias monitor="run /src/utils/monitor.js";
-    alias attack="run /src/command/batch-attack.js";
-    alias batch-analyze="run /src/component/batch/analyze.js";
+    alias attack="run /src/component/batch/batch.daemon.js";
+    alias batch-analyze="run /src/component/batch/target.resolver.js";
     alias dw="connect darkweb; buy -a; home";
-    alias prep="run /src/command/prepare-target.js";
+    alias bd="run /src/command/backdoor.js";
 ```
