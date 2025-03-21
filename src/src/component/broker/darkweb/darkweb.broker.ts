@@ -34,7 +34,6 @@ export class DarkwebBroker extends BrokerBase {
             .filter(program => !filteredType.includes(program.type))
             .sort((a, b) => a.price - b.price);
 
-        this.ns.tprint(JSON.stringify(sortedPrograms, null, 2));
         for (const program of sortedPrograms) {
             if (this.ns.fileExists(program.program)) continue;
 
