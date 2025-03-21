@@ -1,6 +1,7 @@
 import { NS } from "@ns";
 import {MoneyData, RamData, SecurityData, ServerData} from "./server.interfaces";
 import {ServerConstants} from "/src/enum/server-constants.enum";
+import {getNumberOfCores} from "/src/utils/home-cores";
 
 export class ServerDto {
     ns: NS;
@@ -30,8 +31,13 @@ export class ServerDto {
         this.security.level = this.ns.getServerSecurityLevel(this.hostname);
         this.money.available = this.ns.getServerMoneyAvailable(this.hostname);
         this.ram.used = this.ns.getServerUsedRam(this.hostname);
-        this.ram.max = Math.max(this.ns.getServerMaxRam(this.hostname) - (this.isHome ? ServerConstants.HomeComputerRamReselve : 0), 0);
+        this.ram.realMax = this.ns.getServerMaxRam(this.hostname);
+        this.ram.max = Math.max(this.ram.realMax - (this.isHome ? ServerConstants.HomeComputerRamReselve : 0), 0);
         this.ram.free = Math.max(this.ram.max - this.ram.used, 0);
+
+        if (this.isHome) {
+            this.cores = getNumberOfCores();
+        }
 
         return this;
     }
@@ -65,5 +71,17 @@ export class ServerDto {
 
     print(): void {
         this.ns.tprint(JSON.stringify(this, null, 2));
+    }
+
+    serialize(): ServerData {
+        return {
+            hostname: this.hostname,
+            isHome: this.isHome,
+            purchased: this.purchased,
+            cores: this.cores,
+            ram: this.ram,
+            security: this.security,
+            money: this.money
+        };
     }
 }

@@ -2,19 +2,33 @@ import { NS } from "@ns";
 
 export class BrokerBase {
     protected readonly ns: NS;
-    protected _budget_percentage = 100;
+    protected budgetPercentage = 100;
+    protected purchaseCostLimit = Infinity;
 
     constructor(ns: NS) {
         this.ns = ns;
     }
 
     public setBudget(newBudget: number): void {
-        this._budget_percentage = newBudget;
+        this.budgetPercentage = newBudget;
+    }
+
+    public setPurchasedCostLimit(newLimit: number): void {
+        this.purchaseCostLimit = newLimit;
     }
 
     protected canAfford = (cost: number): boolean => {
-        const availableMoney = this.ns.getServerMoneyAvailable("home") * (this._budget_percentage / 100);
+        if (!this.canEverAfford(cost)) throw new Error("Cost is too high");
+
+        const availableMoney = Math.min(
+            this.ns.getServerMoneyAvailable("home") * (this.budgetPercentage / 100),
+            this.purchaseCostLimit
+        );
         return availableMoney >= cost;
+    };
+
+    protected canEverAfford = (cost: number): boolean => {
+        return cost !== Infinity || cost < this.purchaseCostLimit
     };
 
     protected secureFunds = async (cost: number): Promise<void> => {

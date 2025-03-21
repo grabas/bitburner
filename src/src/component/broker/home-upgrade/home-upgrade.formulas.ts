@@ -1,19 +1,16 @@
-import {NS} from "@ns";
-import { BrokerBase } from "/src/component/broker/broker.base"
 import {ServerDto} from "/src/entity/server/server.dto";
 import {ServerConstants} from "/src/enum/server-constants.enum";
 import {Bitnode} from "/src/entity/bitnode/bitnode";
 import {getBitnode} from "/src/repository/bitnode.repository";
 
-export class HomeUpgradeFormulas extends BrokerBase {
+export class HomeUpgradeFormulas {
     private readonly bitnode: Bitnode
-    constructor(ns: NS) {
-        super(ns);
+    constructor() {
         this.bitnode = getBitnode()
     }
 
     public calculateUpgradeHomeRamCost(home: ServerDto): number {
-        const currentRam = home.refresh().ram.max
+        const currentRam = home.refresh().ram.realMax;
         const numUpgrades = Math.log2(currentRam);
 
         const mult = Math.pow(1.58, numUpgrades);

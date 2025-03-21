@@ -1,5 +1,5 @@
 import { ISolver } from '../solver.interface.js';
-import {CodingContractName} from "/src/enum/contract-names.enum";
+import {CodingContractName} from "/src/component/contract/contract-names.enum";
 
 export class UniquePathsOnGrid2 implements ISolver<CodingContractName.UniquePathsInAGridII> {
     solve(obstacleGrid: (1 | 0)[][]): number {

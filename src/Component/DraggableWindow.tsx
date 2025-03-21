@@ -1,15 +1,28 @@
 import React, {cDocument} from "/lib/react";
-import {uuidv4} from "/src/utils/uuidv4";
 
 interface DraggableWindowProps {
     title?: string;
     children: React.ReactNode;
     containerId: string; // Unique ID for the container div
+    x?: number;
+    y?: number;
 }
 
-export const DraggableWindow = ({ title, children, containerId }: DraggableWindowProps) => {
-    const [position, setPosition] = React.useState({ x: 200, y: 100 });
-    const [size, setSize] = React.useState({ width: 500, height: 400 });
+interface WindowSize {
+    width: number;
+    height: number | string;
+}
+
+export const DraggableWindow = ({ title, children, containerId, x, y }: DraggableWindowProps) => {
+    x = x || 300;
+    y = y || 20;
+    const [position, setPosition] = React.useState({ x: x, y: y });
+
+    const [size, setSize] = React.useState<WindowSize>({
+        width: 500,
+        height: "100%",
+    });
+
     const dragRef = React.useRef<HTMLDivElement | null>(null);
 
     const handleMouseDown = (e: React.MouseEvent) => {
@@ -36,12 +49,23 @@ export const DraggableWindow = ({ title, children, containerId }: DraggableWindo
     const handleResizeMouseDown = (e: React.MouseEvent) => {
         const startX = e.clientX;
         const startY = e.clientY;
-        const startSize = { ...size };
 
-        const handleMouseMove = (e: MouseEvent) => {
+        const startWidth = size.width;
+        let startHeight: number;
+        if (typeof size.height === "string") {
+            if (dragRef.current) {
+                startHeight = dragRef.current.getBoundingClientRect().height;
+            } else {
+                startHeight = 200; // fallback value
+            }
+        } else {
+            startHeight = size.height;
+        }
+
+        const handleMouseMove = (ev: MouseEvent) => {
             setSize({
-                width: Math.max(300, startSize.width + (e.clientX - startX)),
-                height: Math.max(200, startSize.height + (e.clientY - startY)),
+                width: Math.max(300, startWidth + (ev.clientX - startX)),
+                height: Math.max(200, startHeight + (ev.clientY - startY)),
             });
         };
 
@@ -102,7 +126,7 @@ export const DraggableWindow = ({ title, children, containerId }: DraggableWindo
                     </button>
                 </span>
             </div>
-            <div className="css-1qhyy18-logs" style={{ height: "calc(100% - 33px)", display: "flex" }}>
+            <div className="css-1qhyy18-logs" style={{ height: "calc(100% - 33px)", display: "block" }}>
                 {children}
             </div>
             <span

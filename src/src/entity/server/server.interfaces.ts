@@ -3,6 +3,7 @@ export interface RamData {
     max: number;
     used: number;
     free: number;
+    realMax: number;
 }
 
 export interface SecurityData {

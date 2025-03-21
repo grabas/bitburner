@@ -11,6 +11,7 @@ export async function main(ns: NS, args = parseArgs(ns.args)): Promise<void> {
 
         do {
             await broker.upgradeHome(home);
+            await ns.sleep(100)
         } while (args.loop);
     } catch (e) {
         ns.tprint(`Error: ${e}`);

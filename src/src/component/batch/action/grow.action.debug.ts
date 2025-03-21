@@ -1,49 +1,47 @@
 import { NS } from "@ns";
 import { FileLogger } from "/src/logger/file.logger";
 import { LoggerPrefixes } from "/src/enum/logger-prefixes.enum";
-import {ActionArgs, ActionLog} from "/src/component/batch/action/action.type";
 import {ServerRepository} from "/src/repository/server.repository";
+import {parseActionArgs} from "/src/component/batch/batch.args";
+import {BatchLog} from "/src/component/batch/batch.interface";
 
-export async function main(ns: NS): Promise<void> {
+export async function main(ns: NS, args = parseActionArgs(ns.args)): Promise<void> {
     const scriptStart = Date.now();
-    const [
-        id,
-        target,
-        sleepTime,
-        minSecLevel,
-        expectedDuration,
-        operationId,
-        batchId,
-        waitFlag
-    ] = ns.args as ActionArgs;
 
-    await ns.sleep(sleepTime);
+    await ns.sleep(args.sleepTime);
 
-    const serverSecurity = ns.getServerSecurityLevel(target) - minSecLevel;
-    if (waitFlag) {
-        while (ns.getServerSecurityLevel(target) !== minSecLevel) {
+    const serverSecurity = ns.getServerSecurityLevel(args.target) - args.minSecLevel;
+    if (args.waitFlag && serverSecurity) {
+        while (ns.getServerSecurityLevel(args.target) !== args.minSecLevel) {
             await ns.sleep(1);
         }
     }
 
     const operationsStart = Date.now();
-    await ns.grow(target);
+    await ns.grow(args.target);
     const duration = Date.now() - operationsStart;
 
-    const targetServer = await (new ServerRepository(ns)).getById(target);
-    const log: ActionLog = {
-        id,
+
+    const targetServer = await (new ServerRepository(ns)).getById(args.target);
+    const log: BatchLog = {
+        id: args.id,
         operation: "grow",
-        batchId,
-        target: targetServer,
-        sleepTime,
+        batchId: args.batchId,
+        security: targetServer.security,
+        money: targetServer.money,
+        sleepTime: args.sleepTime,
         serverSecurity,
-        expectedDuration,
+        expectedDuration: args.expectedDuration,
         actualDuration: duration,
         totalDuration: Date.now() - scriptStart,
+        expectedTotalDuration: args.expectedDuration + args.sleepTime,
         scriptStart,
+        threads: args.threads,
     };
 
+    const portHandle = ns.getPortHandle(args.debugPortNumber as number)
+    portHandle.write(JSON.stringify(log));
+
     (new FileLogger(ns))
-        .log(LoggerPrefixes.BATCHATTACK + operationId, "," + JSON.stringify(log, null, 2));
+        .log(LoggerPrefixes.BATCHATTACK + args.operationId, "," + JSON.stringify(log, null, 2));
 }

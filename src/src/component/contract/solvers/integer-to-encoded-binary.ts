@@ -1,5 +1,5 @@
 import { ISolver } from '../solver.interface.js';
-import {CodingContractName} from "/src/enum/contract-names.enum";
+import {CodingContractName} from "/src/component/contract/contract-names.enum";
 
 function isPowerOfTwo(n: number): boolean {
     return n > 0 && (n & (n - 1)) === 0;

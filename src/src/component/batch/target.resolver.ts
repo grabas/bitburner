@@ -3,11 +3,14 @@ import { Batch } from "./batch";
 import { ServerRepository } from "/src/repository/server.repository";
 import { ServerDto } from "/src/entity/server/server.dto";
 import {HackingFormulas} from "/src/component/batch/batch.formulas";
+import {PrepareBatch} from "/src/component/batch/prepare-batch";
 
 interface BatchStats {
     target: string;
     income: number;
     ram: number;
+    duration: number;
+    prepDuration: number;
 }
 
 function optimizeCandidates(candidates: BatchStats[], maxRam: number) {
@@ -70,8 +73,10 @@ const getPossibleActions = async (ns: NS): Promise<BatchStats[]> => {
         .sortBy("income.perSecond")
         .map((batch: Batch) => ({
             target: batch.target.hostname,
-            income: formulas.getBatchIncomePerSecond(batch.target, batch.host, batch.targetAmountMultiplier) ?? 0,
-            ram: (batch.ramCost * HackingFormulas.getWaveSize(batch, host, true)) / host.refresh().ram.max * 100
+            income: formulas.getBatchIncomePerSecond(batch.target, batch.host, batch.targetAmountMultiplier, true) ?? 0,
+            ram: (batch.ramCost * HackingFormulas.getWaveSize(batch, host, true)) / host.refresh().ram.max * 100,
+            duration: batch.duration,
+            prepDuration: new PrepareBatch(ns, batch.target, batch.host).duration
         }));
 }
 
@@ -91,7 +96,19 @@ export async function main(ns: NS): Promise<void> {
         return;
     }
 
-    ns.tprint(JSON.stringify(await getPossibleActions(ns), null, 2));
+    const possibleActions = (await getPossibleActions(ns))
+        .map((action: BatchStats) => {
+            return {
+                target: action.target,
+                income: ns.formatNumber(action.income) + "/s",
+                duration: ns.tFormat(action.duration),
+                prepDuration: ns.tFormat(action.prepDuration),
+                ram: ns.formatNumber(action.ram) + "%"
+            }
+        }
+    );
+
+    ns.tprint(JSON.stringify(possibleActions, null, 2));
 }
 
 export function autocomplete(data: any): string[] {

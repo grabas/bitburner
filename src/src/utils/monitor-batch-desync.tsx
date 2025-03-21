@@ -1,64 +1,38 @@
-import React, { ReactDOM, cDocument } from "/lib/react";
 import { NS } from "@ns";
-import { DraggableWindow } from "/ui/DraggableWindow";
+import { DraggableWindow } from "/Component/DraggableWindow";
+import BatchAttackDashboard from "/Component/chart/BatchAttackDashboard";
 import { uuidv4 } from "/src/utils/uuidv4";
-import { FileLogger } from "/src/logger/file.logger";
-import { LoggerPrefixes } from "/src/enum/logger-prefixes.enum";
-import LiveChart from "/ui/chart/LiveChart";
-
-let globalBatchData: BatchEntry[] = [];
-
-interface BatchEntry {
-    id: number;
-    operation: string;
-    target: string;
-    sleepTime: number;
-    expectedDuration: number;
-    actualDuration: number;
-    totalDuration: number;
-    scriptStart: number;
-}
-
-const getBatchData = () => globalBatchData;
-
-const transformBatchData = (data: BatchEntry[], type: string) =>
-    data.filter(entry => entry.operation === type)
-        .map(entry => ({
-            x: entry.id,
-            y: entry.actualDuration - entry.expectedDuration,
-        }));
+import React, {ReactDOM, cDocument, scheduler} from "/lib/react";
 
 export async function main(ns: NS) {
     ns.disableLog("asleep");
-    const type = ns.args[0] as string;
-    const fileId = ns.args[1] as string;
+    ns.ui.openTail()
 
-    const root = cDocument.getElementById("root") as HTMLElement;
+    // Use the #root element if it exists; otherwise fallback to body.
+    const root = cDocument.getElementById("root") || cDocument.body;
     const graphContainer = cDocument.createElement("div");
     graphContainer.id = uuidv4();
     graphContainer.className = "react-draggable MuiBox-root";
     root.appendChild(graphContainer);
 
+    ns.ui.closeTail()
     ReactDOM.render(
-        <DraggableWindow title={`${type} Desync`} containerId={graphContainer.id}>
-            <LiveChart
-                source={getBatchData}
-                transform={(data) => transformBatchData(data, type)}
-                refreshInterval={1000}
-            />
+        <DraggableWindow containerId={graphContainer.id} title="Batch Dashboard" x={1020} y={20}>
+            <BatchAttackDashboard ns={ns} portNumber={ns.args[0] as number} />
         </DraggableWindow>,
         graphContainer
     );
 
-    const logger = new FileLogger(ns);
 
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const sleep = (delay: number) => scheduler.postTask(() => {}, {delay});
+
+    // eslint-disable-next-line no-constant-condition
     while (true) {
-        const fileContents = logger.read(LoggerPrefixes.BATCHATTACK + fileId);
-        try {
-            globalBatchData = JSON.parse("[{}" + fileContents + "]");
-        } catch (error) {
-            ns.tprint("Error parsing JSON file: " + error);
+        if (!cDocument.getElementById(graphContainer.id)) {
+            break;
         }
-        await ns.sleep(500);
+        await sleep(500);
     }
 }

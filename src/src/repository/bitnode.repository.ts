@@ -1,5 +1,6 @@
 import { getSave } from "/src/database/save.database";
-import { Bitnode, BitNodeOptions } from "/src/entity/bitnode/bitnode";
+import { Bitnode} from "/src/entity/bitnode/bitnode";
+import { BitNodeOptions } from "/src/entity/bitnode/bitnode.interface";
 
 const BITNODE_CACHE_KEY = "cachedBitnodeNumber";
 const BITNODE_OPTIONS_CACHE_KEY = "cachedBitnodeOptions";

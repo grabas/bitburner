@@ -1,29 +1,14 @@
 import { NS } from "@ns";
-import { FileLogger } from "/src/logger/file.logger";
-import { LoggerPrefixes } from "/src/enum/logger-prefixes.enum";
-import {ActionArgs, ActionLog} from "/src/component/batch/action/action.type";
-import {ServerRepository} from "/src/repository/server.repository";
+import {parseActionArgs} from "/src/component/batch/batch.args";
 
-export async function main(ns: NS): Promise<void> {
-    const scriptStart = Date.now();
-    const [
-        id,
-        target,
-        sleepTime,
-        minSecLevel,
-        expectedDuration,
-        operationId,
-        batchId,
-        waitFlag
-    ] = ns.args as ActionArgs;
+export async function main(ns: NS, args = parseActionArgs(ns.args)): Promise<void> {
+    await ns.sleep(args.sleepTime);
 
-    await ns.sleep(sleepTime);
-
-    if (waitFlag) {
-        while (ns.getServerSecurityLevel(target) !== minSecLevel) {
+    /*if (args.waitFlag) {
+        while (ns.getServerSecurityLevel(args.target) !== args.minSecLevel) {
             await ns.sleep(1);
         }
-    }
+    }*/
 
-    await ns.grow(target);
+    await ns.grow(args.target);
 }

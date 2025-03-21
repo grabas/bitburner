@@ -1,4 +1,4 @@
-import {CodingContractName} from "/src/enum/contract-names.enum";
+import {CodingContractName} from "/src/component/contract/contract-names.enum";
 import { ISolver } from '../solver.interface.js';
 
 export class AlgorithmicStockTrader implements ISolver<CodingContractName.AlgorithmicStockTraderI> {

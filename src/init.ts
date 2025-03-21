@@ -1,18 +1,72 @@
 import { NS } from "@ns";
 import { main as buildDatabase } from '/src/command/build-server-database';
 import { setBitnode } from "/src/repository/bitnode.repository";
+import {COLORS} from "/src/enum/colors.enum";
+import {setColor} from "/src/utils/helpers/set-color";
 
 export async function main(ns: NS): Promise<void> {
-    ns.run('/src/command/solve-contracts.js', 1, "--loop", "--safe");
+    ns.tprint(setColor("Starting...", COLORS.PURPLE));
 
-    await setBitnode();
+    ns.tprint(" ");
+    ns.tprint(setColor("Setting bitnode...", COLORS.ORANGE));
+    const bitNode = await setBitnode();
+    ns.tprint(setColor(`Bitnode ${bitNode.number} set!`, COLORS.GREEN));
 
-    ns.run("/src/component/broker/darkweb/darkweb.daemon.js", 1);
-    ns.run("/src/component/broker/hacknet/hacknet.daemon.js", 1, "--loop");
+    ns.tprint(" ");
+    ns.tprint(setColor("Running contract solver daemon...", COLORS.ORANGE));
+    const contractSolverPID = ns.run('/src/command/solve-contracts.js', 1, "--loop", "--safe");
 
-    await buildDatabase(ns)
+    if (ns.isRunning(contractSolverPID)) {
+        ns.tprint(setColor("Contract solver daemon started!", COLORS.GREEN));
+    }
+
+    ns.tprint(" ");
+    ns.tprint(setColor("Running darkweb broker daemon...", COLORS.ORANGE));
+    const darkwebPID = ns.run("/src/component/broker/darkweb/darkweb.daemon.js", 1, "--no-utility", "--no-formulas");
+    if (ns.isRunning(darkwebPID)) {
+        ns.tprint(setColor("Darkweb broker daemon started!", COLORS.GREEN));
+    }
+
+    ns.tprint(" ");
+    ns.tprint(setColor("Running Hacknet Node broker daemon...", COLORS.ORANGE));
+    const hacknetPID = ns.run("/src/component/broker/hacknet/hacknet.daemon.js", 1, "--loop");
+    if (ns.isRunning(hacknetPID)) {
+        ns.tprint(setColor("Hacknet Node broker daemon started!", COLORS.GREEN));
+    }
+
+    ns.tprint(" ");
+    ns = await buildDatabase(ns)
+
+    ns.tprint(" ");
+    ns.tprint(setColor("Gaining inital access...", COLORS.YELLOW));
     ns.run("/src/command/gain-access.js", 1);
-    ns.run("/src/component/broker/home-upgrade/home-upgrade.daemon.js", 1, "--loop");
-    ns.run("/src/component/batch/batch.daemon.js", 1);
-    ns.run("/src/command/gain-access.js", 1, "--loop");
+
+    ns.tprint(" ");
+
+    ns.tprint(setColor("Running home upgrade broker daemon...", COLORS.ORANGE));
+    const homeUpgradePID = ns.run("/src/component/broker/home-upgrade/home-upgrade.daemon.js", 1, "--loop");
+    if (ns.isRunning(homeUpgradePID)) {
+        ns.tprint(setColor("Home upgrade daemon started!", COLORS.GREEN));
+    }
+
+    ns.tprint(" ");
+    ns.tprint(setColor("Running batch attack daemon...", COLORS.ORANGE));
+
+    // Mandatory n00dles visit :)
+    const batchAttackPID = ns.run("/src/component/batch/batch.daemon.js", 1, "n00dles", "--switch");
+    if (ns.isRunning(batchAttackPID)) {
+        ns.tprint(setColor("Batch attack daemon started!", COLORS.GREEN));
+    }
+
+
+
+    ns.tprint(" ");
+    ns.tprint(setColor("Running gain access command...", COLORS.ORANGE));
+    const gainAccessPID = ns.run("/src/command/gain-access.js", 1, "--loop");
+    if (ns.isRunning(gainAccessPID)) {
+        ns.tprint(setColor("Gain access command started!", COLORS.GREEN));
+    }
+
+    ns.tprint(" ");
+    ns.tprint(setColor("We ballin'!", COLORS.PURPLE));
 }

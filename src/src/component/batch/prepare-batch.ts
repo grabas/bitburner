@@ -3,11 +3,13 @@ import { Scripts } from "/src/enum/scripts.enum";
 import { ServerDto } from "/src/entity/server/server.dto";
 import { HackingFormulas } from "/src/component/batch/batch.formulas";
 import { BatchAction } from "/src/component/batch/batch.interface";
+import {BatchConfig} from "/src/component/batch/batch.config";
 
 export class PrepareBatch {
     public readonly target: ServerDto;
     public readonly host: ServerDto;
     public action: BatchAction[];
+    public duration: number;
 
     constructor(ns: NS, target: ServerDto, host: ServerDto) {
         const hackingFormulas = new HackingFormulas(ns);
@@ -74,5 +76,7 @@ export class PrepareBatch {
                 threads: Math.max(1, Math.floor(action.threads * scaleFactor))
             }));
         }
+
+        this.duration = weakenTime + (this.action.length - 1) * BatchConfig.BATCH_SEPARATION;
     }
 }

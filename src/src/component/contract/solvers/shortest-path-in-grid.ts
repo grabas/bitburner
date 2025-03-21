@@ -1,5 +1,5 @@
 import { ISolver } from '../solver.interface.js';
-import {CodingContractName} from "/src/enum/contract-names.enum";
+import {CodingContractName} from "/src/component/contract/contract-names.enum";
 
 export class ShortestPathInGrid implements ISolver<CodingContractName.ShortestPathInAGrid> {
     solve(grid: (1 | 0)[][]): string {

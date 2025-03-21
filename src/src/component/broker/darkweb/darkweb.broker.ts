@@ -1,6 +1,6 @@
 import { NS, Singularity } from "@ns";
 import { BrokerBase } from "/src/component/broker/broker.base";
-import { DarkWebItem, DarkWebItems, DarkWebPrices } from "/src/enum/darkweb.enum";
+import {DarkWebItem, DarkWebItems, DarkWebItemTypeEnum, DarkWebPrices} from "/src/component/broker/darkweb/darkweb.enum";
 import {getBitnode} from "/src/repository/bitnode.repository";
 
 export class DarkwebBroker extends BrokerBase {
@@ -21,13 +21,20 @@ export class DarkwebBroker extends BrokerBase {
         this.singularity.purchaseTor();
     };
 
-    public purchasePrograms = async () => {
+    public purchasePrograms = async (noUtility= false, noFormulas = false) => {
         if (!this.ns.hasTorRouter()) {
             await this.purchaseTor();
         }
 
-        const sortedPrograms: DarkWebItem[] = Object.values(DarkWebItems).sort((a, b) => a.price - b.price);
+        const filteredType: DarkWebItemTypeEnum[] = [];
+        if (noUtility) filteredType.push(DarkWebItemTypeEnum.Utility);
+        if (noFormulas) filteredType.push(DarkWebItemTypeEnum.Formulas);
 
+        const sortedPrograms: DarkWebItem[] = Object.values(DarkWebItems)
+            .filter(program => !filteredType.includes(program.type))
+            .sort((a, b) => a.price - b.price);
+
+        this.ns.tprint(JSON.stringify(sortedPrograms, null, 2));
         for (const program of sortedPrograms) {
             if (this.ns.fileExists(program.program)) continue;
 

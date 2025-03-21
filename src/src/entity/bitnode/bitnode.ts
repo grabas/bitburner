@@ -1,6 +1,5 @@
-import {BitNodeMultipliers} from "/src/entity/bitnode/bitnode.interface";
+import {BitNodeMultipliers, BitNodeOptions} from "/src/entity/bitnode/bitnode.interface";
 import {getBitnodeMults} from "/src/enum/bitnode.enum";
-import {BitNodeOptions} from "@ns";
 
 export class Bitnode {
     number: number

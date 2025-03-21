@@ -1,5 +1,6 @@
 import { Server } from "@ns";
 import {MoneyData, RamData, SecurityData} from "./server.interfaces";
+import {setNumberOfCores} from "/src/utils/home-cores";
 
 export class ServerEntity {
     hostname: string;
@@ -19,6 +20,7 @@ export class ServerEntity {
         this.ram = {
             level: Math.log2(server.maxRam),
             max: server.maxRam,
+            realMax: server.maxRam,
             used: server.ramUsed,
             free: 0
         };
@@ -38,5 +40,7 @@ export class ServerEntity {
             max: server.moneyMax ?? 0,
             growth: server.serverGrowth ?? 0
         };
+
+        setNumberOfCores(this.cores);
     }
 }

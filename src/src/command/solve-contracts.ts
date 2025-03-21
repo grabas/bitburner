@@ -1,7 +1,6 @@
 import {NS} from "@ns";
 import {parseArgs} from "/src/component/contract/solver.args";
 
-
 export async function main(ns: NS, args = parseArgs(ns.args)) {
     if (args.safe) {
         ns.run("/src/component/contract/solver.test.js", 1, ...ns.args, "--run"); return;

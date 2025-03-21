@@ -3,6 +3,7 @@ import { BrokerBase } from "/src/component/broker/broker.base"
 import {HomeUpgradeFormulas} from "/src/component/broker/home-upgrade/home-upgrade.formulas";
 import {ServerDto} from "/src/entity/server/server.dto";
 import {getBitnode} from "/src/repository/bitnode.repository";
+import {increamentNumberOfCores} from "/src/utils/home-cores";
 
 export class HomeUpgradeBroker extends BrokerBase {
     private formulas: HomeUpgradeFormulas;
@@ -16,25 +17,26 @@ export class HomeUpgradeBroker extends BrokerBase {
         }
 
         this.singularity = ns.singularity
-        this.formulas = new HomeUpgradeFormulas(ns);
+        this.formulas = new HomeUpgradeFormulas();
     }
 
     private upgradeHomeRam = async (home: ServerDto) => {
         await this.secureFunds(this.formulas.calculateUpgradeHomeRamCost(home));
-        this.singularity.upgradeHomeRam();
-
-        const message = `RAM Upgraded to ${this.ns.formatRam(home.refresh().ram.max)}`
-        this.ns.print(message);
-        this.ns.toast(message);
+        if (this.singularity.upgradeHomeRam()) {
+            const message = `RAM Upgraded to ${this.ns.formatRam(home.refresh().ram.max)}`
+            this.ns.print(message);
+            this.ns.toast(message);
+        }
     }
 
     private upgradeHomeCores = async (home: ServerDto) => {
         await this.secureFunds(this.formulas.getUpgradeHomeCoresCost(home));
-        this.singularity.upgradeHomeCores();
-
-        const message = `Cores Upgraded to ${home.refresh().cores}`
-        this.ns.print(message);
-        this.ns.toast(message);
+        if (this.singularity.upgradeHomeCores()) {
+            increamentNumberOfCores()
+            const message = `Cores Upgraded to ${home.refresh().cores}`
+            this.ns.print(message);
+            this.ns.toast(message);
+        }
     }
 
     public upgradeHome = async (home: ServerDto) => {

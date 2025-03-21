@@ -7,8 +7,12 @@ export async function main(ns: NS, args = parseArgs(ns.args)) {
 
     const broker = new HacknetBroker(ns);
 
-    do {
-        await broker.actOnBestDeal();
-        await ns.sleep(100);
-    } while (args.loop);
+    try {
+        do {
+            await broker.actOnBestDeal();
+            await ns.sleep(100);
+        } while (args.loop);
+    } catch (e) {
+        ns.tprint(`Error: ${e}`);
+    }
 }

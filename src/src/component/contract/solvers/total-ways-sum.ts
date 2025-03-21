@@ -1,5 +1,5 @@
 import { ISolver } from '../solver.interface.js';
-import {CodingContractName} from "/src/enum/contract-names.enum";
+import {CodingContractName} from "/src/component/contract/contract-names.enum";
 
 export class TotalWaysSum implements ISolver<CodingContractName.TotalWaysToSum> {
     solve(inputNumber: number): number {

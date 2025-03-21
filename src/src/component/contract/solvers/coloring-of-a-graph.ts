@@ -1,5 +1,5 @@
 import { ISolver } from '../solver.interface.js';
-import {CodingContractName} from "/src/enum/contract-names.enum";
+import {CodingContractName} from "/src/component/contract/contract-names.enum";
 
 export class ColoringOfAGraph implements ISolver<CodingContractName.Proper2ColoringOfAGraph> {
     solve([numVertices, edges]: [number, [number, number][]]): (1 | 0)[] {

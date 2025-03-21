@@ -2,7 +2,7 @@ import { NS } from "@ns";
 import { BatchConfig } from "./batch.config";
 import { ServerRepository } from "/src/repository/server.repository";
 import { uuidv4 } from "/src/utils/uuidv4";
-import {ActionArgs} from "/src/component/batch/action/action.type";
+import {ActionArgs} from "/src/component/batch/batch.args";
 import {monitor, printLog} from "/src/component/batch/batch.monitor";
 import {Batch} from "/src/component/batch/batch";
 import {HackingFormulas} from "/src/component/batch/batch.formulas";
@@ -19,41 +19,49 @@ export class BatchManager {
         this.repository = new ServerRepository(ns);
     }
 
-    public batchAttack = async (targetId: string|null|undefined, debug = false): Promise<void> => {
+    public batchAttack = async (targetId: string|null|undefined, switchTarget = false, debug = false): Promise<void> => {
         const host = await this.repository.getById(this.ns.getHostname());
 
-        const targetWasSet = typeof targetId === "string";
+        switchTarget = typeof targetId !== "string" || switchTarget;
         let target = await this.repository.getById(targetId ?? await getBestTarget(this.ns))
 
         let cycle = 0;
         let actionId = 0;
         let operationId = uuidv4();
 
+        const debugPortNumber = debug ? Math.floor(Math.random() * 255) + 1 : 0;
         if (debug) {
-            this.runDebugProcedures(operationId);
+            this.runDebugProcedures(debugPortNumber);
         }
 
         const processIds = [];
         do {
             await this.prepareTarget(target, host, processIds);
 
-            const batch = new Batch(this.ns, target, host, debug);
+            const batch = new Batch(this.ns, target.refresh(), host.refresh(), true, debug);
             const waveSize = HackingFormulas.getWaveSize(batch, host, false, debug);
 
             printLog(this.ns, batch, waveSize, true);
             for (let i = 0; i < waveSize; i++) {
                 for (const action of batch.action) {
-                    const args: ActionArgs = [
-                        actionId++,               // id
-                        batch.target.hostname,    // target
-                        action.sleepTime,         // sleepTime
-                        batch.target.security.min,// minSecLevel
-                        action.duration ?? 0,     // expectedDuration
-                        operationId,              // operationId
-                        i,                        // batchId
-                        1                         // waitFlag (1 means true)
-                    ];
-                    processIds.push(this.runScript(action.script.path, action.threads, args));
+                    processIds.push(
+                        this.runScript(
+                            action.script.path,
+                            action.threads,
+                            {
+                                id:  actionId++,
+                                target:  batch.target.hostname,
+                                sleepTime:  action.sleepTime,
+                                minSecLevel:  batch.target.security.min,
+                                expectedDuration:  action.duration ?? 0,
+                                operationId:  operationId,
+                                batchId: i,
+                                waitFlag: true,
+                                threads: action.threads,
+                                debugPort: debugPortNumber
+                            } as ActionArgs
+                        )
+                    );
                 }
                 await this.ns.sleep(BatchConfig.BATCH_SEPARATION);
             }
@@ -61,7 +69,7 @@ export class BatchManager {
             await monitor(this.ns, batch, waveSize);
 
             cycle++;
-            if (!targetWasSet && cycle >= BatchConfig.BATCH_TARGET_CYCLES) {
+            if (switchTarget && cycle >= BatchConfig.BATCH_TARGET_CYCLES) {
                 target = await this.repository.getById(await getBestTarget(this.ns));
                 operationId = uuidv4();
                 actionId = 0;
@@ -76,7 +84,7 @@ export class BatchManager {
         threads: number,
         args: ActionArgs
     ): number => {
-        return this.ns.run(scriptPath, threads, ...args);
+        return this.ns.run(scriptPath, threads, ...Object.values(args))
     };
 
     private async prepareTarget(target: ServerDto, host: ServerDto, processIds?: number[]): Promise<void> {
@@ -95,17 +103,23 @@ export class BatchManager {
 
         const preparePids: number[] = []
         for (const action of prepareBatch.action) {
-            const args: ActionArgs = [
-                actionId++,               // id
-                batch.target.hostname,    // target
-                action.sleepTime,         // sleepTime
-                batch.target.security.min,// minSecLevel
-                action.duration ?? 0,     // expectedDuration
-                operationId,              // operationId
-                0,                        // batchId
-                0,                         // waitFlag (1 means true)
-            ];
-            preparePids.push(this.runScript(action.script.path, action.threads, args));
+            preparePids.push(
+                this.runScript(
+                    action.script.path,
+                    action.threads,
+                    {
+                        id:  actionId++,
+                        target:  batch.target.hostname,
+                        sleepTime:  action.sleepTime,
+                        minSecLevel:  batch.target.security.min,
+                        expectedDuration:  action.duration ?? 0,
+                        operationId:  operationId,
+                        batchId: 0,
+                        waitFlag: false,
+                        threads: action.threads
+                    } as ActionArgs
+                )
+            );
         }
 
         while (!target.isPrepared()) {
@@ -127,9 +141,7 @@ export class BatchManager {
         return 0;
     }
 
-    private runDebugProcedures(operationId: string) {
-        this.ns.run("/src/utils/monitor-batch-desync.js", 1, "grow", operationId);
-        this.ns.run("/src/utils/monitor-batch-desync.js", 1, "hack", operationId);
-        this.ns.run("/src/utils/monitor-batch-desync.js", 1, "weaken", operationId);
+    private runDebugProcedures(debugPortNumber: number) {
+        this.ns.run("/src/utils/monitor-batch-desync.js", 1, debugPortNumber);
     }
 }

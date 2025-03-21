@@ -1,6 +1,6 @@
 import {NS} from "@ns";
 import {HacknetNode} from "/src/entity/hacknet/hacknet-node";
-import {HacknetNodeConstants} from "/src/enum/hacknode-constants.enum";
+import {HacknetNodeConstants} from "/src/component/broker/hacknet/hacknet.enum";
 import {Bitnode} from "/src/entity/bitnode/bitnode";
 import {getBitnode} from "/src/repository/bitnode.repository";
 

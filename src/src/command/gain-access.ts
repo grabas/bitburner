@@ -31,7 +31,7 @@ export const main = async (ns: NS, args= parseArgs(ns.args)): Promise<void> => {
             server.refresh();
             allAccessed = allAccessed && server.security.access;
             if (!server.security.access && attemptHacking(ns, server.hostname)) {
-                ns.tprint("Access granted: " + server.hostname)
+                ns.toast("Access granted: " + server.hostname)
             }
         });
 
