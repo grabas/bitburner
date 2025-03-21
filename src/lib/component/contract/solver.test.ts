@@ -21,7 +21,7 @@ export async function main(ns: NS, args = parseArgs(ns.args)) {
     ns.toast("Test completed", allPassed ? "success" : "error");
 
     if (allPassed && args.run) {
-        ns.run("/src/component/contract/solver.daemon.js", 1, ...ns.args);
+        ns.run("/lib/component/contract/solver.daemon.js", 1, ...ns.args);
     }
 
     return allPassed;

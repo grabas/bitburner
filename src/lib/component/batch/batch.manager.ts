@@ -142,6 +142,6 @@ export class BatchManager {
     }
 
     private runDebugProcedures(debugPortNumber: number) {
-        this.ns.run("/src/utils/monitor-batch-desync.js", 1, debugPortNumber);
+        this.ns.run("/lib/utils/monitor-batch-desync.js", 1, debugPortNumber);
     }
 }

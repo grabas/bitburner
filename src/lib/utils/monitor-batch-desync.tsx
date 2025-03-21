@@ -1,6 +1,6 @@
 import { NS } from "@ns";
-import { DraggableWindow } from "/src/Component/DraggableWindow";
-import BatchAttackDashboard from "/src/Component/chart/BatchAttackDashboard";
+import { DraggableWindow } from "/react-component/DraggableWindow";
+import BatchAttackDashboard from "/react-component/chart/BatchAttackDashboard";
 import { uuidv4 } from "/lib/utils/uuidv4";
 import React, {ReactDOM, cDocument, scheduler} from "/react-component/react";
 
