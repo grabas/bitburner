@@ -71,6 +71,7 @@ export class HacknetBroker extends BrokerBase {
             this.purchaseNode(); return;
         }
 
+
         const bestDeal = this.getBestDeal();
         if (bestDeal && (bestDeal.rate ?? Infinity) < this.getNewNodeRate()) {
             await this.secureFunds(bestDeal.cost as number);

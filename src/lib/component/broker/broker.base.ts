@@ -28,7 +28,7 @@ export class BrokerBase {
     };
 
     protected canEverAfford = (cost: number): boolean => {
-        return cost !== Infinity || cost < this.purchaseCostLimit
+        return cost !== Infinity && cost < this.purchaseCostLimit
     };
 
     protected secureFunds = async (cost: number): Promise<void> => {
