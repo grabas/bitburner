@@ -10,7 +10,7 @@ import {getBestTarget} from "/lib/component/batch/target.resolver";
 import {ServerDto} from "/lib/entity/server/server.dto";
 import {PrepareBatch} from "/lib/component/batch/prepare-batch";
 import {BatchType, IBatch} from "/lib/component/batch/batch.interface";
-import {CLEAR_LOGS} from "/react-component/dashboard/BatchAttackDashboard";
+import {CLEAR_PORT_MSG} from "/react-component/hooks/use-port-listener";
 
 export class BatchManager {
     private readonly ns: NS;
@@ -53,7 +53,7 @@ export class BatchManager {
             if (switchTarget && ++cycle >= BatchConfig.BATCH_TARGET_CYCLES) {
                 ({ target, cycle } = await this.resetCycleAndTarget(processIds));
             }
-            this.ns.getPortHandle(monitorPort).write(CLEAR_LOGS);
+            this.ns.getPortHandle(monitorPort).write(CLEAR_PORT_MSG);
         } while (true);
     };
 

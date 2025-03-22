@@ -12,6 +12,7 @@ const ReactDOM = cWindow.ReactDOM as typeof ReactDomNamespace;
 const useEffect = React.useEffect;
 const useState = React.useState;
 const useRef = React.useRef;
+const useCallback = React.useCallback;
 
 export default React;
 export {
@@ -21,5 +22,6 @@ export {
   ReactDOM,
   useEffect,
   useState,
-  useRef
+  useRef,
+  useCallback
 }

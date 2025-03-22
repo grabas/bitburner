@@ -2,6 +2,8 @@ import { useEffect } from "/react-component/react";
 import { NS } from "@ns";
 import {sleep} from "/lib/utils/sleep";
 
+export const CLEAR_PORT_MSG = "CLEAR_PORT_MSG";
+
 export type PortListenerCallback<T> = (newMessages: T[]) => void;
 
 /**
@@ -10,14 +12,12 @@ export type PortListenerCallback<T> = (newMessages: T[]) => void;
  * @param portNumber - The port to listen to.
  * @param parseMessage - Function to convert a string message to type T.
  * @param callback - Function to handle the array of parsed messages.
- * @param clearMsg - (Optional) A special message that indicates the state should be cleared.
  */
 const usePortListener = <T>(
     ns: NS,
     portNumber: number,
     parseMessage: (msg: string) => T,
-    callback: PortListenerCallback<T>,
-    clearMsg?: string
+    callback: PortListenerCallback<T>
 ) => {
     useEffect(() => {
         let cancelled = false;
@@ -28,7 +28,7 @@ const usePortListener = <T>(
                 const newMessages: T[] = [];
                 let msg = port.read();
                 while (msg !== "NULL PORT DATA") {
-                    if (clearMsg && msg === clearMsg) {
+                    if (msg === CLEAR_PORT_MSG) {
                         clearOnNextMessage = true;
                         msg = port.read();
                         continue;
@@ -56,7 +56,7 @@ const usePortListener = <T>(
         return () => {
             cancelled = true;
         };
-    }, [ns, portNumber, parseMessage, callback, clearMsg]);
+    }, [ns, portNumber, parseMessage, callback]);
 };
 
 export default usePortListener;

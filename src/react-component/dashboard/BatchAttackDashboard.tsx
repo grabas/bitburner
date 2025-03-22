@@ -1,11 +1,9 @@
-import React, {useState} from "/react-component/react";
+import React, {useState, useCallback} from "/react-component/react";
 import ApexChart from "../chart/ApexChart";
 import { NS } from "@ns";
 import {BatchMonitorLog} from "/lib/component/batch/batch.interface";
 import {getBatchOrderOptions, getMoneyAndSecurityOptions} from "/react-component/dashboard/BatchAttackDashboard.options";
 import usePortListener from "/react-component/hooks/use-port-listener";
-
-export const CLEAR_LOGS = "CLEAR_LOGS";
 
 interface BatchAttackDashboardProps {
     ns: NS;
@@ -14,15 +12,16 @@ interface BatchAttackDashboardProps {
 
 const BatchAttackDashboard: React.FC<BatchAttackDashboardProps> = ({ ns, portNumber }) => {
     const [logs, setLogs] = useState<BatchMonitorLog[]>([]);
-    const handleMessages = (newMessages: BatchMonitorLog[]) => {
+    const handleMessages = useCallback((newMessages: BatchMonitorLog[]) => {
         if (newMessages.length === 0) {
             setLogs([]);
         } else {
-            setLogs(prev => [...prev, ...newMessages]);
+            setLogs((prev) => [...prev, ...newMessages]);
         }
-    };
+    }, []);
 
-    usePortListener<BatchMonitorLog>(ns, portNumber, JSON.parse, handleMessages, CLEAR_LOGS);
+
+    usePortListener<BatchMonitorLog>(ns, portNumber, JSON.parse, handleMessages);
 
 
     /* ######## Order desync ######## */
