@@ -3,6 +3,8 @@ import { Batch } from "./batch"; // adjust path if needed
 import { getProgressBar } from "/lib/utils/progress-bar";
 import { COLORS } from "/lib/enum/colors.enum";
 import {BatchConfig} from "/lib/component/batch/batch.config";
+import {ServerDto} from "/lib/entity/server/server.dto";
+import {BatchType, IBatch} from "/lib/component/batch/batch.interface";
 
 const TOTAL_LINE_WIDTH = 36;
 
@@ -41,13 +43,11 @@ const LABELS = {
 
 export function printLog(
     ns: NS,
-    batch: Batch,
-    waveSize: number,
+    batch: IBatch,
+    waveSize = 1,
     deploying = false,
-    preparing = false
 ): void {
     ns.clearLog();
-
     const target = batch.target;
     const hostname = target.hostname.toUpperCase();
     const headerPadding = Math.max(0, TOTAL_LINE_WIDTH - hostname.length - 2);
@@ -94,20 +94,21 @@ export function printLog(
         const deployingStr = "...deploying";
         ns.print(`${getSpaceForLine("", deployingStr)}${setColorValue(deployingStr, COLORS.YELLOW)}`);
         ns.print("\t");
-    } else if (preparing) {
-        const preparingStr = "...preparing";
-        ns.print(`${getSpaceForLine("", preparingStr)}${setColorValue(preparingStr, COLORS.YELLOW)}`);
-        ns.print("\t");
     }
 }
 
-export async function monitor(ns: NS, batch: Batch, waveSize: number): Promise<void> {
+export async function monitor(ns: NS, batch: IBatch, waveSize = 1): Promise<void> {
     const startTime = Date.now();
     const finishTime = startTime + batch.duration;
 
     while (Date.now() <= finishTime) {
         printLog(ns, batch, waveSize);
-        ns.print(getProgressBar(startTime, batch.duration));
+
+        const text = batch.type === BatchType.PREPARE
+            ? setColorValue("Preparing", COLORS.YELLOW)
+            : setColorValue("Deploying", COLORS.GREEN);
+
+        ns.print(getProgressBar(startTime, batch.duration, text));
         await ns.sleep(10);
     }
 }

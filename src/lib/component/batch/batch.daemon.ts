@@ -3,7 +3,7 @@ import {BatchManager} from "/lib/component/batch/batch.manager";
 import {parseArgs} from "/lib/component/batch/batch.args";
 
 export async function main(ns: NS, args = parseArgs(ns.args)): Promise<void> {
-    await batchAttack(ns, args.target, args.switchTarget, args.debug);
+    await batchAttack(ns, args.target, args.switchTarget, args.monitor);
 }
 
 export function autocomplete(data: any): string[] {

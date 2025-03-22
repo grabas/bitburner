@@ -4,14 +4,14 @@ export interface BatchScript {
 }
 
 export const Scripts: { [key: string]: BatchScript } = {
-    GROW_BATCH: { path: "/lib/component/batch/action/grow.action.js", size: 1.85 },
-    GROW_BATCH_DEBUG: { path: "/lib/component/batch/action/grow.action.debug.js", size: 2.15 },
+    GROW_BATCH: { path: "/lib/component/batch/action/grow.action.js", size: 1.75 },
+    GROW_BATCH_MONITOR: { path: "/lib/component/batch/action/grow.action.monitor.js", size: 1.95 },
 
     WEAKEN_BATCH: { path: "/lib/component/batch/action/weaken.action.js", size: 1.75 },
-    WEAKEN_BATCH_DEBUG: { path: "/lib/component/batch/action/weaken.action.debug.js", size: 2.15 },
+    WEAKEN_BATCH_MONITOR: { path: "/lib/component/batch/action/weaken.action.monitor.js", size: 1.95 },
 
     HACK_BATCH: { path: "/lib/component/batch/action/hack.action.js", size: 1.80 },
-    HACK_BATCH_DEBUG: { path: "/lib/component/batch/action/hack.action.debug.js", size: 2.10 },
+    HACK_BATCH_MONITOR: { path: "/lib/component/batch/action/hack.action.monitor.js", size: 1.90 },
 
     PREPARATOR: { path: "/lib/hacking/preparator.js", size: 2.1 }
 };

@@ -1,14 +1,16 @@
-import { NS } from "@ns";
-import { BatchConfig } from "./batch.config";
-import { ServerRepository } from "/lib/repository/server.repository";
-import { uuidv4 } from "/lib/utils/uuidv4";
-import { ActionArgs } from "/lib/component/batch/batch.args";
-import { monitor, printLog } from "/lib/component/batch/batch.monitor";
-import { Batch } from "/lib/component/batch/batch";
-import { HackingFormulas } from "/lib/component/batch/batch.formulas";
-import { getBestTarget } from "/lib/component/batch/target.resolver";
-import { ServerDto } from "/lib/entity/server/server.dto";
-import { PrepareBatch } from "/lib/component/batch/prepare-batch";
+import {NS} from "@ns";
+import {BatchConfig} from "./batch.config";
+import {ServerRepository} from "/lib/repository/server.repository";
+import {uuidv4} from "/lib/utils/uuidv4";
+import {ActionArgs} from "/lib/component/batch/batch.args";
+import {monitor as monitorStatus, printLog} from "/lib/component/batch/batch.monitor";
+import {Batch} from "/lib/component/batch/batch";
+import {HackingFormulas} from "/lib/component/batch/batch.formulas";
+import {getBestTarget} from "/lib/component/batch/target.resolver";
+import {ServerDto} from "/lib/entity/server/server.dto";
+import {PrepareBatch} from "/lib/component/batch/prepare-batch";
+import {BatchType, IBatch} from "/lib/component/batch/batch.interface";
+import {CLEAR_LOGS} from "/react-component/chart/BatchAttackDashboard";
 
 export class BatchManager {
     private readonly ns: NS;
@@ -22,7 +24,7 @@ export class BatchManager {
     public batchAttack = async (
         targetId: string | null | undefined,
         switchTarget = false,
-        debug = false
+        monitor = false
     ): Promise<void> => {
         const host = await this.repository.getById(this.ns.getHostname());
         let target = await this.repository.getById(targetId ?? (await getBestTarget(this.ns)));
@@ -30,135 +32,98 @@ export class BatchManager {
         switchTarget = typeof targetId !== "string" || switchTarget;
 
         let cycle = 0;
-        let actionId = 0;
-        let operationId = uuidv4();
-
-        const debugPort = this.randomPort();
-        if (debug) this.runDebugProcedures(debugPort);
+        const monitorPort = this.randomPort();
+        if (monitor) this.runDiagnostics(monitorPort);
 
         const processIds: number[] = [];
         do {
             await this.ensureTargetPrepared(target, host, processIds);
 
-            const batch = new Batch(this.ns, target.refresh(), host.refresh(), true, debug);
-            const waveSize = HackingFormulas.getWaveSize(batch, host, false, debug);
-
+            const batch = new Batch(this.ns, target.refresh(), host.refresh(), monitor);
+            const waveSize = HackingFormulas.getWaveSize(batch, host, false, monitor);
             printLog(this.ns, batch, waveSize, true);
-            actionId = await this.runBatchWaves(batch, waveSize, actionId, operationId, debugPort, processIds);
 
-            await monitor(this.ns, batch, waveSize);
-            cycle++;
+            await this.spawnBatchActions(batch, waveSize, monitorPort, processIds);
 
-            if (switchTarget && cycle >= BatchConfig.BATCH_TARGET_CYCLES) {
-                ({ target, operationId, actionId, cycle } = await this.resetCycleAndTarget(processIds));
+            await monitorStatus(this.ns, batch, waveSize);
+            while (this.processesRunning(processIds)) {
+                await this.ns.sleep(BatchConfig.TICK);
             }
-        } while (!debug);
+
+            if (switchTarget && ++cycle >= BatchConfig.BATCH_TARGET_CYCLES) {
+                ({ target, cycle } = await this.resetCycleAndTarget(processIds));
+            }
+            this.ns.getPortHandle(monitorPort).write(CLEAR_LOGS);
+        } while (true);
     };
 
-    private runBatchWaves = async (
-        batch: Batch,
-        waveSize: number,
-        startActionId: number,
-        operationId: string,
-        debugPort: number,
-        processIds: number[]
-    ): Promise<number> => {
-        let actionId = startActionId;
-        for (let wave = 0; wave < waveSize; wave++) {
-            for (const action of batch.action) {
+    private spawnBatchActions = async (
+        batch: IBatch,
+        waveCount: number,
+        monitorPort: number,
+        processIds?: number[]
+    ): Promise<number[]> => {
+        let actionId = 0;
+        let allPids: number[] = [];
+
+        for (let wave = 0; wave < waveCount; wave++) {
+            const pids = batch.action.map((action) => {
                 const args: ActionArgs = {
                     id: actionId++,
                     target: batch.target.hostname,
                     sleepTime: action.sleepTime,
                     minSecLevel: batch.target.security.min,
+                    moneyMax: batch.target.money.max,
                     expectedDuration: action.duration ?? 0,
-                    operationId,
-                    batchId: wave,
-                    waitFlag: true,
-                    threads: action.threads,
-                    debugPortNumber: debugPort
+                    monitorPortNumber: monitorPort,
+                    waitFlag: batch.type === BatchType.ATTACK,
                 };
-                processIds.push(this.runScript(action.script.path, action.threads, args));
-            }
-            await this.ns.sleep(BatchConfig.BATCH_SEPARATION);
+                return this.runScript(action.script.path, action.threads, args);
+            });
+            allPids = allPids.concat(pids);
+            if (processIds) processIds.push(...pids);
+            if (wave < waveCount - 1) await this.ns.sleep(BatchConfig.BATCH_SEPARATION);
         }
-        return actionId;
+        return allPids;
     };
 
     private ensureTargetPrepared = async (
         target: ServerDto,
         host: ServerDto,
-        processIds: number[]
+        processIds: number[],
     ): Promise<void> => {
         if (target.isPrepared()) return;
 
-        printLog(this.ns, new Batch(this.ns, target, host), 1, false, true);
-        this.killProcesses(processIds);
-        await this.runPrepareBatch(target, host);
+        while (this.processesRunning(processIds)) {
+            await this.ns.sleep(BatchConfig.TICK);
+        }
+
+        const prepareBatch = new PrepareBatch(this.ns, target, host);
+        await this.spawnUntilPrepared(prepareBatch);
         this.ns.toast(`${target.hostname} is prepared`);
     };
 
-    private runPrepareBatch = async (target: ServerDto, host: ServerDto): Promise<void> => {
-        const batch = new Batch(this.ns, target, host);
-        const prepareBatch = new PrepareBatch(this.ns, target, host);
-        let actionId = 0;
-        const operationId = uuidv4();
-        let preparePids = this.spawnActions(
-            prepareBatch.action,
-            batch.target,
-            0,
-            false,
-            operationId,
-            () => actionId++
-        );
+    private spawnUntilPrepared = async (prepareBatch: PrepareBatch): Promise<void> => {
+        if (prepareBatch.target.isPrepared()) return;
+        const preparePids = await this.spawnBatchActions(prepareBatch, 1, 0);
 
-        while (!target.isPrepared()) {
-            if (preparePids.every((pid) => !this.ns.isRunning(pid))) {
-                preparePids = this.spawnActions(
-                    prepareBatch.action,
-                    batch.target,
-                    0,
-                    false,
-                    operationId,
-                    () => actionId++
-                );
+        while (!prepareBatch.target.isPrepared()) {
+            if (!this.processesRunning(preparePids)) {
+                await this.spawnUntilPrepared(prepareBatch);
             }
-            await this.ns.sleep(100);
+            await monitorStatus(this.ns, prepareBatch);
         }
         this.killProcesses(preparePids);
     };
 
-    private spawnActions = (
-        actions: any[],
-        target: ServerDto,
-        batchId: number,
-        waitFlag: boolean,
-        operationId: string,
-        getActionId: () => number
-    ): number[] => {
-        return actions.map((action) => {
-            const args: ActionArgs = {
-                id: getActionId(),
-                target: target.hostname,
-                sleepTime: action.sleepTime,
-                minSecLevel: target.security.min,
-                expectedDuration: action.duration ?? 0,
-                operationId,
-                batchId,
-                waitFlag,
-                threads: action.threads,
-                debugPortNumber: 0,
-            };
-            return this.runScript(action.script.path, action.threads, args);
-        });
-    };
+    private processesRunning = (pids: number[]): boolean => pids.some((pid) => this.ns.isRunning(pid));
 
     private randomPort = (): number => Math.floor(Math.random() * 255) + 1;
 
     private runScript = (scriptPath: string, threads: number, args: ActionArgs): number =>
         this.ns.run(scriptPath, threads, ...Object.values(args));
 
-    private runDebugProcedures = (debugPort: number): number =>
+    private runDiagnostics = (debugPort: number): number =>
         this.ns.run("/lib/utils/monitor-batch-desync.js", 1, debugPort);
 
     private killProcesses = (pids: number[]): void => {
@@ -169,13 +134,12 @@ export class BatchManager {
     private async resetCycleAndTarget(processIds: number[]): Promise<{
         target: ServerDto;
         operationId: string;
-        actionId: number;
         cycle: number;
     }> {
         const bestTargetId = await getBestTarget(this.ns);
         const newTarget = await this.repository.getById(bestTargetId);
         const newOperationId = uuidv4();
         this.killProcesses(processIds);
-        return { target: newTarget, operationId: newOperationId, actionId: 0, cycle: 0 };
+        return { target: newTarget, operationId: newOperationId, cycle: 0 };
     }
 }

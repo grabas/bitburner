@@ -1,4 +1,4 @@
-export const getProgressBar = (startTime: number, duration: number) => {
+export const getProgressBar = (startTime: number, duration: number, text = "Remaining") => {
     const endTime = startTime + duration;
     const barWidth = 30;
 
@@ -11,5 +11,5 @@ export const getProgressBar = (startTime: number, duration: number) => {
     const bar = "[" + "=".repeat(filledWidth) + " ".repeat(emptyWidth) + "]";
     const timeRemaining = new Date(remainingTime).toISOString().substr(11, 8);
 
-    return `${bar} ${Math.floor(percentComplete * 100)}%  \nRemaining:\t\t    ${timeRemaining}`;
+    return `${bar} ${Math.floor(percentComplete * 100)}%  \n${text}:\t\t    ${timeRemaining}`;
 }

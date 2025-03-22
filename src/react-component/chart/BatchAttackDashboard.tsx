@@ -1,7 +1,9 @@
 import React, {useEffect, useState} from "/react-component/react";
 import ApexChart from "./ApexChart";
 import { NS } from "@ns";
-import {BatchLog} from "/lib/component/batch/batch.interface";
+import {BatchMonitorLog} from "/lib/component/batch/batch.interface";
+
+export const CLEAR_LOGS = "CLEAR_LOGS";
 
 interface BatchAttackDashboardProps {
     ns: NS;
@@ -9,17 +11,27 @@ interface BatchAttackDashboardProps {
 }
 
 const BatchAttackDashboard: React.FC<BatchAttackDashboardProps> = ({ ns, portNumber }) => {
-    const [logs, setLogs] = useState<BatchLog[]>([]);
+    const [logs, setLogs] = useState<BatchMonitorLog[]>([]);
     useEffect(() => {
         let cancelled = false;
         async function pollPort() {
             const port = ns.getPortHandle(portNumber);
+            let clearOnNextMessage = false;
             while (!cancelled) {
-                const newLogs: BatchLog[] = [];
+                const newLogs: BatchMonitorLog[] = [];
                 let msg = port.read();
                 while (msg !== "NULL PORT DATA") {
+                    if (msg === CLEAR_LOGS) {
+                        clearOnNextMessage = true;
+                        msg = port.read();
+                        continue;
+                    }
                     try {
-                        const log: BatchLog = JSON.parse(msg);
+                        if (clearOnNextMessage) {
+                            setLogs([]);
+                            clearOnNextMessage = false;
+                        }
+                        const log: BatchMonitorLog = JSON.parse(msg);
                         newLogs.push(log);
                     } catch (err) {
                         ns.tprint("Error parsing log message: " + err);
@@ -83,11 +95,11 @@ const BatchAttackDashboard: React.FC<BatchAttackDashboardProps> = ({ ns, portNum
 
     const securityData = [...logs].map((log, index) => ({
         x: index,
-        y: log.security.level.toFixed(2),
+        y: log.securityLevel.toFixed(2),
     }));
     const moneyData = [...logs].map((log, index) => ({
         x: index,
-        y: (log.money.available / log.money.max * 100).toFixed(2),
+        y: (log.moneyAvailable / log.moneyMax * 100).toFixed(2),
     }));
     const lineChartOptions = {
         chart: { type: "line", height: 250, toolbar: { show: false }},
