@@ -160,7 +160,7 @@ export class HackingFormulas{
     }
 
     public getGrowSecurity = (growThreads: number): number => {
-        return 2 * ServerConstants.ServerFortifyAmount * growThreads;
+        return 3 * ServerConstants.ServerFortifyAmount * growThreads;
     }
 
     public getGrowThreads = (server: ServerDto, host: ServerDto, startMoney: number, idealistic = false): number => {

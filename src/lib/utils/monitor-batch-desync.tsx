@@ -1,8 +1,9 @@
 import { NS } from "@ns";
 import { DraggableWindow } from "/react-component/DraggableWindow";
-import BatchAttackDashboard from "/react-component/chart/BatchAttackDashboard";
+import BatchAttackDashboard from "/react-component/dashboard/BatchAttackDashboard";
 import { uuidv4 } from "/lib/utils/uuidv4";
 import React, {ReactDOM, cDocument, scheduler} from "/react-component/react";
+import {sleep} from "/lib/utils/sleep";
 
 export async function main(ns: NS) {
     ns.disableLog("asleep");
@@ -22,11 +23,6 @@ export async function main(ns: NS) {
         </DraggableWindow>,
         graphContainer
     );
-
-
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const sleep = (delay: number) => scheduler.postTask(() => {}, {delay});
 
     // eslint-disable-next-line no-constant-condition
     while (true) {

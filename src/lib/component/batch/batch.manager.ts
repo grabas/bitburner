@@ -10,7 +10,7 @@ import {getBestTarget} from "/lib/component/batch/target.resolver";
 import {ServerDto} from "/lib/entity/server/server.dto";
 import {PrepareBatch} from "/lib/component/batch/prepare-batch";
 import {BatchType, IBatch} from "/lib/component/batch/batch.interface";
-import {CLEAR_LOGS} from "/react-component/chart/BatchAttackDashboard";
+import {CLEAR_LOGS} from "/react-component/dashboard/BatchAttackDashboard";
 
 export class BatchManager {
     private readonly ns: NS;
