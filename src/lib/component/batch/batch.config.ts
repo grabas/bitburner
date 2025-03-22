@@ -3,7 +3,6 @@ export enum BatchConfig {
     BATCH_SEPARATION = 4 * TICK,
     TIME_BUFFER = 500,
     BATCH_TARGET_CYCLES = 5,
-    DEBUG_WAVE_SIZE = 100,
     MAX_WAVE_SIZE = 200,
     GROW_BUFFER = 1.05
 }

@@ -115,7 +115,7 @@ export const getMoneyAndSecurityOptions = () => ({
     ],
 });
 
-export const desyncChartOptions = () => ({
+export const getDesyncChartOptions = () => ({
     chart: {
         type: "line",
         height: 250,

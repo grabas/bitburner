@@ -20,17 +20,15 @@ export class HackingFormulas{
     /* ############ BATCH ############ */
 
 
-    public static getWaveSize(batch: Batch, host: ServerDto, maxRam = false, debug = false): number {
+    public static getWaveSize(batch: Batch, host: ServerDto, maxRam = false): number {
         const whatCanYouFitInRam = Math.floor((maxRam ? host.refresh().ram.max : host.getRamAvailable()) / batch.ramCost);
         const whatCanYouFitInDuration = Math.ceil(batch.duration / BatchConfig.BATCH_SEPARATION)
 
-        const size = Math.min(
+        return Math.min(
             whatCanYouFitInRam,
             whatCanYouFitInDuration,
             BatchConfig.MAX_WAVE_SIZE // before the sync goes to hell because of exp gain and/or host core/ram upgrades
         );
-
-        return debug ? Math.min(size, BatchConfig.DEBUG_WAVE_SIZE) : size;
     }
 
 

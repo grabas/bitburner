@@ -40,7 +40,7 @@ export class BatchManager {
             await this.ensureTargetPrepared(target, host, processIds);
 
             const batch = new Batch(this.ns, target.refresh(), host.refresh(), monitor);
-            const waveSize = HackingFormulas.getWaveSize(batch, host, false, monitor);
+            const waveSize = HackingFormulas.getWaveSize(batch, host, false);
             printLog(this.ns, batch, waveSize, true);
 
             await this.spawnBatchActions(batch, waveSize, monitorPort, processIds);

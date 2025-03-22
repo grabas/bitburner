@@ -2,7 +2,7 @@ import React, {useState, useCallback} from "/react-component/react";
 import ApexChart from "../chart/ApexChart";
 import { NS } from "@ns";
 import {BatchMonitorLog} from "/lib/component/batch/batch.interface";
-import {getBatchOrderOptions, getMoneyAndSecurityOptions} from "/react-component/dashboard/BatchAttackDashboard.options";
+import {getBatchOrderOptions, getDesyncChartOptions, getMoneyAndSecurityOptions} from "/react-component/dashboard/BatchAttackDashboard.options";
 import usePortListener from "/react-component/hooks/use-port-listener";
 
 interface BatchAttackDashboardProps {
@@ -83,7 +83,7 @@ const BatchAttackDashboard: React.FC<BatchAttackDashboardProps> = ({ ns, portNum
         }
     });
 
-    const desyncChartOptions = getMoneyAndSecurityOptions();
+    const desyncChartOptions = getDesyncChartOptions();
     const desyncChartSeries = operations.map((op) => ({
         name: op,
         data: desyncData[op],
