@@ -1,4 +1,7 @@
 import {ScriptArg} from "@ns";
+import {CrimeType} from "/lib/enum/crime.enum";
+
+export type InitScripts = { [key: string]: Script; }
 
 export interface TestScript {
     name: string;
@@ -15,8 +18,7 @@ export interface Script {
     priority?: number;
 }
 
-
-export const EssentialInitScripts: { [key: string]: Script } = {
+export const GlobalRequirements: InitScripts = {
     SET_BITNODE: {
         name: "Set Bitnode",
         path: "/lib/command/set-bitnode.js",
@@ -34,13 +36,12 @@ export const EssentialInitScripts: { [key: string]: Script } = {
         path: "/lib/command/build-server-database.js",
         defaultArgs: [],
         preTest: undefined,
-        postTest: {
-            name: "ServerRepositoryTest",
-            path: "/lib/test/tests/server-repository.test.js",
-            portNumber: 10110
-        },
+        postTest: undefined,
         priority: 1,
-    },
+    }
+}
+
+export const Commands: InitScripts = {
     INITIAL_GAIN_ACCESS: {
         name: "Initial Gain Access",
         path: "/lib/command/gain-access.js",
@@ -56,10 +57,42 @@ export const EssentialInitScripts: { [key: string]: Script } = {
             portNumber: 10210
         },
         priority: 2,
+    },
+    TAPEWORM_INFESTATION: {
+        name: "Tapeworm Infestation",
+        path: "/lib/command/tapeworm-infestation.js",
+        defaultArgs: [],
+        preTest: {
+            name: "InitalGainAccessTest",
+            path: "/lib/test/tests/initial-gain-access.test.js",
+            portNumber: 10300
+        },
+        postTest: {
+            name: "IsBusyTest",
+            path: "/lib/test/tests/tapewormed.test.js",
+            portNumber: 10310
+        },
+        priority: 3,
+    },
+    COMMIT_CRIME: {
+        name: "Commit Crime",
+        path: "/lib/command/commit-crime.js",
+        defaultArgs: [CrimeType.Homicide],
+        preTest: {
+            name: "SingularityTest",
+            path: "/lib/test/tests/singularity.test.js",
+            portNumber: 10400
+        },
+        postTest: {
+            name: "IsBusyTest",
+            path: "/lib/test/tests/is-busy.test.js",
+            portNumber: 10410
+        },
+        priority: 4,
     }
 }
 
-export const InitScripts: { [key: string]: Script } = {
+export const BrokersAndAgents: InitScripts = {
     CONTRACT_SOLVER: {
         name: "Contract Solver",
         path: "/lib/component/contract/solver.daemon.js",
@@ -67,10 +100,10 @@ export const InitScripts: { [key: string]: Script } = {
         preTest: {
             name: "ContractSolverTest",
             path: "/lib/test/tests/contract-solver.test.js",
-            portNumber: 10300
+            portNumber: 10500
         },
         postTest: undefined,
-        priority: 3,
+        priority: 5,
     },
     HOME_UPGRADE_BROKER: {
         name: "Home Upgrade Broker",
@@ -79,10 +112,10 @@ export const InitScripts: { [key: string]: Script } = {
         preTest: {
             name: "SingularityTest",
             path: "/lib/test/tests/singularity.test.js",
-            portNumber: 10400
+            portNumber: 10600
         },
         postTest: undefined,
-        priority: 4
+        priority: 6
     },
     HACKNET_BROKER: {
         name: "Hacknet Broker",
@@ -90,7 +123,7 @@ export const InitScripts: { [key: string]: Script } = {
         defaultArgs: ["--loop"],
         preTest: undefined,
         postTest: undefined,
-        priority: 5,
+        priority: 7,
     },
     DARKWEB_BROKER: {
         name: "Darkweb Broker",
@@ -99,18 +132,18 @@ export const InitScripts: { [key: string]: Script } = {
         preTest: {
             name: "SingularityTest",
             path: "/lib/test/tests/singularity.test.js",
-            portNumber: 10600
+            portNumber: 10800
         },
         postTest: undefined,
-        priority: 6
+        priority: 8
     },
     GAIN_ACCESS: {
         name: "Gain Access",
         path: "/lib/command/gain-access.js",
-        defaultArgs: ["--loop"],
+        defaultArgs: ["--loop", "--tapeworm"],
         preTest: undefined,
         postTest: undefined,
-        priority: 7,
+        priority: 9,
     }/*,
     BATCH_ATTACK: {
         name: "Batch Attack",
@@ -122,6 +155,6 @@ export const InitScripts: { [key: string]: Script } = {
             portNumber: 10800
         },
         postTest: undefined,
-        priority: 8,
+        priority: 9,
     },*/
 };

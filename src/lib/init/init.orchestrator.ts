@@ -1,7 +1,14 @@
 import {FilenameOrPID, NS} from "@ns";
 import {Colors} from "/lib/enum/colors.enum";
 import {setColor} from "/lib/utils/helpers/set-color";
-import {EssentialInitScripts, InitScripts, Script, TestScript} from "/lib/init/init.config";
+import {
+    GlobalRequirements,
+    BrokersAndAgents,
+    Script,
+    TestScript,
+    Commands,
+    InitScripts
+} from "/lib/init/init.config";
 import {runTest} from "/lib/test/test.resolver";
 import "/lib/utils/prototypes";
 
@@ -13,38 +20,30 @@ export class InitOrchestrator {
     }
 
     public init = async () => {
-        await this.runEssentialScripts();
-        const failedScripts = await this.runScripts();
-        await this.watch(failedScripts);
-    }
+        this.print("Initializing...", Colors.YELLOW);
 
-    private runEssentialScripts = async () => {
-        const scripts = Object.values(EssentialInitScripts).sortBy("priority", "ASC");
-        for (const script of scripts) {
-            this.print("\t")
+        const failedGlobalRequirements = await this.runsScripts(GlobalRequirements, true);
 
-            const preTestResult = await this.runTestScript(script.preTest, script.name);
-            if (!preTestResult) {
-                throw new Error(`Pre-test failed for essencial script ${script.name}`);
-            }
-
-            const proccessId = this.ns.run(script.path, 1, ...script.defaultArgs);
-            while (this.isRunning(proccessId)) {
-                await this.ns.sleep(100);
-            }
-
-            const postTestResult = await this.runTestScript(script.postTest, script.name);
-            if (!postTestResult) {
-                throw new Error(`Post-test failed for essencial script ${script.name}`);
-            }
+        if (failedGlobalRequirements.length) {
+            throw new Error("Failed to run essential scripts");
         }
+
+        await this.runsScripts(Commands, true);
+        await this.watch(
+            await this.runsScripts(BrokersAndAgents)
+        );
+
+        this.print("\t");
+        this.print("Initialization complete!", Colors.YELLOW);
     }
 
-    private runScripts = async (): Promise<Script[]> => {
+    private runsScripts = async (initScripts: InitScripts, asCommand = false): Promise<Script[]> => {
         const failedScripts: Script[] = [];
-        const scripts = Object.values(InitScripts).sortBy("priority", "ASC");
+
+        const scripts = Object.values(initScripts).sortBy("priority", "ASC");
         for (const script of scripts) {
-            const result = await this.runScript(script);
+            const result = await this.runScript(script, asCommand);
+
             if (!result) {
                 failedScripts.push(script);
             }
@@ -53,8 +52,35 @@ export class InitOrchestrator {
         return failedScripts;
     }
 
+    private runScript = async (script: Script, asCommand = false): Promise<boolean> => {
+        this.print("\t")
+        this.print(`Running ${script.name}...`, Colors.ORANGE);
+
+        if (!(await this.runTestScript(script.preTest, script.name))) return false;
+        const scriptPid = this.ns.run(script.path, 1, ...script.defaultArgs);
+
+        if (!scriptPid) {
+            this.print(`Failed to run ${script.name}`, Colors.RED);
+            return false;
+        }
+
+        if (asCommand) {
+            while (this.isRunning(scriptPid)) {
+                await this.ns.sleep(500);
+            }
+        }
+
+        if (!(await this.runTestScript(script.postTest, script.name))) return false;
+        this.print(`${script.name} OK!`, Colors.PURPLE);
+
+        return true;
+    }
+
     private watch = async (scripts: Script[]) => {
         if (!scripts.length) return;
+
+        this.print("\t")
+        this.print("Waiting for server upgrade...", Colors.YELLOW);
 
         const serverMaxRam = this.ns.getServerMaxRam("home");
         while (serverMaxRam === this.ns.getServerMaxRam("home")) {
@@ -73,21 +99,6 @@ export class InitOrchestrator {
         if (failedScripts.length) {
             await this.watch(failedScripts);
         }
-    }
-
-    private runScript = async (script: Script): Promise<boolean> => {
-        this.print("\t")
-
-        if (!(await this.runTestScript(script.preTest, script.name))) return false;
-        const scriptPid = this.ns.run(script.path, 1, ...script.defaultArgs);
-
-        if (!this.isRunning(scriptPid)) {
-            this.print(`Failed to run ${script.name}`, Colors.RED);
-            return false;
-        }
-
-        this.print(`Running ${script.name}...`, Colors.GREEN);
-        return true;
     }
 
     private runTestScript = async (testScript: TestScript|undefined, scriptName: string) => {

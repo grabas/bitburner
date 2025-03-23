@@ -1,7 +1,7 @@
 import {NS} from "@ns";
 import {TestBase} from "/lib/test/test.base";
 import {parseArgs} from "/lib/test/test.args";
-import {InitScripts} from "/lib/init/init.config";
+import {BrokersAndAgents} from "/lib/init/init.config";
 
 export async function main(ns: NS, args = parseArgs(ns)): Promise<void> {
     await (new GainAccessTest(ns, args.port)).runTest();
@@ -13,7 +13,7 @@ class GainAccessTest extends TestBase {
     }
 
     async test(): Promise<boolean> {
-        if (!this.ns.isRunning(InitScripts.DARKWEB_BROKER.path)) {
+        if (!this.ns.isRunning(BrokersAndAgents.DARKWEB_BROKER.path)) {
             throw new Error("Darkweb broker is not running");
         }
 

@@ -16,26 +16,30 @@ export const getTransaction = async (mode: IDBTransactionMode = "readonly"): Pro
 };
 
 export const getSave = async (): Promise<any> => {
-    const store: IDBObjectStore = await getTransaction();
+    try {
+        const store: IDBObjectStore = await getTransaction();
 
-    return new Promise<any>((resolve, reject) => {
-        const request: IDBRequest = store.get("save");
+        return new Promise<any>((resolve, reject) => {
+            const request: IDBRequest = store.get("save");
 
-        request.onsuccess = async () => {
-            if (request.result instanceof Uint8Array) {
-                try {
-                    const decompressedData = await decompressGzip(request.result);
-                    resolve(decompressedData);
-                } catch (error) {
-                    reject(`Error decompressing savefile: ${error}`);
+            request.onsuccess = async () => {
+                if (request.result instanceof Uint8Array) {
+                    try {
+                        const decompressedData = await decompressGzip(request.result);
+                        resolve(decompressedData);
+                    } catch (error) {
+                        reject(`Error decompressing savefile: ${error}`);
+                    }
+                } else {
+                    reject("Save data is not a Uint8Array, Try to save game first!");
                 }
-            } else {
-                reject("Save data is not a Uint8Array.");
-            }
-        };
+            };
 
-        request.onerror = () => reject("Error retrieving savefile");
-    });
+            request.onerror = () => reject("Error retrieving savefile");
+        });
+    } catch (error) {
+        alert(`Error getting save: ${error}, Try to save game first!`);
+    }
 };
 
 async function decompressGzip(data: Uint8Array): Promise<any> {
