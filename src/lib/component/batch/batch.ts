@@ -1,6 +1,6 @@
 import { NS } from "@ns";
 import { BatchConfig } from "./batch.config";
-import {Scripts} from "/lib/enum/scripts.enum";
+import {ActionScripts} from "/lib/enum/scripts.enum";
 import {ServerDto} from "/lib/entity/server/server.dto";
 import {HackingFormulas} from "/lib/component/batch/batch.formulas";
 import {BatchAction, BatchType, IBatch} from "/lib/component/batch/batch.interface";
@@ -34,12 +34,12 @@ export class Batch implements IBatch {
         const weakenTime = hackingFormulas.calculateWeakenTime(target, idealistic);
 
         this.action = [{
-            script: monitor ? Scripts.HACK_BATCH_MONITOR : Scripts.HACK_BATCH,
+            script: monitor ? ActionScripts.HACK_BATCH_MONITOR : ActionScripts.HACK_BATCH,
             sleepTime: hackingFormulas.getHackSleepTime(target, idealistic),
             threads: hackingThreads,
             duration: hackingFormulas.calculateHackTime(target, idealistic)
         }, {
-            script: monitor ? Scripts.WEAKEN_BATCH_MONITOR : Scripts.WEAKEN_BATCH,
+            script: monitor ? ActionScripts.WEAKEN_BATCH_MONITOR : ActionScripts.WEAKEN_BATCH,
             sleepTime: hackingFormulas.getWeakenSleepTime(),
             threads: hackingFormulas.calculateWeakenThreads(
                 target,
@@ -48,12 +48,12 @@ export class Batch implements IBatch {
             ),
             duration: weakenTime
         }, {
-            script: monitor ? Scripts.GROW_BATCH_MONITOR : Scripts.GROW_BATCH,
+            script: monitor ? ActionScripts.GROW_BATCH_MONITOR : ActionScripts.GROW_BATCH,
             sleepTime: hackingFormulas.getGrowSleepTime(target, idealistic),
             threads: growThreads,
             duration: hackingFormulas.calculateGrowTime(target, idealistic)
         }, {
-            script: monitor ? Scripts.WEAKEN_BATCH_MONITOR : Scripts.WEAKEN_BATCH,
+            script: monitor ? ActionScripts.WEAKEN_BATCH_MONITOR : ActionScripts.WEAKEN_BATCH,
             sleepTime: hackingFormulas.getWeakenSleepTime(2),
             threads: hackingFormulas.calculateWeakenThreads(
                 target,

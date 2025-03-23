@@ -1,7 +1,7 @@
 import { NS } from "@ns";
 import { Batch } from "./batch"; // adjust path if needed
 import { getProgressBar } from "/lib/utils/progress-bar";
-import { COLORS } from "/lib/enum/colors.enum";
+import { Colors } from "/lib/enum/colors.enum";
 import {BatchConfig} from "/lib/component/batch/batch.config";
 import {ServerDto} from "/lib/entity/server/server.dto";
 import {BatchType, IBatch} from "/lib/component/batch/batch.interface";
@@ -19,16 +19,16 @@ function setColor(
     isYellow: (val: number) => boolean
 ): string {
     if (isGreen(value)) {
-        return COLORS.GREEN;
+        return Colors.GREEN;
     } else if (isYellow(value)) {
-        return COLORS.YELLOW;
+        return Colors.YELLOW;
     } else {
-        return COLORS.RED;
+        return Colors.RED;
     }
 }
 
 function setColorValue(text: string, color: string): string {
-    return `${color}${text}${COLORS.RESET}`;
+    return `${color}${text}${Colors.RESET}`;
 }
 
 const LABELS = {
@@ -46,6 +46,7 @@ export function printLog(
     batch: IBatch,
     waveSize = 1,
     deploying = false,
+    preparing = false,
 ): void {
     ns.clearLog();
     const target = batch.target;
@@ -53,7 +54,7 @@ export function printLog(
     const headerPadding = Math.max(0, TOTAL_LINE_WIDTH - hostname.length - 2);
     const leftPad = Math.floor(headerPadding / 2);
     const rightPad = headerPadding - leftPad;
-    ns.print(`${COLORS.PURPLE}${"-".repeat(leftPad)} ${hostname} ${"-".repeat(rightPad)}${COLORS.PURPLE}-`);
+    ns.print(`${Colors.PURPLE}${"-".repeat(leftPad)} ${hostname} ${"-".repeat(rightPad)}${Colors.PURPLE}-`);
 
     const cycleDuration = (waveSize - 1) * BatchConfig.BATCH_SEPARATION + batch.duration + BatchConfig.TIME_BUFFER
     const incomePerCycle = batch.targetAmount * waveSize;
@@ -84,15 +85,19 @@ export function printLog(
     ns.print(`${LABELS.MONEY}${getSpaceForLine(LABELS.MONEY, moneyStr)}${coloredMoney}`);
     ns.print(`${LABELS.SECURITY}${getSpaceForLine(LABELS.SECURITY, secStr)}${coloredSec}`);
     ns.print("\t");
-    ns.print(`${LABELS.INCOME_CYCLE}${getSpaceForLine(LABELS.INCOME_CYCLE, income)}${setColorValue(income, COLORS.GREEN)}`);
-    ns.print(`${LABELS.INCOME_SECOND}${getSpaceForLine(LABELS.INCOME_SECOND, incomePerSecond)}${setColorValue(incomePerSecond, COLORS.GREEN)}`);
-    ns.print(`${LABELS.BATCHES}${getSpaceForLine(LABELS.BATCHES, waveSize.toString())}${setColorValue(waveSize.toString(), COLORS.PURPLE)}`);
+    ns.print(`${LABELS.INCOME_CYCLE}${getSpaceForLine(LABELS.INCOME_CYCLE, income)}${setColorValue(income, Colors.GREEN)}`);
+    ns.print(`${LABELS.INCOME_SECOND}${getSpaceForLine(LABELS.INCOME_SECOND, incomePerSecond)}${setColorValue(incomePerSecond, Colors.GREEN)}`);
+    ns.print(`${LABELS.BATCHES}${getSpaceForLine(LABELS.BATCHES, waveSize.toString())}${setColorValue(waveSize.toString(), Colors.PURPLE)}`);
     ns.print(`${LABELS.RAM_PER_BATCH}${getSpaceForLine(LABELS.RAM_PER_BATCH, ramPerBatch)}${ramPerBatch}`);
-    ns.print(`${LABELS.RAM_TOTAL}${getSpaceForLine(LABELS.RAM_TOTAL, totalRamString)}${setColorValue(totalRamString, COLORS.RED)}`);
+    ns.print(`${LABELS.RAM_TOTAL}${getSpaceForLine(LABELS.RAM_TOTAL, totalRamString)}${setColorValue(totalRamString, Colors.RED)}`);
 
     if (deploying) {
         const deployingStr = "...deploying";
-        ns.print(`${getSpaceForLine("", deployingStr)}${setColorValue(deployingStr, COLORS.YELLOW)}`);
+        ns.print(`${getSpaceForLine("", deployingStr)}${setColorValue(deployingStr, Colors.YELLOW)}`);
+        ns.print("\t");
+    } else if (preparing) {
+        const preparingStr = "...preparing";
+        ns.print(`${getSpaceForLine("", preparingStr)}${setColorValue(preparingStr, Colors.YELLOW)}`);
         ns.print("\t");
     }
 }
@@ -105,8 +110,8 @@ export async function monitor(ns: NS, batch: IBatch, waveSize = 1): Promise<void
         printLog(ns, batch, waveSize);
 
         const text = batch.type === BatchType.PREPARE
-            ? setColorValue("Preparing", COLORS.YELLOW)
-            : setColorValue("Deploying", COLORS.GREEN);
+            ? setColorValue("Preparing", Colors.YELLOW)
+            : setColorValue("Deploying", Colors.GREEN);
 
         ns.print(getProgressBar(startTime, batch.duration, text));
         await ns.sleep(10);

@@ -20,7 +20,7 @@ export interface HackNodeMultipliers {
     coreCost: number
 }
 
-export const getHacknetMultipliers = (ns: NS): HackNodeMultipliers => {
+export const getHacknodeMultipliers = (ns: NS): HackNodeMultipliers => {
     const mults = ns.getPlayer().mults;
     return {
         nodeMoney: mults.hacknet_node_money,
@@ -37,7 +37,7 @@ export class HacknetFormulas {
 
     constructor(ns: NS) {
         this.bitnode = getBitnode();
-        this.multipliers = getHacknetMultipliers(ns);
+        this.multipliers = getHacknodeMultipliers(ns);
     }
 
     public calculateNodeCost(n = 1): number {

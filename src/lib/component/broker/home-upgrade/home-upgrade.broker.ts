@@ -3,7 +3,7 @@ import { BrokerBase } from "/lib/component/broker/broker.base"
 import {HomeUpgradeFormulas} from "/lib/component/broker/home-upgrade/home-upgrade.formulas";
 import {ServerDto} from "/lib/entity/server/server.dto";
 import {getBitnode} from "/lib/repository/bitnode.repository";
-import {increamentNumberOfCores} from "/lib/utils/home-cores";
+import {getNumberOfCores, increamentNumberOfCores} from "/lib/utils/home-cores";
 
 export class HomeUpgradeBroker extends BrokerBase {
     private formulas: HomeUpgradeFormulas;
@@ -17,34 +17,33 @@ export class HomeUpgradeBroker extends BrokerBase {
         }
 
         this.singularity = ns.singularity
-        this.formulas = new HomeUpgradeFormulas();
+        this.formulas = new HomeUpgradeFormulas(ns);
     }
 
-    private upgradeHomeRam = async (home: ServerDto) => {
-        await this.secureFunds(this.formulas.calculateUpgradeHomeRamCost(home));
+    private upgradeHomeRam = async () => {
         if (this.singularity.upgradeHomeRam()) {
-            const message = `RAM Upgraded to ${this.ns.formatRam(home.refresh().ram.max)}`
+            const message = `RAM Upgraded to ${this.ns.getServerMaxRam("home")}`
             this.ns.print(message);
             this.ns.toast(message);
         }
     }
 
-    private upgradeHomeCores = async (home: ServerDto) => {
-        await this.secureFunds(this.formulas.getUpgradeHomeCoresCost(home));
+    private upgradeHomeCores = async () => {
+        await this.secureFunds(this.formulas.getUpgradeHomeCoresCost());
         if (this.singularity.upgradeHomeCores()) {
             increamentNumberOfCores()
-            const message = `Cores Upgraded to ${home.refresh().cores}`
+            const message = `Cores Upgraded to ${getNumberOfCores()}`
             this.ns.print(message);
             this.ns.toast(message);
         }
     }
 
-    public upgradeHome = async (home: ServerDto) => {
-        const ramCost = this.formulas.calculateUpgradeHomeRamCost(home);
-        const coresCost = this.formulas.getUpgradeHomeCoresCost(home);
+    public upgradeHome = async () => {
+        const ramCost = this.formulas.calculateUpgradeHomeRamCost();
+        const coresCost = this.formulas.getUpgradeHomeCoresCost();
 
         ramCost < coresCost ?
-            await this.upgradeHomeRam(home) :
-            await this.upgradeHomeCores(home);
+            await this.upgradeHomeRam() :
+            await this.upgradeHomeCores();
     }
 }

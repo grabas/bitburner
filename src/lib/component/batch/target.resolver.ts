@@ -69,7 +69,7 @@ const getPossibleActions = async (ns: NS): Promise<BatchStats[]> => {
 
     return candidates
         .map((target: ServerDto) => new Batch(ns, target, host))
-        .filter((batch: Batch) => batch.hackChance >= 0.9 && batch.target.security.access)
+        .filter((batch: Batch) => batch.hackChance === 1 && batch.target.security.access)
         .sortBy("income.perSecond")
         .map((batch: Batch) => ({
             target: batch.target.hostname,

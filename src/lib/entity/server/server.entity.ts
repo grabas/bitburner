@@ -20,7 +20,6 @@ export class ServerEntity {
         this.ram = {
             level: Math.log2(server.maxRam),
             max: server.maxRam,
-            realMax: server.maxRam,
             used: server.ramUsed,
             free: 0
         };

@@ -125,9 +125,7 @@ export const getDesyncChartOptions = () => ({
     },
     xaxis: {
         labels: {
-            style: {
-                colors: "#fff",
-            },
+            show: false,
         },
     },
     yaxis: {

@@ -2,11 +2,11 @@ import { NS } from "@ns";
 import { Crawler } from "/lib/utils/crawler";
 import { ServerEntity } from "/lib/entity/server/server.entity";
 import { DATABASE_NAME, STORE_NAME } from "/lib/database/server.database";
-import {COLORS} from "/lib/enum/colors.enum";
+import {Colors} from "/lib/enum/colors.enum";
 import {setColor} from "/lib/utils/helpers/set-color";
 
 export async function main(ns: NS) {
-    ns.tprint(setColor("Building database...", COLORS.ORANGE));
+    ns.tprint(setColor("Building database...", Colors.ORANGE));
 
     const servers = new Crawler(ns)
         .getNetwork()
@@ -43,7 +43,7 @@ export async function main(ns: NS) {
         };
 
         txn.oncomplete = () => {
-            ns.tprint(setColor("Database built!", COLORS.GREEN));
+            ns.tprint(setColor("Database built!", Colors.GREEN));
             resolve();
         };
 

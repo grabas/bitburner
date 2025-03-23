@@ -1,3 +1,3 @@
-import {COLORS} from "/lib/enum/colors.enum";
+import {Colors} from "/lib/enum/colors.enum";
 
-export const setColor = (text: string, color: string): string => `${color}${text}${COLORS.RESET}`;
+export const setColor = (text: string|number|boolean, color: string): string => `${color}${text}${Colors.RESET}`;

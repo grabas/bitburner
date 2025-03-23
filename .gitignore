@@ -3,3 +3,4 @@ dist/
 NetscriptDefinitions.d.ts
 .idea
 /src/play.ts
+/src/play-r.tsx

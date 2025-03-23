@@ -55,14 +55,18 @@ export class HacknetBroker extends BrokerBase {
         return Array.from({length: this.hacknet.numNodes()}, (_, i) => new HacknetNode(this.ns, i));
     }
 
-    public getBestDeal = (): Rates | null => {
-        const bestDealPerBatch =  this.getNodes()
+    public getBestDealsPerNode = (): Rates[] => {
+        return this.getNodes()
             .map(node => this.formulas.getBestRate(node))
             .flat()
             .filter(rate => this.canEverAfford(rate.cost ?? Infinity));
+    }
 
-        return bestDealPerBatch.length ?
-            bestDealPerBatch.reduce((best, rate) => (best.rate ?? Infinity) < (rate.rate ?? Infinity) ? best : rate) :
+    public getBestDeal = (): Rates | null => {
+        const getBestDealsPerNode = this.getBestDealsPerNode().filter((rate) => this.canAfford(rate.cost as number))
+
+        return getBestDealsPerNode.length ?
+            getBestDealsPerNode.reduce((best, rate) => (best.rate ?? Infinity) < (rate.rate ?? Infinity) ? best : rate) :
             null;
     }
 
@@ -71,16 +75,14 @@ export class HacknetBroker extends BrokerBase {
             this.purchaseNode(); return;
         }
 
-
         const bestDeal = this.getBestDeal();
         if (bestDeal && (bestDeal.rate ?? Infinity) < this.getNewNodeRate()) {
-            await this.secureFunds(bestDeal.cost as number);
             this.upgradeMap[bestDeal.type](bestDeal.index);
             this.ns.print(`Upgraded node ${bestDeal.index} ${bestDeal.type} for ${this.ns.formatNumber(bestDeal.cost as number)}`);
         } else {
             const newNodeCost = this.getNewNodeCost();
 
-            if (!this.canEverAfford(newNodeCost) && bestDeal === null) {
+            if (!this.canEverAfford(newNodeCost) && this.getBestDealsPerNode().length === 0) {
                 throw new Error("No best deal found and new node cost exceeds purchase limit. Exiting...");
             }
 

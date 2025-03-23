@@ -13,7 +13,7 @@ export async function main(ns: NS) {
     const target = ns.args[0].toString();
     const serverRepository = new ServerRepository(ns);
 
-    target ? (await serverRepository.getById(target)).print() : (await serverRepository.getNetwork()).forEach((server: ServerDto) => server.print());
+    target ? (await serverRepository.getById(target)).print() : (await serverRepository.getServers()).forEach((server: ServerDto) => server.print());
 }
 
 export class ServerRepository {
@@ -31,7 +31,7 @@ export class ServerRepository {
         return new ServerDto(this.ns, server);
     }
 
-    public async getNetwork(includeHome = false): Promise<ServerDto[]> {
+    public async getServers(includeHome = false): Promise<ServerDto[]> {
         const allServers: ServerData[] = await getAllServers();
         return allServers
             .filter((server: ServerData) => includeHome || !server.isHome)
@@ -39,7 +39,7 @@ export class ServerRepository {
     }
 
     public async getHackedServers(includeHome = false): Promise<ServerDto[]> {
-        const network = await this.getNetwork(includeHome);
+        const network = await this.getServers(includeHome);
         return network.filter(server => server.security.access);
     }
 
@@ -60,7 +60,7 @@ export class ServerRepository {
     }
 
     public async getMonetaryServers(): Promise<ServerDto[]> {
-        const network = await this.getNetwork();
+        const network = await this.getServers();
         return network.filter(server => server.money.max > 0).sortBy("money.max");
     }
 

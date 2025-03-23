@@ -3,7 +3,7 @@ export interface BatchScript {
     size: number;
 }
 
-export const Scripts: { [key: string]: BatchScript } = {
+export const ActionScripts: { [key: string]: BatchScript } = {
     GROW_BATCH: { path: "/lib/component/batch/action/grow.action.js", size: 1.75 },
     GROW_BATCH_MONITOR: { path: "/lib/component/batch/action/grow.action.monitor.js", size: 1.95 },
 
@@ -15,5 +15,3 @@ export const Scripts: { [key: string]: BatchScript } = {
 
     PREPARATOR: { path: "/lib/hacking/preparator.js", size: 2.1 }
 };
-
-export type ScriptsEnum = keyof typeof Scripts;

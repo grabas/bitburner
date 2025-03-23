@@ -3,16 +3,8 @@ import {parseActionArgs} from "/lib/component/batch/batch.args";
 import {BatchMonitorLog} from "/lib/component/batch/batch.interface";
 
 export async function main(ns: NS, args = parseActionArgs(ns.args)): Promise<void> {
-    await ns.sleep(args.sleepTime);
-
-    if (args.waitFlag) {
-        while (ns.getServerSecurityLevel(args.target) !== args.minSecLevel) {
-            await ns.sleep(1);
-        }
-    }
-
     const operationsStart = Date.now();
-    await ns.grow(args.target);
+    await ns.grow(args.target, {additionalMsec: args.sleepTime});
     const duration = Date.now() - operationsStart;
 
     const log: BatchMonitorLog = {
@@ -22,7 +14,7 @@ export async function main(ns: NS, args = parseActionArgs(ns.args)): Promise<voi
         securityLevel: ns.getServerSecurityLevel(args.target),
         moneyMax: args.moneyMax,
         moneyAvailable: ns.getServerMoneyAvailable(args.target),
-        expectedDuration: args.expectedDuration,
+        expectedDuration: args.expectedDuration + args.sleepTime,
         actualDuration: duration
     }
 

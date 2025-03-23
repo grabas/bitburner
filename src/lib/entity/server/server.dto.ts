@@ -30,10 +30,14 @@ export class ServerDto {
         this.security.access = this.ns.hasRootAccess(this.hostname);
         this.security.level = this.ns.getServerSecurityLevel(this.hostname);
         this.money.available = this.ns.getServerMoneyAvailable(this.hostname);
-        this.ram.used = this.ns.getServerUsedRam(this.hostname);
-        this.ram.realMax = this.ns.getServerMaxRam(this.hostname);
-        this.ram.max = Math.max(this.ram.realMax - (this.isHome ? ServerConstants.HomeComputerRamReselve : 0), 0);
-        this.ram.free = Math.max(this.ram.max - this.ram.used, 0);
+
+        this.ram.used =  this.isHome ?
+            Math.max(ServerConstants.HomeComputerRamReselve, this.ns.getServerUsedRam(this.hostname)) :
+            this.ns.getServerUsedRam(this.hostname);
+
+        const realMax = this.ns.getServerMaxRam(this.hostname);
+        this.ram.max = realMax - ServerConstants.HomeComputerRamReselve;
+        this.ram.free = realMax - this.ram.used;
 
         if (this.isHome) {
             this.cores = getNumberOfCores();

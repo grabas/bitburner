@@ -57,6 +57,32 @@ export class BatchManager {
         } while (true);
     };
 
+    private ensureTargetPrepared = async (
+        target: ServerDto,
+        host: ServerDto,
+        processIds: number[],
+    ): Promise<void> => {
+        while (this.processesRunning(processIds)) {
+            await this.ns.sleep(BatchConfig.TICK);
+        }
+
+        if (target.isPrepared()) return;
+
+        const prepareBatch = new PrepareBatch(this.ns, target, host);
+        const preparePids = await this.spawnBatchActions(prepareBatch, 1, 0);
+
+        printLog(this.ns, prepareBatch, 1, false, true);
+        while (!prepareBatch.target.isPrepared()) {
+            if (!this.processesRunning(preparePids)) {
+                await this.ensureTargetPrepared(target, host, preparePids);
+            }
+            await this.ns.sleep(BatchConfig.TICK);
+        }
+
+        this.killProcesses(preparePids);
+        this.ns.toast(`${target.hostname} is prepared`);
+    };
+
     private spawnBatchActions = async (
         batch: IBatch,
         waveCount: number,
@@ -87,38 +113,8 @@ export class BatchManager {
         return allPids;
     };
 
-    private ensureTargetPrepared = async (
-        target: ServerDto,
-        host: ServerDto,
-        processIds: number[],
-    ): Promise<void> => {
-        if (target.isPrepared()) return;
-
-        while (this.processesRunning(processIds)) {
-            await this.ns.sleep(BatchConfig.TICK);
-        }
-
-        const prepareBatch = new PrepareBatch(this.ns, target, host);
-        await this.spawnUntilPrepared(prepareBatch);
-        this.ns.toast(`${target.hostname} is prepared`);
-    };
-
-    private spawnUntilPrepared = async (prepareBatch: PrepareBatch): Promise<void> => {
-        if (prepareBatch.target.isPrepared()) return;
-        const preparePids = await this.spawnBatchActions(prepareBatch, 1, 0);
-
-        while (!prepareBatch.target.isPrepared()) {
-            if (!this.processesRunning(preparePids)) {
-                await this.spawnUntilPrepared(prepareBatch);
-            }
-            await monitorStatus(this.ns, prepareBatch);
-        }
-        this.killProcesses(preparePids);
-    };
-
-    private processesRunning = (pids: number[]): boolean => pids.some((pid) => this.ns.isRunning(pid));
-
     private randomPort = (): number => Math.floor(Math.random() * 255) + 1;
+    private processesRunning = (pids: number[]): boolean => pids.some((pid) => this.ns.isRunning(pid));
 
     private runScript = (scriptPath: string, threads: number, args: ActionArgs): number =>
         this.ns.run(scriptPath, threads, ...Object.values(args));

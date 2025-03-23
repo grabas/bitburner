@@ -1,8 +1,20 @@
-export function parseArgs(args: (string | number | boolean)[]) {
+import {NS} from "@ns";
+
+export function parseArgs(ns: NS): { target: string | undefined; monitor: boolean; switchTarget: boolean } {
+    const flags = ns.flags([
+        ["target", ""],
+        ["monitor", false],
+        ["m", false],
+        ["switch", false],
+        ["s", false],
+    ]);
+
+    const positional = flags._ as string[];
+
     return {
-        target: args[0] as string || null,
-        monitor: args.includes("-m") || args.includes("--monitor"),
-        switchTarget: args.includes("-s") || args.includes("--switch"),
+        target: (flags.target || positional[0]) as string | undefined,
+        monitor: (flags.m || flags.monitor) as boolean,
+        switchTarget: (flags.s || flags.switch) as boolean,
     };
 }
 

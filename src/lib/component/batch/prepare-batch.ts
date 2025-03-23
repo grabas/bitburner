@@ -1,5 +1,5 @@
 import { NS } from "@ns";
-import { Scripts } from "/lib/enum/scripts.enum";
+import { ActionScripts } from "/lib/enum/scripts.enum";
 import { ServerDto } from "/lib/entity/server/server.dto";
 import { HackingFormulas } from "/lib/component/batch/batch.formulas";
 import {BatchAction, BatchType, IBatch} from "/lib/component/batch/batch.interface";
@@ -23,8 +23,8 @@ export class PrepareBatch implements IBatch {
 
         this.action = [];
 
-        const growScript = monitor ? Scripts.GROW_BATCH_MONITOR : Scripts.GROW_BATCH;
-        const weakenScript = monitor ? Scripts.WEAKEN_BATCH_MONITOR : Scripts.WEAKEN_BATCH;
+        const growScript = monitor ? ActionScripts.GROW_BATCH_MONITOR : ActionScripts.GROW_BATCH;
+        const weakenScript = monitor ? ActionScripts.WEAKEN_BATCH_MONITOR : ActionScripts.WEAKEN_BATCH;
 
         if (target.getSecurityLevel() > target.security.min) {
             let weakenThreads = hackingFormulas.calculateWeakenThreads(target, host);

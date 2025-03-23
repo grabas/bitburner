@@ -2,7 +2,7 @@ import {NS, Player} from "@ns";
 import {ServerDto} from "/lib/entity/server/server.dto";
 import {BatchConfig} from "/lib/component/batch/batch.config";
 import {ServerConstants} from "/lib/enum/server-constants.enum";
-import {Scripts} from "/lib/enum/scripts.enum";
+import {ActionScripts} from "/lib/enum/scripts.enum";
 import {getBitnode} from "/lib/repository/bitnode.repository";
 import {Bitnode} from "/lib/entity/bitnode/bitnode";
 import {Batch} from "/lib/component/batch/batch";
@@ -102,7 +102,7 @@ export class HackingFormulas{
     }
 
     public getHackSecurity = (hackThreads: number): number => {
-        return ServerConstants.ServerFortifyAmount * hackThreads;
+        return ServerConstants.ServerFortifyAmount * hackThreads * 1.5;
     }
 
     public calculatePercentMoneyHacked(target: ServerDto, idealistic = false): number {
@@ -224,7 +224,7 @@ export class HackingFormulas{
 
 
     public getHackMultiplier(target: ServerDto, host: ServerDto, idealistic = false): number {
-        const candidates = Array.from({ length: 999 }, (_, i) => {
+        const candidates = Array.from({ length: BatchConfig.MAX_MULTIPLIER }, (_, i) => {
             const hackMultiplier = (i + 1) / 1000;
             const value = this.getBatchIncomePerSecond(target, host, hackMultiplier, idealistic);
             return { multiplier: hackMultiplier, value };
@@ -253,9 +253,9 @@ export class HackingFormulas{
         const weakenGrowThreads = this.calculateWeakenThreads(target, host, this.getGrowSecurity(growThreads))
 
         const totalRam =
-            (Scripts.WEAKEN_BATCH.size * weakenHackThreads + weakenGrowThreads) +
-            (Scripts.HACK_BATCH.size * hackingThreads) +
-            (Scripts.GROW_BATCH.size * growThreads);
+            (ActionScripts.WEAKEN_BATCH.size * weakenHackThreads + weakenGrowThreads) +
+            (ActionScripts.HACK_BATCH.size * hackingThreads) +
+            (ActionScripts.GROW_BATCH.size * growThreads);
 
         const batchSize = Math.min(
             Math.floor(host.refresh().ram.max / totalRam),

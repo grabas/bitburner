@@ -7,10 +7,9 @@ export async function main(ns: NS, args = parseArgs(ns.args)): Promise<void> {
     ns.disableLog("ALL");
     try {
         const broker = new HomeUpgradeBroker(ns);
-        const home = await (new ServerRepository(ns)).getById(ns.getHostname());
 
         do {
-            await broker.upgradeHome(home);
+            await broker.upgradeHome();
             await ns.sleep(100)
         } while (args.loop);
     } catch (e) {
