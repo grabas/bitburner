@@ -224,7 +224,7 @@ export class HackingFormulas{
 
 
     public getHackMultiplier(target: ServerDto, host: ServerDto, idealistic = false): number {
-        const candidates = Array.from({ length: BatchConfig.MAX_MULTIPLIER }, (_, i) => {
+        const candidates = Array.from({ length: BatchConfig.MAX_MULTIPLIER * 1000 }, (_, i) => {
             const hackMultiplier = (i + 1) / 1000;
             const value = this.getBatchIncomePerSecond(target, host, hackMultiplier, idealistic);
             return { multiplier: hackMultiplier, value };
