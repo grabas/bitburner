@@ -31,23 +31,3 @@ You can monitor the logs using the following command:
 ```
 
 #### Then in game, go to Options -> Remote API -> type in the port: `12525` -> click connect. The icon should turn green and say it's online.
-
-## Aliases
-You can use the following aliases to make your life easier:
-
-Execute in the game console
-
-```
-    alias cc="clear";
-    alias init="run /init.js";
-    alias play="run /play.js";
-    alias access="run /lib/command/gain-access.js";
-    alias get-server="run /lib/repository/server-repository.js";
-    alias path="run /lib/utils/crawler.js";
-    alias solve="run /lib/command/solve-contracts.js";
-    alias monitor="run /lib/utils/monitor.js";
-    alias attack="run /lib/component/batch/batch.daemon.js";
-    alias batch-analyze="run /lib/component/batch/target.resolver.js";
-    alias dw="connect darkweb; buy -a; home";
-    alias bd="run /lib/command/backdoor.js";
-```

@@ -72,7 +72,7 @@ export class TapewormManager {
 
         while (true) {
             const message = portHandle.read();
-            
+
             if (message !== "NULL PORT DATA") {
                 const action = JSON.parse(message) as TapewormPortMessage;
                 const target = await this.serverRepository.getById(action.target);
