@@ -1,11 +1,11 @@
 import { NS } from "@ns";
 import { ActionScripts } from "/lib/enum/scripts.enum";
 import { ServerDto } from "/lib/entity/server/server.dto";
-import { HackingFormulas } from "/lib/component/batch/batch.formulas";
-import {BatchAction, BatchType, IBatch} from "/lib/component/batch/batch.interface";
-import {BatchConfig} from "/lib/component/batch/batch.config";
+import {BatchAction, BatchType, IBatch} from "/lib/component/batch-attack/batch.interface";
+import {BatchConfig} from "/lib/component/batch-attack/batch.config";
+import {BatchHackingFormulas} from "/lib/component/batch-attack/batch.formulas";
 
-export class PrepareBatch implements IBatch {
+export class PrepareBatchDto implements IBatch {
     public readonly type = BatchType.PREPARE;
     public readonly target: ServerDto;
     public readonly host: ServerDto;
@@ -18,7 +18,7 @@ export class PrepareBatch implements IBatch {
         this.host = host;
         this.target = target;
 
-        const hackingFormulas = new HackingFormulas(ns);
+        const hackingFormulas = new BatchHackingFormulas(ns);
         const weakenTime = hackingFormulas.calculateWeakenTime(target);
 
         this.action = [];

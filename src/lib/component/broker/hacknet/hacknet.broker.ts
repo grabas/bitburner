@@ -65,7 +65,7 @@ export class HacknetBroker extends BrokerBase {
 
     public getDeals = (): Rates[] => {
         const deals = this.getNodes()
-            .map(node => this.formulas.getBestRate(node))
+            .map(node => this.formulas.calculateGainToCost(node))
             .flat()
             .filter(rate => this.canEverAfford(
                 this.effectiveCost(rate.cost as number)

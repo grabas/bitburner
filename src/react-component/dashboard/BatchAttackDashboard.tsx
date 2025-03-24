@@ -1,7 +1,7 @@
 import React, {useState, useCallback} from "/react-component/react";
 import ApexChart from "../chart/ApexChart";
 import { NS } from "@ns";
-import {BatchMonitorLog} from "/lib/component/batch/batch.interface";
+import {BatchMonitorLog} from "/lib/component/batch-attack/batch.interface";
 import {getBatchOrderOptions, getDesyncChartOptions, getMoneyAndSecurityOptions} from "/react-component/dashboard/BatchAttackDashboard.options";
 import usePortListener from "/react-component/hooks/use-port-listener";
 

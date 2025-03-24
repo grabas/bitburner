@@ -2,15 +2,15 @@ import {NS} from "@ns";
 import {BatchConfig} from "./batch.config";
 import {ServerRepository} from "/lib/repository/server.repository";
 import {uuidv4} from "/lib/utils/uuidv4";
-import {ActionArgs} from "/lib/component/batch/batch.args";
-import {monitor, monitor as monitorStatus, printLog} from "/lib/component/batch/batch.monitor";
-import {Batch} from "/lib/component/batch/batch";
-import {HackingFormulas} from "/lib/component/batch/batch.formulas";
-import {getBestTarget} from "/lib/component/batch/target.resolver";
+import {ActionArgs} from "/lib/component/batch-attack/batch.args";
+import {monitor as monitorStatus, printLog} from "/lib/component/batch-attack/batch.monitor";
+import {BatchDto} from "/lib/component/batch-attack/batch.dto";
+import {getBestTarget} from "/lib/component/batch-attack/target.resolver";
 import {ServerDto} from "/lib/entity/server/server.dto";
-import {PrepareBatch} from "/lib/component/batch/prepare-batch";
-import {BatchType, IBatch} from "/lib/component/batch/batch.interface";
+import {PrepareBatchDto} from "/lib/component/batch-attack/prepare-batch.dto";
+import {BatchType, IBatch} from "/lib/component/batch-attack/batch.interface";
 import {CLEAR_PORT_MSG} from "/react-component/hooks/use-port-listener";
+import {BatchHackingFormulas} from "/lib/component/batch-attack/batch.formulas";
 
 export class BatchManager {
     private readonly ns: NS;
@@ -39,8 +39,8 @@ export class BatchManager {
         do {
             await this.ensureTargetPrepared(target, host, processIds);
 
-            const batch = new Batch(this.ns, target.refresh(), host.refresh(), monitor);
-            const waveSize = HackingFormulas.getWaveSize(host, batch.ramCost, batch.duration);
+            const batch = new BatchDto(this.ns, target.refresh(), host.refresh(), monitor);
+            const waveSize = BatchHackingFormulas.getWaveSize(host, batch.ramCost, batch.duration);
             printLog(this.ns, batch, waveSize, true);
 
             await this.spawnBatchActions(batch, waveSize, monitorPort, processIds);
@@ -69,7 +69,7 @@ export class BatchManager {
 
         if (target.isPrepared()) return;
 
-        const prepareBatch = new PrepareBatch(this.ns, target, host);
+        const prepareBatch = new PrepareBatchDto(this.ns, target, host);
         const preparePids = await this.spawnBatchActions(prepareBatch, 1, 0);
 
         printLog(this.ns, prepareBatch, 1, false, true);
@@ -121,7 +121,7 @@ export class BatchManager {
         this.ns.run(scriptPath, threads, ...Object.values(args));
 
     private runDiagnostics = (debugPort: number): number =>
-        this.ns.run("/lib/utils/monitor-batch-desync.js", 1, debugPort);
+        this.ns.run("/lib/utils/monitor-batch-attack-desync.js", 1, debugPort);
 
     private killProcesses = (pids: number[]): void => {
         pids.forEach((pid) => this.ns.kill(pid));

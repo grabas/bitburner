@@ -66,7 +66,9 @@ export class ServerRepository {
 
     public async getTargetableServers(): Promise<ServerDto[]> {
         const hackedServers = await this.getHackedServers();
-        return hackedServers.filter((server: ServerDto) => server.security.levelRequired <= this.ns.getHackingLevel())
+        return hackedServers
+            .filter((server: ServerDto) => server.security.levelRequired <= this.ns.getHackingLevel())
+            .filter((server: ServerDto) => server.money.max > 0)
             .sortBy("security.levelRequired", "ASC");
     }
 

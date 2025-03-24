@@ -1,11 +1,8 @@
 import {NS, Player} from "@ns";
 import {ServerDto} from "/lib/entity/server/server.dto";
-import {BatchConfig} from "/lib/component/batch/batch.config";
 import {ServerConstants} from "/lib/enum/server-constants.enum";
-import {ActionScripts} from "/lib/enum/scripts.enum";
 import {getBitnode} from "/lib/repository/bitnode.repository";
 import {Bitnode} from "/lib/entity/bitnode/bitnode";
-import {Batch} from "/lib/component/batch/batch";
 import {clampNumber} from "/lib/utils/helpers/clamp-number";
 
 export class HackingFormulas{
@@ -17,31 +14,12 @@ export class HackingFormulas{
         this.bitnode = getBitnode();
     }
 
-    /* ############ BATCH ############ */
-
-
-    public static getWaveSize(host: ServerDto, ramCost: number, duration: number, maxRam = false): number {
-        const whatCanYouFitInRam = Math.floor((maxRam ? host.refresh().ram.max : host.getRamAvailable()) / ramCost);
-        const whatCanYouFitInDuration = Math.ceil(duration / BatchConfig.BATCH_SEPARATION)
-
-        return Math.min(
-            whatCanYouFitInRam,
-            whatCanYouFitInDuration,
-            BatchConfig.MAX_WAVE_SIZE // before the sync goes to hell because of exp gain and/or host core/ram upgrades
-        );
-    }
-
-
     /* ############ WEAKEN ############ */
 
 
     public calculateWeakenTime = (target: ServerDto, idealistic = false): number => {
         const hackTime = this.calculateHackTime(target, idealistic);
         return hackTime * 4;
-    }
-
-    public getWeakenSleepTime = (multiplier = 0): number => {
-        return BatchConfig.TICK * multiplier;
     }
 
     public calculateWeakenThreads = (target: ServerDto, host: ServerDto, decrease?: number): number => {
@@ -82,11 +60,6 @@ export class HackingFormulas{
                 this.calculateIntelligenceBonus(player, 1));
 
         return hackingTime * 1000;
-    }
-
-    public getHackSleepTime = (target: ServerDto, idealistic = false): number => {
-        const hacktime = this.calculateHackTime(target, idealistic);
-        return this.calculateWeakenTime(target, idealistic) - BatchConfig.TICK - hacktime;
     }
 
     public getHackThreads = (target: ServerDto, multiplier: number, idealistic = false): number => {
@@ -147,14 +120,9 @@ export class HackingFormulas{
     /* ############ GROW ############ */
 
 
-
     public calculateGrowTime = (target: ServerDto, idealistic = false): number => {
         const hackTime =  this.calculateHackTime(target, idealistic);
         return hackTime * 3.2;
-    }
-
-    public getGrowSleepTime = (target: ServerDto, idealistic = false): number => {
-        return this.calculateWeakenTime(target, idealistic) + BatchConfig.TICK - this.calculateGrowTime(target, idealistic);
     }
 
     public getGrowSecurity = (growThreads: number): number => {
@@ -162,7 +130,7 @@ export class HackingFormulas{
     }
 
     public getGrowThreads = (server: ServerDto, host: ServerDto, startMoney: number, idealistic = false): number => {
-        const threads = this.numCycleForGrowthCorrected(server, host, startMoney, idealistic) * BatchConfig.GROW_BUFFER;
+        const threads = this.numCycleForGrowthCorrected(server, host, startMoney, idealistic) * 1.05;
         return Math.max(Math.ceil(threads), 1);
     }
 
@@ -222,58 +190,6 @@ export class HackingFormulas{
 
     /* ############ GENERAL ############ */
 
-
-    public getHackMultiplier(target: ServerDto, host: ServerDto, monitor = false, idealistic = false): number {
-        const candidates = Array.from({ length: BatchConfig.MAX_MULTIPLIER * 1000 }, (_, i) => {
-            const hackMultiplier = (i + 1) / 1000;
-            const value = this.getBatchIncomePerSecond(target, host, hackMultiplier, monitor, idealistic);
-            return { multiplier: hackMultiplier, value };
-        }).filter(entry => entry.value !== null);
-
-        if (candidates.length === 0) return 0;
-
-        const best = candidates.reduce((acc, cur) => (cur.value! > acc.value! ? cur : acc));
-        return best.multiplier;
-    }
-
-    public getBatchIncomePerSecond = (
-        target: ServerDto,
-        host: ServerDto,
-        hackMultiplier: number,
-        monitor = false,
-        idealistic = false
-    ): number => {
-        const weakenTime = this.calculateWeakenTime(target, idealistic);
-        const duration =  weakenTime + 2 * BatchConfig.TICK;
-
-        const hackingThreads = this.getHackThreads(target, hackMultiplier, idealistic);
-        const targetAmount = this.getHackMoney(target, hackingThreads, idealistic);
-
-        const growThreads = this.getGrowThreads(target, host, target.money.max - targetAmount, idealistic)
-        const weakenHackThreads = this.calculateWeakenThreads(target, host, this.getHackSecurity(hackingThreads));
-        const weakenGrowThreads = this.calculateWeakenThreads(target, host, this.getGrowSecurity(growThreads))
-
-        const totalWeakenThreads = weakenHackThreads + weakenGrowThreads;
-
-
-        const weakenScript = monitor ? ActionScripts.WEAKEN_BATCH_MONITOR : ActionScripts.WEAKEN_BATCH;
-        const growScript = monitor ? ActionScripts.GROW_BATCH_MONITOR : ActionScripts.GROW_BATCH;
-        const hackScript = monitor ? ActionScripts.HACK_BATCH_MONITOR : ActionScripts.HACK_BATCH;
-
-        const totalRam =
-            (weakenScript.size * totalWeakenThreads) +
-            (hackScript.size * hackingThreads) +
-            (growScript.size * growThreads);
-
-        const batchSize = HackingFormulas.getWaveSize(host, totalRam, duration, idealistic);
-
-        if (batchSize === 0) return 0;
-
-        const cycleDuration = (batchSize - 1) * BatchConfig.BATCH_SEPARATION + duration + BatchConfig.TIME_BUFFER;
-        const incomePerCycle = batchSize * targetAmount
-
-        return incomePerCycle / (cycleDuration / 1000);
-    }
 
     public getHackSkillGain(server: ServerDto, initialExp?: number): number {
         const player = this.ns.getPlayer();

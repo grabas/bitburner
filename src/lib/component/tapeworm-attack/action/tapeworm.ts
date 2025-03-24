@@ -1,19 +1,9 @@
-import {NS, ScriptArg} from "@ns";
-
-const parseArgs = (args: ScriptArg[]) => {
-    if (args.length !== 2) {
-        throw new Error("Invalid number of arguments");
-    }
-
-    return {
-        minSecurityLevel: args[0] as number,
-        maxMoney: args[1] as number
-    };
-}
+import {NS, } from "@ns";
+import {parseArgs} from "/lib/component/tapeworm-attack/tapeworm.args";
 
 export async function main(ns: NS, args = parseArgs(ns.args)): Promise<void> {
     try {
-        const target = ns.getHostname()
+        const target = args.target
         const securityThreshold = args.minSecurityLevel + 3;
         const moneyThreshold = args.maxMoney * 0.9;
 

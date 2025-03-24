@@ -36,7 +36,7 @@ export class ServerDto {
             this.ns.getServerUsedRam(this.hostname);
 
         const realMax = this.ns.getServerMaxRam(this.hostname);
-        this.ram.max = realMax - ServerConstants.HomeComputerRamReselve;
+        this.ram.max = this.isHome ? realMax - ServerConstants.HomeComputerRamReselve : realMax;
         this.ram.free = realMax - this.ram.used;
 
         if (this.isHome) {

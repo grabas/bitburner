@@ -1,4 +1,4 @@
-import {Script} from "/lib/enum/scripts.enum";
+import {ActionScript} from "/lib/enum/scripts.enum";
 import {ServerDto} from "/lib/entity/server/server.dto";
 
 export enum BatchType {
@@ -17,7 +17,7 @@ export interface IBatch {
 }
 
 export interface BatchAction {
-    script: Script;
+    script: ActionScript;
     sleepTime: number;
     threads: number;
     duration?: number;

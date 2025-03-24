@@ -36,7 +36,11 @@ export const GlobalRequirements: InitScripts = {
         path: "/lib/command/build-server-database.js",
         defaultArgs: [],
         preTest: undefined,
-        postTest: undefined,
+        postTest: {
+            name: "ServerRepositoryTest",
+            path: "/lib/test/tests/server-repository.test.js",
+            portNumber: 10100
+        },
         priority: 1,
     }
 }
@@ -146,8 +150,8 @@ export const BrokersAndAgents: InitScripts = {
         priority: 9,
     }/*,
     BATCH_ATTACK: {
-        name: "Batch Attack",
-        path: "/lib/component/batch/batch.daemon.js",
+        name: "BatchDto Attack",
+        path: "/lib/component/batch-attack/batch.daemon.js",
         defaultArgs: ["--loop"],
         preTest: {
             name: "BatchAttackTest",

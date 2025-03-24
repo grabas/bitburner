@@ -47,11 +47,6 @@ export class HacknetFormulas {
         return HacknetNodeConstants.BaseCost * Math.pow(HacknetNodeConstants.PurchaseNextMult, n - 1) * this.multipliers.purchaseCost;
     }
 
-    public getBestRate = (hacknetNode: HacknetNode): Rates => {
-        const rates = this.calculateGainToCost(hacknetNode);
-        return rates.reduce((max, item) => ((item.rate ?? Infinity) < (max.rate ?? Infinity) ? item : max), rates[0]);
-    }
-
     public calculateGainToCost = (hacknetNode: HacknetNode): Rates[] =>
         (["level", "ram", "core"] as const).map(type => this.calculateUpgradeGTC(hacknetNode, type));
 

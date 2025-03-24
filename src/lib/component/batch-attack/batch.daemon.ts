@@ -1,6 +1,6 @@
 import {NS} from "@ns";
-import {BatchManager} from "/lib/component/batch/batch.manager";
-import {parseArgs} from "/lib/component/batch/batch.args";
+import {BatchManager} from "/lib/component/batch-attack/batch.manager";
+import {parseArgs} from "/lib/component/batch-attack/batch.args";
 
 export async function main(ns: NS, args = parseArgs(ns)): Promise<void> {
     await batchAttack(ns, args.target, args.switchTarget, args.monitor);

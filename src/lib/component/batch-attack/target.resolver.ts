@@ -1,9 +1,9 @@
 import { NS } from "@ns";
-import { Batch } from "./batch";
+import { BatchDto } from "./batch.dto";
 import { ServerRepository } from "/lib/repository/server.repository";
 import { ServerDto } from "/lib/entity/server/server.dto";
-import {HackingFormulas} from "/lib/component/batch/batch.formulas";
-import {PrepareBatch} from "/lib/component/batch/prepare-batch";
+import {PrepareBatchDto} from "/lib/component/batch-attack/prepare-batch.dto";
+import {BatchHackingFormulas} from "/lib/component/batch-attack/batch.formulas";
 
 interface BatchStats {
     target: string;
@@ -17,17 +17,17 @@ const getPossibleActions = async (ns: NS, monitor = false): Promise<BatchStats[]
     const serverRepository = new ServerRepository(ns);
     const host = await serverRepository.getById("home");
     const candidates = await serverRepository.getMonetaryServers();
-    const formulas = new HackingFormulas(ns);
+    const formulas = new BatchHackingFormulas(ns);
 
     return candidates
-        .map((target: ServerDto) => new Batch(ns, target, host, monitor))
-        .filter((batch: Batch) => batch.hackChance === 1 && batch.target.security.access)
-        .map((batch: Batch) => ({
+        .map((target: ServerDto) => new BatchDto(ns, target, host, monitor))
+        .filter((batch: BatchDto) => batch.hackChance === 1 && batch.target.security.access)
+        .map((batch: BatchDto) => ({
             target: batch.target.hostname,
             income: formulas.getBatchIncomePerSecond(batch.target, host, batch.targetAmountMultiplier, true),
-            ram: batch.ramCost * HackingFormulas.getWaveSize(host, batch.ramCost, batch.duration, true) / host.refresh().ram.max * 100,
+            ram: batch.ramCost * BatchHackingFormulas.getWaveSize(host, batch.ramCost, batch.duration, true) / host.refresh().ram.max * 100,
             duration: batch.duration,
-            prepDuration: new PrepareBatch(ns, batch.target, batch.host).duration
+            prepDuration: new PrepareBatchDto(ns, batch.target, batch.host).duration
         })).sortBy("income");
 }
 
@@ -43,7 +43,7 @@ export async function main(ns: NS): Promise<void> {
         const host = await serverRepository.getById("home");
         const target = await serverRepository.getById(ns.args[0] as string);
 
-        ns.tprint(JSON.stringify(new Batch(ns, target, host), null, 2));
+        ns.tprint(JSON.stringify(new BatchDto(ns, target, host), null, 2));
         return;
     }
 

@@ -1,10 +1,8 @@
 import { NS } from "@ns";
-import { Batch } from "./batch"; // adjust path if needed
 import { getProgressBar } from "/lib/utils/progress-bar";
 import { Colors } from "/lib/enum/colors.enum";
-import {BatchConfig} from "/lib/component/batch/batch.config";
-import {ServerDto} from "/lib/entity/server/server.dto";
-import {BatchType, IBatch} from "/lib/component/batch/batch.interface";
+import {BatchConfig} from "/lib/component/batch-attack/batch.config";
+import {BatchType, IBatch} from "/lib/component/batch-attack/batch.interface";
 
 const TOTAL_LINE_WIDTH = 36;
 
@@ -37,7 +35,7 @@ const LABELS = {
     INCOME_CYCLE: "Income per cycle:",
     INCOME_SECOND: "Income per second:",
     BATCHES: "Batches:",
-    RAM_PER_BATCH: "RAM per batch:",
+    RAM_PER_BATCH: "RAM per batch-attack:",
     RAM_TOTAL: "RAM total:",
 };
 

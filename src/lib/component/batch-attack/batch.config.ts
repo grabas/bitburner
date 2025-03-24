@@ -5,5 +5,5 @@ export enum BatchConfig {
     BATCH_TARGET_CYCLES = 5,
     MAX_WAVE_SIZE = Infinity,
     GROW_BUFFER = 1.05,
-    MAX_MULTIPLIER = 0.8, // 0.X
+    MAX_MULTIPLIER = 0.8
 }

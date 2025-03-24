@@ -2,10 +2,10 @@ import { NS } from "@ns";
 import { BatchConfig } from "./batch.config";
 import {ActionScripts} from "/lib/enum/scripts.enum";
 import {ServerDto} from "/lib/entity/server/server.dto";
-import {HackingFormulas} from "/lib/component/batch/batch.formulas";
-import {BatchAction, BatchType, IBatch} from "/lib/component/batch/batch.interface";
+import {BatchAction, BatchType, IBatch} from "/lib/component/batch-attack/batch.interface";
+import {BatchHackingFormulas} from "/lib/component/batch-attack/batch.formulas";
 
-export class Batch implements IBatch {
+export class BatchDto implements IBatch {
     public readonly type = BatchType.ATTACK;
     public readonly target: ServerDto;
     public readonly host: ServerDto;
@@ -22,12 +22,10 @@ export class Batch implements IBatch {
 
         const idealistic = true;
 
-        const hackingFormulas = new HackingFormulas(ns);
+        const hackingFormulas = new BatchHackingFormulas(ns);
         this.hackChance = hackingFormulas.getHackChance(target, idealistic);
 
         const multiplier = hackingFormulas.getHackMultiplier(target, host, idealistic);
-        this.targetAmountMultiplier = multiplier;
-
         const hackingThreads = hackingFormulas.getHackThreads(target, multiplier, idealistic);
         const targetAmount = hackingFormulas.getHackMoney(target, hackingThreads, idealistic);
         const growThreads = hackingFormulas.getGrowThreads(target, host, target.money.max - targetAmount, idealistic)
@@ -69,5 +67,6 @@ export class Batch implements IBatch {
         }, 0).toFixed(2));
 
         this.targetAmount = targetAmount
+        this.targetAmountMultiplier = multiplier;
     }
 }

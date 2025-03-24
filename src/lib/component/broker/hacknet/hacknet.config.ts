@@ -1,4 +1,4 @@
 export enum HacknetBrokerConfig {
-    BUDGET_PERCENTAGE = 100,
-    PURCHASE_COST_LIMIT = Infinity,
+    BUDGET_PERCENTAGE = 10,
+    PURCHASE_COST_LIMIT = 2e7,
 }
