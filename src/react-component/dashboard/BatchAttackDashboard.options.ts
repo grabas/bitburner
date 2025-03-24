@@ -36,6 +36,9 @@ export const getBatchOrderOptions = (categories: number[], colors: string[]) => 
             color: "#fff",
         },
     },
+    tooltip: {
+        theme: "dark",
+    },
     colors: colors,
     legend: {
         show: false,
@@ -82,6 +85,9 @@ export const getMoneyAndSecurityOptions = () => ({
                 colors: "#fff",
             },
         },
+    },
+    tooltip: {
+        theme: "dark",
     },
     title: {
         text: "Money (%) and Security",
@@ -146,6 +152,9 @@ export const getDesyncChartOptions = () => ({
         labels: {
             colors: ["#fff", "#fff", "#fff"],
         },
+    },
+    tooltip: {
+        theme: "dark",
     },
     responsive: [
         {

@@ -1,6 +1,10 @@
-import {FilenameOrPID, NS} from "@ns";
+import "/lib/utils/prototypes";
+import {FilenameOrPID, NS, ScriptArg} from "@ns";
+
 import {Colors} from "/lib/enum/colors.enum";
 import {setColor} from "/lib/utils/helpers/set-color";
+import {runTest} from "/lib/test/test.resolver";
+
 import {
     GlobalRequirements,
     BrokersAndAgents,
@@ -9,8 +13,6 @@ import {
     Commands,
     InitScripts
 } from "/lib/init/init.config";
-import {runTest} from "/lib/test/test.resolver";
-import "/lib/utils/prototypes";
 
 export class InitOrchestrator {
     private readonly ns: NS;
@@ -55,6 +57,11 @@ export class InitOrchestrator {
     private runScript = async (script: Script, asCommand = false): Promise<boolean> => {
         this.print("\t")
         this.print(`Running ${script.name}...`, Colors.ORANGE);
+
+        if (this.isRunning(script.path, script.defaultArgs)) {
+            this.print(`${script.name} is already running`, Colors.YELLOW);
+            return true;
+        }
 
         if (!(await this.runTestScript(script.preTest, script.name))) return false;
         const scriptPid = this.ns.run(script.path, 1, ...script.defaultArgs);
@@ -109,6 +116,11 @@ export class InitOrchestrator {
         return true;
     }
 
+    private isRunning = (id: FilenameOrPID, args?: ScriptArg[]): boolean => {
+        return args && args.length ?
+            this.ns.isRunning(id, "home", ...args) :
+            this.ns.isRunning(id, "home");
+    }
+
     private print = (message: string|number|boolean, color = Colors.WHITE) => this.ns.tprint(setColor(message, color));
-    private isRunning = (id: FilenameOrPID): boolean => this.ns.isRunning(id, "home");
 }

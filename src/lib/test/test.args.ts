@@ -6,7 +6,6 @@ export function parseArgs(ns: NS) {
         ["p", 1],
     ]);
 
-
     const positional = flags._ as string|number[];
 
     return {

@@ -6,10 +6,10 @@ import {getBitnode} from "/lib/repository/bitnode.repository";
 
 export interface Rates {
     index: number,
-    cost: number | null,
-    type: "level" | "ram" | "core",
+    cost: number,
+    type: "level" | "ram" | "core" | "newNode",
     gain: number,
-    rate: number | null
+    rate: number
 }
 
 export interface HackNodeMultipliers {
@@ -86,7 +86,7 @@ export class HacknetFormulas {
             cost,
             type,
             gain,
-            rate: (cost / gain),
+            rate: gain !== 0 && cost !== Infinity ? (cost / gain) : null,
         } as Rates;
     };
 

@@ -14,6 +14,7 @@ interface UpgradeMap {
     level: HacknetUpgradeFunction;
     ram: HacknetUpgradeFunction;
     core: HacknetUpgradeFunction;
+    newNode: () => HacknetNode|null;
 }
 
 export class HacknetBroker extends BrokerBase {
@@ -31,8 +32,13 @@ export class HacknetBroker extends BrokerBase {
         this.upgradeMap = {
             "level": this.hacknet.upgradeLevel,
             "ram": this.hacknet.upgradeRam,
-            "core": this.hacknet.upgradeCore
+            "core": this.hacknet.upgradeCore,
+            "newNode": this.purchaseNode
         }
+    }
+
+    private getNodes = (): HacknetNode[] => {
+        return Array.from({length: this.hacknet.numNodes()}, (_, i) => new HacknetNode(this.ns, i));
     }
 
     private purchaseNode = (): HacknetNode|null => {
@@ -46,24 +52,34 @@ export class HacknetBroker extends BrokerBase {
         return this.formulas.calculateNodeCost(this.hacknet.numNodes() + 1);
     }
 
-    private getNewNodeRate = (): number => {
+    private getNewNodeRate = (): Rates => {
         const newNodeGain = this.formulas.calculateMoneyGainRate();
-        return this.getNewNodeCost() / newNodeGain;
+        return {
+            index: -1,
+            cost: this.getNewNodeCost(),
+            type: "newNode",
+            gain: newNodeGain,
+            rate: this.getNewNodeCost() / newNodeGain
+        };
     }
 
-    private getNodes = (): HacknetNode[] => {
-        return Array.from({length: this.hacknet.numNodes()}, (_, i) => new HacknetNode(this.ns, i));
-    }
-
-    public getBestDealsPerNode = (): Rates[] => {
-        return this.getNodes()
+    public getDeals = (): Rates[] => {
+        const deals = this.getNodes()
             .map(node => this.formulas.getBestRate(node))
             .flat()
-            .filter(rate => this.canEverAfford(rate.cost ?? Infinity));
+            .filter(rate => this.canEverAfford(
+                this.effectiveCost(rate.cost as number)
+            ));
+
+        if (this.canEverAfford(this.getNewNodeCost())) deals.push(this.getNewNodeRate())
+
+        return deals;
     }
 
-    public getBestDeal = (): Rates | null => {
-        const getBestDealsPerNode = this.getBestDealsPerNode().filter((rate) => this.canAfford(rate.cost as number))
+    public getBestDealICanAfford = (): Rates | null => {
+        const getBestDealsPerNode =
+            this.getDeals()
+                .filter((rate) => this.canAfford(rate.cost as number))
 
         return getBestDealsPerNode.length ?
             getBestDealsPerNode.reduce((best, rate) => (best.rate ?? Infinity) < (rate.rate ?? Infinity) ? best : rate) :
@@ -75,21 +91,17 @@ export class HacknetBroker extends BrokerBase {
             this.purchaseNode(); return;
         }
 
-        const bestDeal = this.getBestDeal();
-        if (bestDeal && (bestDeal.rate ?? Infinity) < this.getNewNodeRate()) {
+        if (!this.getDeals().length) {
+            throw new Error("No more deals to me made. Exiting...");
+        }
+
+        const bestDeal = this.getBestDealICanAfford();
+
+        if (bestDeal) {
             this.upgradeMap[bestDeal.type](bestDeal.index);
             this.ns.print(`Upgraded node ${bestDeal.index} ${bestDeal.type} for ${this.ns.formatNumber(bestDeal.cost as number)}`);
-        } else {
-            const newNodeCost = this.getNewNodeCost();
-
-            if (!this.canEverAfford(newNodeCost) && this.getBestDealsPerNode().length === 0) {
-                throw new Error("No best deal found and new node cost exceeds purchase limit. Exiting...");
-            }
-
-            if (this.canAfford(newNodeCost)) {
-                this.purchaseNode();
-                this.ns.print(`Purchased new node for ${this.ns.formatNumber(newNodeCost)}`);
-            }
         }
     }
+
+    private effectiveCost = (cost: number | null): number => cost === null ? Infinity : cost;
 }

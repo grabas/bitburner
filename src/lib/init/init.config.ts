@@ -152,9 +152,9 @@ export const BrokersAndAgents: InitScripts = {
         preTest: {
             name: "BatchAttackTest",
             path: "/lib/test/tests/batch-attack.test.js",
-            portNumber: 10800
+            portNumber: 11000
         },
         postTest: undefined,
-        priority: 9,
+        priority: 10,
     },*/
 };

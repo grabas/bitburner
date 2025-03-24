@@ -20,9 +20,9 @@ export class HackingFormulas{
     /* ############ BATCH ############ */
 
 
-    public static getWaveSize(batch: Batch, host: ServerDto, maxRam = false): number {
-        const whatCanYouFitInRam = Math.floor((maxRam ? host.refresh().ram.max : host.getRamAvailable()) / batch.ramCost);
-        const whatCanYouFitInDuration = Math.ceil(batch.duration / BatchConfig.BATCH_SEPARATION)
+    public static getWaveSize(host: ServerDto, ramCost: number, duration: number, maxRam = false): number {
+        const whatCanYouFitInRam = Math.floor((maxRam ? host.refresh().ram.max : host.getRamAvailable()) / ramCost);
+        const whatCanYouFitInDuration = Math.ceil(duration / BatchConfig.BATCH_SEPARATION)
 
         return Math.min(
             whatCanYouFitInRam,
@@ -223,10 +223,10 @@ export class HackingFormulas{
     /* ############ GENERAL ############ */
 
 
-    public getHackMultiplier(target: ServerDto, host: ServerDto, idealistic = false): number {
+    public getHackMultiplier(target: ServerDto, host: ServerDto, monitor = false, idealistic = false): number {
         const candidates = Array.from({ length: BatchConfig.MAX_MULTIPLIER * 1000 }, (_, i) => {
             const hackMultiplier = (i + 1) / 1000;
-            const value = this.getBatchIncomePerSecond(target, host, hackMultiplier, idealistic);
+            const value = this.getBatchIncomePerSecond(target, host, hackMultiplier, monitor, idealistic);
             return { multiplier: hackMultiplier, value };
         }).filter(entry => entry.value !== null);
 
@@ -240,8 +240,9 @@ export class HackingFormulas{
         target: ServerDto,
         host: ServerDto,
         hackMultiplier: number,
+        monitor = false,
         idealistic = false
-    ): number | null => {
+    ): number => {
         const weakenTime = this.calculateWeakenTime(target, idealistic);
         const duration =  weakenTime + 2 * BatchConfig.TICK;
 
@@ -252,16 +253,21 @@ export class HackingFormulas{
         const weakenHackThreads = this.calculateWeakenThreads(target, host, this.getHackSecurity(hackingThreads));
         const weakenGrowThreads = this.calculateWeakenThreads(target, host, this.getGrowSecurity(growThreads))
 
-        const totalRam =
-            (ActionScripts.WEAKEN_BATCH.size * weakenHackThreads + weakenGrowThreads) +
-            (ActionScripts.HACK_BATCH.size * hackingThreads) +
-            (ActionScripts.GROW_BATCH.size * growThreads);
+        const totalWeakenThreads = weakenHackThreads + weakenGrowThreads;
 
-        const batchSize = Math.min(
-            Math.floor(host.refresh().ram.max / totalRam),
-            Math.ceil(duration / BatchConfig.BATCH_SEPARATION),
-            BatchConfig.MAX_WAVE_SIZE
-        );
+
+        const weakenScript = monitor ? ActionScripts.WEAKEN_BATCH_MONITOR : ActionScripts.WEAKEN_BATCH;
+        const growScript = monitor ? ActionScripts.GROW_BATCH_MONITOR : ActionScripts.GROW_BATCH;
+        const hackScript = monitor ? ActionScripts.HACK_BATCH_MONITOR : ActionScripts.HACK_BATCH;
+
+        const totalRam =
+            (weakenScript.size * totalWeakenThreads) +
+            (hackScript.size * hackingThreads) +
+            (growScript.size * growThreads);
+
+        const batchSize = HackingFormulas.getWaveSize(host, totalRam, duration, idealistic);
+
+        if (batchSize === 0) return 0;
 
         const cycleDuration = (batchSize - 1) * BatchConfig.BATCH_SEPARATION + duration + BatchConfig.TIME_BUFFER;
         const incomePerCycle = batchSize * targetAmount

@@ -18,12 +18,11 @@ export class BrokerBase {
     }
 
     protected canAfford = (cost: number): boolean => {
-        if (!this.canEverAfford(cost)) throw new Error("Cost is too high");
-
         const availableMoney = Math.min(
             this.ns.getServerMoneyAvailable("home") * (this.budgetPercentage / 100),
             this.purchaseCostLimit
         );
+
         return availableMoney >= cost;
     };
 

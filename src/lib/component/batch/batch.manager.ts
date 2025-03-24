@@ -3,7 +3,7 @@ import {BatchConfig} from "./batch.config";
 import {ServerRepository} from "/lib/repository/server.repository";
 import {uuidv4} from "/lib/utils/uuidv4";
 import {ActionArgs} from "/lib/component/batch/batch.args";
-import {monitor as monitorStatus, printLog} from "/lib/component/batch/batch.monitor";
+import {monitor, monitor as monitorStatus, printLog} from "/lib/component/batch/batch.monitor";
 import {Batch} from "/lib/component/batch/batch";
 import {HackingFormulas} from "/lib/component/batch/batch.formulas";
 import {getBestTarget} from "/lib/component/batch/target.resolver";
@@ -27,7 +27,7 @@ export class BatchManager {
         monitor = false
     ): Promise<void> => {
         const host = await this.repository.getById(this.ns.getHostname());
-        let target = await this.repository.getById(targetId ?? (await getBestTarget(this.ns)));
+        let target = await this.repository.getById(targetId ?? (await getBestTarget(this.ns, monitor)));
 
         switchTarget = typeof targetId !== "string" || switchTarget;
 
@@ -40,7 +40,7 @@ export class BatchManager {
             await this.ensureTargetPrepared(target, host, processIds);
 
             const batch = new Batch(this.ns, target.refresh(), host.refresh(), monitor);
-            const waveSize = HackingFormulas.getWaveSize(batch, host, false);
+            const waveSize = HackingFormulas.getWaveSize(host, batch.ramCost, batch.duration);
             printLog(this.ns, batch, waveSize, true);
 
             await this.spawnBatchActions(batch, waveSize, monitorPort, processIds);
@@ -51,7 +51,7 @@ export class BatchManager {
             }
 
             if (switchTarget && ++cycle >= BatchConfig.BATCH_TARGET_CYCLES) {
-                ({ target, cycle } = await this.resetCycleAndTarget(processIds));
+                ({ target, cycle } = await this.resetCycleAndTarget(processIds, monitor));
             }
             this.ns.getPortHandle(monitorPort).write(CLEAR_PORT_MSG);
         } while (true);
@@ -128,12 +128,12 @@ export class BatchManager {
         pids.length = 0;
     };
 
-    private async resetCycleAndTarget(processIds: number[]): Promise<{
+    private async resetCycleAndTarget(processIds: number[], monitor = false): Promise<{
         target: ServerDto;
         operationId: string;
         cycle: number;
     }> {
-        const bestTargetId = await getBestTarget(this.ns);
+        const bestTargetId = await getBestTarget(this.ns, monitor);
         const newTarget = await this.repository.getById(bestTargetId);
         const newOperationId = uuidv4();
         this.killProcesses(processIds);
