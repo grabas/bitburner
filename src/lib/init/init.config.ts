@@ -6,7 +6,7 @@ export type InitScripts = { [key: string]: Script; }
 export interface TestScript {
     name: string;
     path: string;
-    portNumber: number;
+    args?: ScriptArg[];
 }
 
 export interface Script {
@@ -16,6 +16,7 @@ export interface Script {
     preTest?: TestScript;
     postTest?: TestScript;
     priority?: number;
+    host?: string;
 }
 
 export const GlobalRequirements: InitScripts = {
@@ -23,11 +24,9 @@ export const GlobalRequirements: InitScripts = {
         name: "Set Bitnode",
         path: "/lib/command/set-bitnode.js",
         defaultArgs: [],
-        preTest: undefined,
         postTest: {
-            name: "BitnodeTest",
+            name: "Bitnode Test",
             path: "/lib/test/tests/bitnode.test.js",
-            portNumber: 10010
         },
         priority: 0,
     },
@@ -35,119 +34,152 @@ export const GlobalRequirements: InitScripts = {
         name: "Build Server Database",
         path: "/lib/command/build-server-database.js",
         defaultArgs: [],
-        preTest: undefined,
         postTest: {
-            name: "ServerRepositoryTest",
+            name: "Database Built Test",
             path: "/lib/test/tests/server-repository.test.js",
-            portNumber: 10100
         },
         priority: 1,
-    }
-}
-
-export const Commands: InitScripts = {
+    },
     INITIAL_GAIN_ACCESS: {
         name: "Initial Gain Access",
         path: "/lib/command/gain-access.js",
         defaultArgs: [],
-        preTest: {
-            name: "ServerRepositoryTest",
-            path: "/lib/test/tests/server-repository.test.js",
-            portNumber: 10200
-        },
+        preTest: undefined,
         postTest: {
-            name: "InitalGainAccessTest",
+            name: "Inital Gain Access Test",
             path: "/lib/test/tests/initial-gain-access.test.js",
-            portNumber: 10210
         },
         priority: 2,
-    },
-    TAPEWORM_INFESTATION: {
-        name: "Tapeworm Infestation",
-        path: "/lib/command/tapeworm-infestation.js",
+    }
+}
+
+export const Commands: InitScripts = {
+    SYNC_CODEBASE: {
+        name: "Initial Codebase Sync",
+        path: "/lib/command/sync-codebase.js",
         defaultArgs: [],
-        preTest: {
-            name: "InitalGainAccessTest",
-            path: "/lib/test/tests/initial-gain-access.test.js",
-            portNumber: 10300
-        },
+        preTest: undefined,
         postTest: {
-            name: "IsBusyTest",
-            path: "/lib/test/tests/tapewormed.test.js",
-            portNumber: 10310
+            name: "Codebase Synced Test",
+            path: "/lib/test/tests/sync-codebase.test.js",
         },
-        priority: 3,
+        priority: 20,
     },
     COMMIT_CRIME: {
         name: "Commit Crime",
         path: "/lib/command/commit-crime.js",
         defaultArgs: [CrimeType.Homicide],
         preTest: {
-            name: "SingularityTest",
+            name: "Singularity Test",
             path: "/lib/test/tests/singularity.test.js",
-            portNumber: 10400
         },
         postTest: {
-            name: "IsBusyTest",
+            name: "Is Busy Test",
             path: "/lib/test/tests/is-busy.test.js",
-            portNumber: 10410
         },
-        priority: 4,
+        priority: 30,
     }
 }
 
 export const BrokersAndAgents: InitScripts = {
-    CONTRACT_SOLVER: {
-        name: "Contract Solver",
-        path: "/lib/component/contract/solver.daemon.js",
+    SYNC_CODEBASE: {
+        name: "Codebase Sync",
+        path: "/lib/command/sync-codebase.js",
         defaultArgs: ["--loop"],
-        preTest: {
-            name: "ContractSolverTest",
-            path: "/lib/test/tests/contract-solver.test.js",
-            portNumber: 10500
+        postTest: {
+            name: "Codebase Sync is Running Test",
+            path: "/lib/test/tests/is-running.test.js",
+            args: ["/lib/command/sync-codebase.js", "--loop"]
         },
-        postTest: undefined,
-        priority: 5,
+        priority: 30,
+        host: "n00dles"
+    },
+    CONTRACT_SOLVER_LISTENER: {
+        name: "Contract Solver Listener",
+        path: "/lib/component/contract/solver.listener.js",
+        defaultArgs: [],
+        postTest: {
+            name: "Listener is Running Test",
+            path: "/lib/test/tests/is-running.test.js",
+            args: ["/lib/component/contract/solver.listener.js"]
+        },
+        priority: 50,
+        host: "harakiri-sushi"
+    },
+    CONTRACT_SOLVER_DISPATCHER: {
+        name: "Contract Solver Dispatcher",
+        path: "/lib/component/contract/solver.dispatcher.js",
+        defaultArgs: [],
+        preTest: {
+            name: "Listener is Running Test",
+            path: "/lib/test/tests/is-running.test.js",
+            args: ["/lib/component/contract/solver.listener.js"]
+        },
+        postTest: {
+            name: "Dispatcher is Running Test",
+            path: "/lib/test/tests/is-running.test.js",
+            args: ["/lib/component/contract/solver.dispatcher.js"]
+        },
+        priority: 50,
+        host: "hong-fang-tea"
     },
     HOME_UPGRADE_BROKER: {
         name: "Home Upgrade Broker",
         path: "/lib/component/broker/home-upgrade/home-upgrade.daemon.js",
         defaultArgs: ["--loop"],
         preTest: {
-            name: "SingularityTest",
+            name: "Singularity Test",
             path: "/lib/test/tests/singularity.test.js",
-            portNumber: 10600
         },
-        postTest: undefined,
-        priority: 6
+        postTest: {
+            name: "Home Upgrade Broker is Running Test",
+            path: "/lib/test/tests/is-running.test.js",
+            args: ["/lib/component/broker/home-upgrade/home-upgrade.daemon.js", "--loop"]
+        },
+        priority: 60,
+        host: "joesguns"
     },
     HACKNET_BROKER: {
         name: "Hacknet Broker",
         path: "/lib/component/broker/hacknet/hacknet.daemon.js",
         defaultArgs: ["--loop"],
         preTest: undefined,
-        postTest: undefined,
-        priority: 7,
+        postTest: {
+            name: "Hacknet Broker Test",
+            path: "/lib/test/tests/hacknet.test.js",
+            args: ["--loop"]
+        },
+        priority: 70,
+        host: "foodnstuff"
     },
     DARKWEB_BROKER: {
         name: "Darkweb Broker",
         path: "/lib/component/broker/darkweb/darkweb.daemon.js",
         defaultArgs: ["--no-utility", "--no-formulas"],
         preTest: {
-            name: "SingularityTest",
+            name: "Singularity Test",
             path: "/lib/test/tests/singularity.test.js",
-            portNumber: 10800
         },
-        postTest: undefined,
-        priority: 8
+        postTest: {
+            name: "Darkweb Broker Test",
+            path: "/lib/test/tests/darkweb.test.js",
+            args: ["--no-utility", "--no-formulas"]
+        },
+        priority: 80,
+        host: "foodnstuff"
     },
     GAIN_ACCESS: {
         name: "Gain Access",
         path: "/lib/command/gain-access.js",
-        defaultArgs: ["--loop", "--tapeworm"],
+        defaultArgs: ["--loop"],
         preTest: undefined,
-        postTest: undefined,
-        priority: 9,
+        postTest: {
+            name: "Gain Access Test",
+            path: "/lib/test/tests/gain-access.test.js",
+            args: ["--loop"]
+        },
+        priority: 90,
+        host: "foodnstuff"
     }/*,
     BATCH_ATTACK: {
         name: "BatchDto Attack",
@@ -159,6 +191,6 @@ export const BrokersAndAgents: InitScripts = {
             portNumber: 11000
         },
         postTest: undefined,
-        priority: 10,
+        priority: 100,
     },*/
 };

@@ -45,4 +45,16 @@ export class DarkwebBroker extends BrokerBase {
             this.ns.toast(message);
         }
     };
+
+    public allPurchased= (noUtility= false, noFormulas = false) => {
+        if (!this.ns.hasTorRouter()) return false;
+
+        const filteredType: DarkWebItemTypeEnum[] = [];
+        if (noUtility) filteredType.push(DarkWebItemTypeEnum.Utility);
+        if (noFormulas) filteredType.push(DarkWebItemTypeEnum.Formulas);
+
+        return Object.values(DarkWebItems)
+            .filter(program => !filteredType.includes(program.type))
+            .every(program => this.ns.fileExists(program.program));
+    }
 }

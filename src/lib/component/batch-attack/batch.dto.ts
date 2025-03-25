@@ -25,7 +25,7 @@ export class BatchDto implements IBatch {
         const hackingFormulas = new BatchHackingFormulas(ns);
         this.hackChance = hackingFormulas.getHackChance(target, idealistic);
 
-        const multiplier = hackingFormulas.getHackMultiplier(target, host, idealistic);
+        const multiplier = hackingFormulas.getHackMultiplier(target, host, monitor, idealistic);
         const hackingThreads = hackingFormulas.getHackThreads(target, multiplier, idealistic);
         const targetAmount = hackingFormulas.getHackMoney(target, hackingThreads, idealistic);
         const growThreads = hackingFormulas.getGrowThreads(target, host, target.money.max - targetAmount, idealistic)

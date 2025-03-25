@@ -12,11 +12,12 @@ class InitialGainAccessTest extends TestBase {
     }
 
     async test(): Promise<boolean> {
-        const repository = new ServerRepository(this.ns);
-        const hackedServers = await repository.getHackedServers();
+        const testSubject = "n00dles";
 
-        if (!hackedServers.length) {
-            throw new Error("No hacked servers found");
+        for (const file of this.ns.ls("home", ".js")) {
+            if (!this.ns.fileExists(file, testSubject)) {
+                throw new Error(`Codebase sync failed: ${file} was not found on ${testSubject}`);
+            }
         }
 
         return true;

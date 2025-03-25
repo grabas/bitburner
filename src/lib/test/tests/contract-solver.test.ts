@@ -1,15 +1,14 @@
 import {NS} from "@ns";
 import {TestBase} from "/lib/test/test.base";
-import {parseArgs} from "/lib/test/test.args";
 import {solveContract} from "/lib/component/contract/solver.service";
 
-export async function main(ns: NS, args = parseArgs(ns)): Promise<void> {
-    await (new ContractSolverTest(ns, args.port)).runTest();
+export async function main(ns: NS): Promise<void> {
+    await (new ContractSolverTest(ns)).runTest();
 }
 
 class ContractSolverTest extends TestBase {
-    constructor(ns: NS, portNumber: number) {
-        super(ns, portNumber);
+    constructor(ns: NS) {
+        super(ns);
     }
 
     async test() {

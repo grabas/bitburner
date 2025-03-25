@@ -1,13 +1,12 @@
 import {NS} from "@ns";
 import {ITest, TestResult} from "/lib/test/test.interface";
+import {Ports} from "/lib/enum/ports.enum";
 
 export abstract class TestBase implements ITest {
     protected readonly ns: NS;
-    private readonly portNumber: number;
 
-    protected constructor(ns: NS, portNumber: number) {
+    protected constructor(ns: NS) {
         this.ns = ns;
-        this.portNumber = portNumber;
     }
 
     abstract test(): Promise<boolean>;
@@ -30,6 +29,6 @@ export abstract class TestBase implements ITest {
     }
 
     report(result: TestResult) {
-        this.ns.getPortHandle(this.portNumber).write(JSON.stringify(result));
+        this.ns.getPortHandle(Ports.TESTTING_PORT).write(JSON.stringify(result));
     }
 }

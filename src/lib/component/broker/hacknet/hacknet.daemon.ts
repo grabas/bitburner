@@ -13,6 +13,6 @@ export async function main(ns: NS, args = parseArgs(ns.args)) {
             await ns.sleep(100);
         } while (args.loop);
     } catch (e) {
-        ns.tprint(`${e}`);
+        ns.print(`${e}`);
     }
 }

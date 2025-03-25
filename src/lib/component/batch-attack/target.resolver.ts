@@ -21,10 +21,10 @@ const getPossibleActions = async (ns: NS, monitor = false): Promise<BatchStats[]
 
     return candidates
         .map((target: ServerDto) => new BatchDto(ns, target, host, monitor))
-        .filter((batch: BatchDto) => batch.hackChance === 1 && batch.target.security.access)
+        .filter((batch: BatchDto) => batch.hackChance >= 0.9 && batch.target.security.access)
         .map((batch: BatchDto) => ({
             target: batch.target.hostname,
-            income: formulas.getBatchIncomePerSecond(batch.target, host, batch.targetAmountMultiplier, true),
+            income: formulas.getBatchIncomePerSecond(batch.target, host, batch.targetAmountMultiplier, monitor),
             ram: batch.ramCost * BatchHackingFormulas.getWaveSize(host, batch.ramCost, batch.duration, true) / host.refresh().ram.max * 100,
             duration: batch.duration,
             prepDuration: new PrepareBatchDto(ns, batch.target, batch.host).duration
@@ -51,7 +51,7 @@ export async function main(ns: NS): Promise<void> {
         .map((action: BatchStats) => {
             return {
                 target: action.target,
-                income: ns.formatNumber(action.income) + "/s",
+                income: ns.formatNumber(action.income),
                 duration: ns.tFormat(action.duration),
                 prepDuration: ns.tFormat(action.prepDuration),
                 ram: ns.formatNumber(action.ram) + "%"

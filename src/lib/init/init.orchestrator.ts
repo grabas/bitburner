@@ -58,13 +58,13 @@ export class InitOrchestrator {
         this.print("\t")
         this.print(`Running ${script.name}...`, Colors.ORANGE);
 
-        if (this.isRunning(script.path, script.defaultArgs)) {
+        if (this.isRunning(script.path, script.host ?? "home", script.defaultArgs)) {
             this.print(`${script.name} is already running`, Colors.YELLOW);
             return true;
         }
 
         if (!(await this.runTestScript(script.preTest, script.name))) return false;
-        const scriptPid = this.ns.run(script.path, 1, ...script.defaultArgs);
+        const scriptPid = this.ns.exec(script.path, script.host ?? "home", 1, ...script.defaultArgs);
 
         if (!scriptPid) {
             this.print(`Failed to run ${script.name}`, Colors.RED);
@@ -72,7 +72,7 @@ export class InitOrchestrator {
         }
 
         if (asCommand) {
-            while (this.isRunning(scriptPid)) {
+            while (this.isRunning(scriptPid, script.host ?? "home", script.defaultArgs)) {
                 await this.ns.sleep(500);
             }
         }
@@ -110,16 +110,16 @@ export class InitOrchestrator {
 
     private runTestScript = async (testScript: TestScript|undefined, scriptName: string) => {
         if (testScript) {
-            return await runTest(this.ns, testScript, scriptName);
+            return await runTest(this.ns, testScript, scriptName, testScript.args ?? []);
         }
 
         return true;
     }
 
-    private isRunning = (id: FilenameOrPID, args?: ScriptArg[]): boolean => {
+    private isRunning = (id: FilenameOrPID, host: string, args?: ScriptArg[]): boolean => {
         return args && args.length ?
-            this.ns.isRunning(id, "home", ...args) :
-            this.ns.isRunning(id, "home");
+            this.ns.isRunning(id, host, ...args) :
+            this.ns.isRunning(id, host);
     }
 
     private print = (message: string|number|boolean, color = Colors.WHITE) => this.ns.tprint(setColor(message, color));

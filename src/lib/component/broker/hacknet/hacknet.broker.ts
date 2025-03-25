@@ -103,5 +103,7 @@ export class HacknetBroker extends BrokerBase {
         }
     }
 
+    public noMoreDeals = (): boolean => !this.getDeals().length;
+
     private effectiveCost = (cost: number | null): number => cost === null ? Infinity : cost;
 }

@@ -62,7 +62,6 @@ export class BatchManager {
         host: ServerDto,
         processIds: number[],
     ): Promise<void> => {
-        this.ns.killall(target.hostname);
         while (this.processesRunning(processIds)) {
             await this.ns.sleep(BatchConfig.TICK);
         }

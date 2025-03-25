@@ -33,10 +33,10 @@ export class BatchHackingFormulas extends HackingFormulas {
         return this.calculateWeakenTime(target, idealistic) - BatchConfig.TICK - hacktime;
     }
 
-    public getHackMultiplier(target: ServerDto, host: ServerDto, monitor = false, idealistic = false): number {
+    public getHackMultiplier(target: ServerDto, host: ServerDto, monitor = false): number {
         const candidates = Array.from({ length: BatchConfig.MAX_MULTIPLIER * 1000 }, (_, i) => {
             const hackMultiplier = (i + 1) / 1000;
-            const value = this.getBatchIncomePerSecond(target, host, hackMultiplier, monitor, idealistic);
+            const value = this.getBatchIncomePerSecond(target, host, hackMultiplier, monitor);
             return { multiplier: hackMultiplier, value };
         }).filter(entry => entry.value !== null);
 
@@ -51,8 +51,9 @@ export class BatchHackingFormulas extends HackingFormulas {
         host: ServerDto,
         hackMultiplier: number,
         monitor = false,
-        idealistic = false
     ): number => {
+        const idealistic = true;
+
         const weakenTime = this.calculateWeakenTime(target, idealistic);
         const duration =  weakenTime + 2 * BatchConfig.TICK;
 
@@ -64,7 +65,6 @@ export class BatchHackingFormulas extends HackingFormulas {
         const weakenGrowThreads = this.calculateWeakenThreads(target, host, this.getGrowSecurity(growThreads))
 
         const totalWeakenThreads = weakenHackThreads + weakenGrowThreads;
-
 
         const weakenScript = monitor ? ActionScripts.WEAKEN_BATCH_MONITOR : ActionScripts.WEAKEN_BATCH;
         const growScript = monitor ? ActionScripts.GROW_BATCH_MONITOR : ActionScripts.GROW_BATCH;

@@ -1,6 +1,7 @@
 import {CodingContractObject, NS} from "@ns";
 import {Crawler} from "/lib/utils/crawler";
 import {getSolver} from "/lib/component/contract/solver.registry";
+import {toString} from "/lib/utils/helpers/serialize-to-string";
 
 export async function solve(ns: NS, safe = true, verbose = true): Promise<void> {
     ns.disableLog("ALL");
@@ -28,7 +29,7 @@ export const solveContract = (ns: NS, contract: CodingContractObject, safe = tru
         return false;
     }
 
-    const result: string = contract.submit(serialize(solver.solve(contract.data)));
+    const result: string = contract.submit(toString(solver.solve(contract.data)));
     const success = result.length > 0;
     const message = success? result : `Failed to solve contract ${contract.type}`
 
@@ -38,11 +39,4 @@ export const solveContract = (ns: NS, contract: CodingContractObject, safe = tru
     }
 
     return success;
-}
-
-const serialize = (data: any): string => {
-    const type = typeof data;
-    if (type === "string") return data;
-    if (type === "number" || type === "bigint" || type === "boolean") return data.toString();
-    return JSON.stringify(data);
 }
