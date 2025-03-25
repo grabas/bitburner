@@ -29,17 +29,12 @@ class GainAccessTest extends TestBase {
             return true;
         }
 
-        const workers = await repository.getWorkers(true);
-
         const scriptName = "/lib/command/gain-access.js";
-        for (const server of workers) {
-            const isRunning = this.args.length ?
-                this.ns.isRunning(scriptName, server.hostname, ...this.args) :
-                this.ns.isRunning(scriptName, server.hostname);
-
-            if (isRunning) return true;
+        const isRunning = await repository.isRunningOnAnyServer(scriptName, this.args);
+        if (!isRunning) {
+            throw new Error(`Script is not running on any of the available servers`);
         }
 
-        throw new Error(`Script is not running on any of the available servers`);
+        return true
     }
 }

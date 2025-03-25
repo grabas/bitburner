@@ -1,4 +1,4 @@
-import {NS} from "@ns";
+import {NS, ScriptArg} from "@ns";
 import { getAllServers, getServerById } from '../database/server.database.js';
 import { ServerDto } from '/lib/entity/server/server.dto';
 import { ServerData } from "/lib/entity/server/server.interfaces";
@@ -81,5 +81,19 @@ export class ServerRepository {
     public async getIdleServers(): Promise<ServerDto[]> {
         const purchasedServers = await this.getPurchased();
         return purchasedServers.filter(server => server.ram.used === 0);
+    }
+
+    public async isRunningOnAnyServer(scriptName: string, args: ScriptArg[] = []): Promise<boolean> {
+        const servers = await this.getServers(true);
+
+        for (const server of servers) {
+            const isRunning = args.length ?
+                this.ns.isRunning(scriptName, server.hostname, ...args) :
+                this.ns.isRunning(scriptName, server.hostname);
+
+            if (isRunning) return true;
+        }
+
+        return false;
     }
 }

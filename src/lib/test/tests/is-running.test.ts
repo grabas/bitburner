@@ -22,17 +22,11 @@ class IsRunningTest extends TestBase {
     }
 
     async test(): Promise<boolean> {
-        const serverRepository = new ServerRepository(this.ns);
-        const servers = await serverRepository.getWorkers(true);
-
-        for (const server of servers) {
-            const isRunning = this.args.length ?
-                this.ns.isRunning(this.scriptName, server.hostname, ...this.args) :
-                this.ns.isRunning(this.scriptName, server.hostname);
-
-            if (isRunning) return true;
+        const isRunning = await (new ServerRepository(this.ns)).isRunningOnAnyServer(this.scriptName, this.args);
+        if (!isRunning) {
+            throw new Error(`Script is not running on any of the available servers`);
         }
 
-        throw new Error(`Script is not running on any of the available servers`);
+        return true;
     }
 }

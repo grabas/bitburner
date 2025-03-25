@@ -7,6 +7,7 @@ import {toString} from "/lib/utils/helpers/serialize-to-string";
 import {Ports} from "/lib/enum/ports.enum";
 
 export async function main(ns: NS): Promise<void> {
+    ns.disableLog("ALL");
     const portHandler = ns.getPortHandle(Ports.SOLVER_PORT);
     const network = (new Crawler(ns)).getNetwork();
     while (true) {
@@ -22,7 +23,7 @@ export async function main(ns: NS): Promise<void> {
             portHandler.write(JSON.stringify(contract));
         }
 
-        await ns.sleep(1000);
+        await ns.sleep(200);
     }
 }
 

@@ -25,7 +25,7 @@ const getPossibleActions = async (ns: NS, monitor = false): Promise<BatchStats[]
         .map((batch: BatchDto) => ({
             target: batch.target.hostname,
             income: formulas.getBatchIncomePerSecond(batch.target, host, batch.targetAmountMultiplier, monitor),
-            ram: batch.ramCost * BatchHackingFormulas.getWaveSize(host, batch.ramCost, batch.duration, true) / host.refresh().ram.max * 100,
+            ram: batch.ramCost * BatchHackingFormulas.getWaveSize(host, batch.ramCost, batch.duration) / host.refresh().ram.max * 100,
             duration: batch.duration,
             prepDuration: new PrepareBatchDto(ns, batch.target, batch.host).duration
         })).sortBy("income");
@@ -33,7 +33,7 @@ const getPossibleActions = async (ns: NS, monitor = false): Promise<BatchStats[]
 
 export const getBestTarget = async (ns: NS, monitor = false): Promise<string> => {
     const candidates = await getPossibleActions(ns, monitor);
-    return candidates[0].target ?? "n00dles";
+    return candidates.length ? candidates[0].target : "n00dles";
 }
 
 export async function main(ns: NS): Promise<void> {

@@ -1,6 +1,9 @@
 import {NS} from "@ns";
 import {TestBase} from "/lib/test/test.base";
-import {solveContract} from "/lib/component/contract/solver.service";
+import {getTestData} from "/lib/test/test-data/constract-solver";
+import {getSolver} from "/lib/component/contract/solver.registry";
+import {CodingContractName} from "/lib/component/contract/contract-names.enum";
+import {toString} from "/lib/utils/helpers/serialize-to-string";
 
 export async function main(ns: NS): Promise<void> {
     await (new ContractSolverTest(ns)).runTest();
@@ -12,15 +15,31 @@ class ContractSolverTest extends TestBase {
     }
 
     async test() {
-        const contractsTypes = this.ns.codingcontract.getContractTypes();
-        for (let i = 0; i < 100; i++) {
-            for (const contractType of contractsTypes) {
-                const fileName =  this.ns.codingcontract.createDummyContract(contractType);
-                const contract =  this.ns.codingcontract.getContract(fileName);
+        for (const constract of getTestData()) {
+            const solver = getSolver(constract.type);
 
-                if (!solveContract(this.ns, contract, false, false)) {
-                    throw new Error(`Failed to solve contract ${contractType}`);
+            if (!solver) {
+                throw new Error(`Solver not found for contract type: ${constract.type}`);
+            }
+
+            const solution = solver.solve(constract.data)
+
+            if (constract.type === CodingContractName.CompressionIIILZCompression) {
+                const lzDecompressor = getSolver(CodingContractName.CompressionIILZDecompression)
+
+                if (!lzDecompressor) {
+                    throw new Error(`Solver not found for contract type: ${constract.type}`);
                 }
+
+                if (lzDecompressor.solve(toString(solution)) !== toString(constract.data)) {
+                    throw new Error(`Failed to solve contract type: ${constract.type}`);
+                }
+
+                continue;
+            }
+
+            if (toString(solution) !== toString(constract.solution)) {
+                throw new Error(`Failed to solve contract type: ${constract.type}`);
             }
         }
 

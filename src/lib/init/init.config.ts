@@ -9,17 +9,62 @@ export interface TestScript {
     args?: ScriptArg[];
 }
 
+/**
+ * Represents a script configuration for executing tasks.
+ */
 export interface Script {
+    /**
+     * The file path of the script.
+     */
     path: string;
+
+    /**
+     * The name of the script.
+     */
     name: string;
+
+    /**
+     * The default arguments for the script.
+     */
     defaultArgs: ScriptArg[];
+
+    /**
+     * A precondition test that runs before the script.
+     */
     preTest?: TestScript;
+
+    /**
+     * A test that runs after the script.
+     */
     postTest?: TestScript;
+
+    /**
+     * Priority for the script execution.
+     */
     priority?: number;
+
+    /**
+     * The host on which the script runs.
+     */
     host?: string;
+
+    /**
+     * If true, throws an error if the script fails. Used for critical scripts and global requirements.
+     */
+    throwOfFailure?: boolean;
+
+    /**
+     * If true, waits for the script to finish before continuing. Used for command-like scripts
+     */
+    waitForExecution?: boolean;
+
+    /**
+     * If true Init orchestrator will try to run the script again of on home upgrade.
+     */
+    ensureRunning?: boolean;
 }
 
-export const GlobalRequirements: InitScripts = {
+export const InitScripts: InitScripts = {
     SET_BITNODE: {
         name: "Set Bitnode",
         path: "/lib/command/set-bitnode.js",
@@ -29,6 +74,8 @@ export const GlobalRequirements: InitScripts = {
             path: "/lib/test/tests/bitnode.test.js",
         },
         priority: 0,
+        throwOfFailure: true,
+        waitForExecution: true,
     },
     BUILD_SERVER_DATABASE: {
         name: "Build Server Database",
@@ -39,6 +86,8 @@ export const GlobalRequirements: InitScripts = {
             path: "/lib/test/tests/server-repository.test.js",
         },
         priority: 1,
+        throwOfFailure: true,
+        waitForExecution: true,
     },
     INITIAL_GAIN_ACCESS: {
         name: "Initial Gain Access",
@@ -50,11 +99,10 @@ export const GlobalRequirements: InitScripts = {
             path: "/lib/test/tests/initial-gain-access.test.js",
         },
         priority: 2,
-    }
-}
-
-export const Commands: InitScripts = {
-    SYNC_CODEBASE: {
+        throwOfFailure: true,
+        waitForExecution: true,
+    },
+    INITIAL_SYNC_CODEBASE: {
         name: "Initial Codebase Sync",
         path: "/lib/command/sync-codebase.js",
         defaultArgs: [],
@@ -63,7 +111,9 @@ export const Commands: InitScripts = {
             name: "Codebase Synced Test",
             path: "/lib/test/tests/sync-codebase.test.js",
         },
-        priority: 20,
+        priority: 3,
+        throwOfFailure: true,
+        waitForExecution: true,
     },
     COMMIT_CRIME: {
         name: "Commit Crime",
@@ -77,11 +127,9 @@ export const Commands: InitScripts = {
             name: "Is Busy Test",
             path: "/lib/test/tests/is-busy.test.js",
         },
-        priority: 30,
-    }
-}
-
-export const BrokersAndAgents: InitScripts = {
+        priority: 10,
+        waitForExecution: true,
+    },
     SYNC_CODEBASE: {
         name: "Codebase Sync",
         path: "/lib/command/sync-codebase.js",
@@ -92,19 +140,25 @@ export const BrokersAndAgents: InitScripts = {
             args: ["/lib/command/sync-codebase.js", "--loop"]
         },
         priority: 30,
-        host: "n00dles"
+        host: "n00dles",
+        ensureRunning: true,
     },
     CONTRACT_SOLVER_LISTENER: {
         name: "Contract Solver Listener",
         path: "/lib/component/contract/solver.listener.js",
         defaultArgs: [],
+        preTest:{
+            name: "Contract Solvers Test",
+            path: "/lib/test/tests/contract-solver.test.js"
+        },
         postTest: {
             name: "Listener is Running Test",
             path: "/lib/test/tests/is-running.test.js",
             args: ["/lib/component/contract/solver.listener.js"]
         },
         priority: 50,
-        host: "harakiri-sushi"
+        host: "harakiri-sushi",
+        ensureRunning: true,
     },
     CONTRACT_SOLVER_DISPATCHER: {
         name: "Contract Solver Dispatcher",
@@ -121,7 +175,8 @@ export const BrokersAndAgents: InitScripts = {
             args: ["/lib/component/contract/solver.dispatcher.js"]
         },
         priority: 50,
-        host: "hong-fang-tea"
+        host: "hong-fang-tea",
+        ensureRunning: true,
     },
     HOME_UPGRADE_BROKER: {
         name: "Home Upgrade Broker",
@@ -137,20 +192,20 @@ export const BrokersAndAgents: InitScripts = {
             args: ["/lib/component/broker/home-upgrade/home-upgrade.daemon.js", "--loop"]
         },
         priority: 60,
-        host: "joesguns"
+        host: "joesguns",
     },
     HACKNET_BROKER: {
         name: "Hacknet Broker",
         path: "/lib/component/broker/hacknet/hacknet.daemon.js",
         defaultArgs: ["--loop"],
-        preTest: undefined,
         postTest: {
             name: "Hacknet Broker Test",
             path: "/lib/test/tests/hacknet.test.js",
             args: ["--loop"]
         },
         priority: 70,
-        host: "foodnstuff"
+        host: "foodnstuff",
+        ensureRunning: true,
     },
     DARKWEB_BROKER: {
         name: "Darkweb Broker",
@@ -166,31 +221,34 @@ export const BrokersAndAgents: InitScripts = {
             args: ["--no-utility", "--no-formulas"]
         },
         priority: 80,
-        host: "foodnstuff"
+        host: "foodnstuff",
     },
     GAIN_ACCESS: {
         name: "Gain Access",
         path: "/lib/command/gain-access.js",
         defaultArgs: ["--loop"],
-        preTest: undefined,
         postTest: {
             name: "Gain Access Test",
             path: "/lib/test/tests/gain-access.test.js",
             args: ["--loop"]
         },
         priority: 90,
-        host: "foodnstuff"
-    }/*,
+        host: "foodnstuff",
+        ensureRunning: true,
+    },
     BATCH_ATTACK: {
-        name: "BatchDto Attack",
+        name: "Batch Attack",
         path: "/lib/component/batch-attack/batch.daemon.js",
-        defaultArgs: ["--loop"],
+        defaultArgs: ["--switch", "--monitor"],
         preTest: {
-            name: "BatchAttackTest",
+            name: "Batch attack Test",
             path: "/lib/test/tests/batch-attack.test.js",
-            portNumber: 11000
         },
-        postTest: undefined,
+        postTest: {
+            name: "Home Upgrade Broker is Running Test",
+            path: "/lib/test/tests/is-running.test.js",
+            args: ["/lib/component/batch-attack/batch.daemon.js", "--switch", "--monitor"]
+        },
         priority: 100,
-    },*/
+    },
 };

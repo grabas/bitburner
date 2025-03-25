@@ -120,7 +120,7 @@ export class BatchManager {
         this.ns.run(scriptPath, threads, ...Object.values(args));
 
     private runDiagnostics = (debugPort: number): number =>
-        this.ns.run("/lib/utils/monitor-batch-attack-desync.js", 1, debugPort);
+        this.ns.run("/lib/utils/monitor-batch-desync.js", 1, debugPort);
 
     private killProcesses = (pids: number[]): void => {
         pids.forEach((pid) => this.ns.kill(pid));

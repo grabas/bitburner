@@ -9,8 +9,8 @@ export class BatchHackingFormulas extends HackingFormulas {
         super(ns);
     }
 
-    public static getWaveSize(host: ServerDto, ramCost: number, duration: number, maxRam = false): number {
-        const whatCanYouFitInRam = Math.floor((maxRam ? host.refresh().ram.max : host.getRamAvailable()) / ramCost);
+    public static getWaveSize(host: ServerDto, ramCost: number, duration: number): number {
+        const whatCanYouFitInRam = Math.floor(host.getRamAvailable() / ramCost);
         const whatCanYouFitInDuration = Math.ceil(duration / BatchConfig.BATCH_SEPARATION)
 
         return Math.min(
@@ -75,7 +75,7 @@ export class BatchHackingFormulas extends HackingFormulas {
             (hackScript.size * hackingThreads) +
             (growScript.size * growThreads);
 
-        const batchSize = BatchHackingFormulas.getWaveSize(host, totalRam, duration, idealistic);
+        const batchSize = BatchHackingFormulas.getWaveSize(host, totalRam, duration);
 
         if (batchSize === 0) return 0;
 

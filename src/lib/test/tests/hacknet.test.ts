@@ -20,18 +20,12 @@ class HacknetTest extends TestBase {
 
         if (hacknetBroker.noMoreDeals()) return true;
 
-        const serverRepository = new ServerRepository(this.ns);
-        const servers = await serverRepository.getWorkers(true);
-
         const scriptName = "/lib/component/broker/hacknet/hacknet.daemon.js"
-        for (const server of servers) {
-            const isRunning = this.args.length ?
-                this.ns.isRunning(scriptName, server.hostname, ...this.args) :
-                this.ns.isRunning(scriptName, server.hostname);
-
-            if (isRunning) return true;
+        const isRunning = await (new ServerRepository(this.ns)).isRunningOnAnyServer(scriptName, this.args);
+        if (!isRunning) {
+            throw new Error(`Script is not running on any of the available servers`);
         }
 
-        throw new Error(`Script is not running on any of the available servers`);
+        return true;
     }
 }

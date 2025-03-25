@@ -6,8 +6,8 @@ import {sleep} from "/lib/utils/sleep";
 export async function main(ns: NS) {
     ns.disableLog("ALL");
     ns.ui.openTail()
-    ns.ui.resizeTail(500, 900)
-    ns.ui.moveTail(1020, 20)
+    ns.ui.resizeTail(500, 940)
+    ns.ui.moveTail(1020, 25)
     ns.clearLog()
 
     ns.printRaw(<BatchAttackDashboard ns={ns} portNumber={ns.args[0] as number} />)

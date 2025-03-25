@@ -5,6 +5,6 @@ export async function main(ns: NS): Promise<void> {
     try {
         await (new InitOrchestrator(ns)).init();
     } catch (error) {
-        ns.tprint(error instanceof Error ? error.message : error);
+        ns.print(error instanceof Error ? error.message : error);
     }
 }

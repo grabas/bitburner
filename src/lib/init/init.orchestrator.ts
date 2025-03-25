@@ -6,11 +6,8 @@ import {setColor} from "/lib/utils/helpers/set-color";
 import {runTest} from "/lib/test/test.resolver";
 
 import {
-    GlobalRequirements,
-    BrokersAndAgents,
     Script,
     TestScript,
-    Commands,
     InitScripts
 } from "/lib/init/init.config";
 
@@ -24,63 +21,56 @@ export class InitOrchestrator {
     public init = async () => {
         this.print("Initializing...", Colors.YELLOW);
 
-        const failedGlobalRequirements = await this.runsScripts(GlobalRequirements, true);
+        const failedScripts = await this.runsScripts();
 
-        if (failedGlobalRequirements.length) {
-            throw new Error("Failed to run essential scripts");
-        }
-
-        await this.runsScripts(Commands, true);
-        await this.watch(
-            await this.runsScripts(BrokersAndAgents)
-        );
+        await this.watch(failedScripts);
 
         this.print("\t");
         this.print("Initialization complete!", Colors.YELLOW);
     }
 
-    private runsScripts = async (initScripts: InitScripts, asCommand = false): Promise<Script[]> => {
+    private runsScripts = async (): Promise<Script[]> => {
         const failedScripts: Script[] = [];
 
-        const scripts = Object.values(initScripts).sortBy("priority", "ASC");
+        const scripts = Object.values(InitScripts).sortBy("priority", "ASC");
         for (const script of scripts) {
-            const result = await this.runScript(script, asCommand);
+            this.print("\t")
+            this.print(`Running ${script.name}...`, Colors.ORANGE);
 
-            if (!result) {
+            const result = await this.runScript(script);
+
+            if (!result && script.ensureRunning) {
                 failedScripts.push(script);
+                continue;
             }
+
+            this.print(`${script.name} OK!`, Colors.PURPLE);
         }
 
         return failedScripts;
     }
 
-    private runScript = async (script: Script, asCommand = false): Promise<boolean> => {
-        this.print("\t")
-        this.print(`Running ${script.name}...`, Colors.ORANGE);
-
-        if (this.isRunning(script.path, script.host ?? "home", script.defaultArgs)) {
+    private runScript = async (script: Script): Promise<boolean> => {
+        if (this.isRunning(script.path, script.host, script.defaultArgs)) {
             this.print(`${script.name} is already running`, Colors.YELLOW);
             return true;
         }
 
-        if (!(await this.runTestScript(script.preTest, script.name))) return false;
-        const scriptPid = this.ns.exec(script.path, script.host ?? "home", 1, ...script.defaultArgs);
+        try {
+            await this.runTestScript(script.preTest, script.name);
 
-        if (!scriptPid) {
-            this.print(`Failed to run ${script.name}`, Colors.RED);
+            await this.exec(script);
+
+            await this.runTestScript(script.postTest, script.name);
+
+            return true;
+        } catch (error: unknown) {
+            this.print(error instanceof Error ? error.message : String(error), Colors.RED);
+
+            if (script.throwOfFailure) throw error;
+
             return false;
         }
-
-        if (asCommand) {
-            while (this.isRunning(scriptPid, script.host ?? "home", script.defaultArgs)) {
-                await this.ns.sleep(500);
-            }
-        }
-
-        if (!(await this.runTestScript(script.postTest, script.name))) return false;
-        this.print(`${script.name} OK!`, Colors.PURPLE);
-
-        return true;
     }
 
     private watch = async (scripts: Script[]) => {
@@ -97,8 +87,7 @@ export class InitOrchestrator {
         scripts.sortBy("priority", "ASC");
         const failedScripts: Script[] = [];
         for (const script of scripts) {
-            const result = await this.runScript(script);
-            if (!result) {
+            if (!await this.runScript(script)) {
                 failedScripts.push(script);
             }
         }
@@ -116,7 +105,19 @@ export class InitOrchestrator {
         return true;
     }
 
-    private isRunning = (id: FilenameOrPID, host: string, args?: ScriptArg[]): boolean => {
+    private exec = async (script: Script) => {
+        const scriptPid = this.ns.exec(script.path, script.host ?? "home", 1, ...script.defaultArgs);
+
+        if (!scriptPid) throw new Error(`Script failed to run`);
+
+        if (script.waitForExecution) {
+            while (this.isRunning(scriptPid, script.host, script.defaultArgs)) {
+                await this.ns.sleep(500);
+            }
+        }
+    }
+
+    private isRunning = (id: FilenameOrPID, host?: string, args?: ScriptArg[]): boolean => {
         return args && args.length ?
             this.ns.isRunning(id, host, ...args) :
             this.ns.isRunning(id, host);
