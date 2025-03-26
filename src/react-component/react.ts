@@ -13,6 +13,7 @@ const useEffect = React.useEffect;
 const useState = React.useState;
 const useRef = React.useRef;
 const useCallback = React.useCallback;
+const useMemo = React.useMemo;
 
 export default React;
 export {
@@ -23,5 +24,6 @@ export {
   useEffect,
   useState,
   useRef,
-  useCallback
+  useCallback,
+  useMemo
 }

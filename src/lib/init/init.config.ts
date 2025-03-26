@@ -14,14 +14,14 @@ export interface TestScript {
  */
 export interface Script {
     /**
-     * The file path of the script.
-     */
-    path: string;
-
-    /**
      * The name of the script.
      */
     name: string;
+
+    /**
+     * The file path of the script.
+     */
+    path: string;
 
     /**
      * The default arguments for the script.
@@ -245,7 +245,7 @@ export const InitScripts: InitScripts = {
             path: "/lib/test/tests/batch-attack.test.js",
         },
         postTest: {
-            name: "Home Upgrade Broker is Running Test",
+            name: "Batch Attack Manager is Running Test",
             path: "/lib/test/tests/is-running.test.js",
             args: ["/lib/component/batch-attack/batch.daemon.js", "--switch", "--monitor"]
         },
