@@ -1,23 +1,6 @@
 import { NS } from "@ns";
 import "/lib/utils/prototypes";
 
-export function autocomplete(data: any): string[] {
-    data.flags([['verbose', false], ['refreshRate', 200]]);
-    return [...data.servers];
-}
-
-export async function main(ns: NS): Promise<void> {
-    const target: string = ns.args[0].toString();
-    const crawler = new Crawler(ns);
-
-    let path = "";
-    crawler.getPath(target).forEach((node: string) => {
-        path += "connect " + node + "; ";
-    });
-
-    ns.tprint(path);
-}
-
 export class Crawler {
     private readonly ns: NS;
 

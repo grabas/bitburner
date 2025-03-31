@@ -1,7 +1,6 @@
 import {NS} from "@ns";
 import {BatchConfig} from "./batch.config";
 import {ServerRepository} from "/lib/repository/server.repository";
-import {uuidv4} from "/lib/utils/uuidv4";
 import {ActionArgs} from "/lib/component/batch-attack/batch.args";
 import {monitor as monitorStatus, printLog} from "/lib/component/batch-attack/batch.monitor";
 import {BatchDto} from "/lib/component/batch-attack/batch.dto";
@@ -129,13 +128,11 @@ export class BatchManager {
 
     private async resetCycleAndTarget(processIds: number[], monitor = false): Promise<{
         target: ServerDto;
-        operationId: string;
         cycle: number;
     }> {
         const bestTargetId = await getBestTarget(this.ns, monitor);
         const newTarget = await this.repository.getById(bestTargetId);
-        const newOperationId = uuidv4();
         this.killProcesses(processIds);
-        return { target: newTarget, operationId: newOperationId, cycle: 0 };
+        return { target: newTarget, cycle: 0 };
     }
 }

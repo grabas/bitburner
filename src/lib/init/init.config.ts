@@ -115,10 +115,10 @@ export const InitScripts: InitScripts = {
         throwOfFailure: true,
         waitForExecution: true,
     },
-    COMMIT_CRIME: {
-        name: "Commit Crime",
-        path: "/lib/command/commit-crime.js",
-        defaultArgs: [CrimeType.Homicide],
+    ACTION_RESOLVER: {
+        name: "Resolving Action",
+        path: "/lib/command/action-resolver.js",
+        defaultArgs: [],
         preTest: {
             name: "Singularity Test",
             path: "/lib/test/tests/singularity.test.js",
@@ -128,7 +128,8 @@ export const InitScripts: InitScripts = {
             path: "/lib/test/tests/is-busy.test.js",
         },
         priority: 10,
-        waitForExecution: true,
+        waitForExecution: false,
+        host: "sigma-cosmetics",
     },
     SYNC_CODEBASE: {
         name: "Codebase Sync",
@@ -194,7 +195,7 @@ export const InitScripts: InitScripts = {
         priority: 60,
         host: "joesguns",
     },
-    HACKNET_BROKER: {
+    /*HACKNET_BROKER: {
         name: "Hacknet Broker",
         path: "/lib/component/broker/hacknet/hacknet.daemon.js",
         defaultArgs: ["--loop"],
@@ -206,7 +207,7 @@ export const InitScripts: InitScripts = {
         priority: 70,
         host: "foodnstuff",
         ensureRunning: true,
-    },
+    },*/
     DARKWEB_BROKER: {
         name: "Darkweb Broker",
         path: "/lib/component/broker/darkweb/darkweb.daemon.js",
@@ -239,7 +240,7 @@ export const InitScripts: InitScripts = {
     BATCH_ATTACK: {
         name: "Batch Attack",
         path: "/lib/component/batch-attack/batch.daemon.js",
-        defaultArgs: ["--switch", "--monitor"],
+        defaultArgs: ["--switch"],
         preTest: {
             name: "Batch attack Test",
             path: "/lib/test/tests/batch-attack.test.js",
@@ -247,7 +248,7 @@ export const InitScripts: InitScripts = {
         postTest: {
             name: "Batch Attack Manager is Running Test",
             path: "/lib/test/tests/is-running.test.js",
-            args: ["/lib/component/batch-attack/batch.daemon.js", "--switch", "--monitor"]
+            args: ["/lib/component/batch-attack/batch.daemon.js", "--switch"]
         },
         priority: 100,
     },

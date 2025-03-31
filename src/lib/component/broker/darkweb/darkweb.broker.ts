@@ -32,11 +32,10 @@ export class DarkwebBroker extends BrokerBase {
 
         const sortedPrograms: DarkWebItem[] = Object.values(DarkWebItems)
             .filter(program => !filteredType.includes(program.type))
+            .filter(program => !this.ns.fileExists(program.program))
             .sort((a, b) => a.price - b.price);
 
         for (const program of sortedPrograms) {
-            if (this.ns.fileExists(program.program)) continue;
-
             await this.secureFunds(program.price);
             this.singularity.purchaseProgram(program.program);
 

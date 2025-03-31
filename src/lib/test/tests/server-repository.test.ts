@@ -16,7 +16,7 @@ class ServerRepositoryTest extends TestBase {
         const servers = await repository.getServers();
 
         if (!servers.length) {
-            throw new Error("No hacked servers found");
+            throw new Error("No servers found");
         }
 
         return true;
