@@ -36,7 +36,6 @@ export enum FactionName {
 }
 
 export const FactionServers = {
-    [FactionName.FulcrumSecretTechnologies]: "fulcrumassets",
     [FactionName.CyberSec]: "CSEC",
     [FactionName.NiteSec]: "avmnite-02h",
     [FactionName.TheBlackHand]: "I.I.I.I",

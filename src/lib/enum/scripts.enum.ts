@@ -4,7 +4,7 @@ export interface ActionScript {
 }
 
 export const ActionScripts: { [key: string]: ActionScript } = {
-    GROW_BATCH: { path: "/lib/component/batch-attack/action/grow.action.js", size: 1.75 },
+    GROW_BATCH: { path: "/lib/component/batch-attack/action/grow.action.js", size: 1.85 },
     GROW_BATCH_MONITOR: { path: "/lib/component/batch-attack/action/grow.action.monitor.js", size: 1.95 },
 
     WEAKEN_BATCH: { path: "/lib/component/batch-attack/action/weaken.action.js", size: 1.75 },

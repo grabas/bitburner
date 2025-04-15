@@ -34,6 +34,7 @@ export class GangManager {
         let firstTick = true;
         let notifiedForNextTick = false;
 
+        let cycle = 0
         while (true) {
             this.recruit();
             this.equipMembers();
@@ -54,7 +55,7 @@ export class GangManager {
                 notifiedForNextTick = false;
 
                 if (!firstTick) {
-                    lowestInterval = Math.min(lowestInterval, tickInterval);
+                    lowestInterval = cycle % 5 === 0 ? tickInterval : Math.min(lowestInterval, tickInterval);
                 } else {
                     firstTick = false;
                 }
@@ -74,11 +75,17 @@ export class GangManager {
                 }
             }
 
+            cycle++;
             await this.ns.sleep(10);
         }
     }
 
     private decideMemberAction = (memberName: string): void => {
+        if (this.gang.getMemberNames().length < 6) {
+            this.gang.setMemberTask(memberName, this.isHacking ? GangTaskNames.Ransomware : GangTaskNames.MugPeople);
+            return;
+        }
+
         const mainStat = this.isHacking ? "hack" : "str";
         const trainingTask = this.isHacking ? GangTaskNames.TrainHacking : GangTaskNames.TrainCombat;
 
@@ -89,7 +96,7 @@ export class GangManager {
             return;
         }
 
-        if (ascensionResult[mainStat] >= 1.15 && ascensionResult["cha"] >= 1.05) {
+        if (ascensionResult[mainStat] >= 1.15 && ascensionResult["cha"] >= 1.05 && this.gang.getMemberInformation(memberName).augmentations.length > 1) {
             this.gang.ascendMember(memberName);
             this.gang.setMemberTask(memberName, trainingTask);
             return;
@@ -105,7 +112,7 @@ export class GangManager {
     private maximizeMoney = (): boolean => {
         const gangInformation = this.gang.getGangInformation();
 
-        if (this.gang.getMemberNames().length < GangConstants.MaximumGangMembers) {
+        if (this.gang.getMemberNames().length < 10) {
             return false;
         }
 
@@ -113,10 +120,10 @@ export class GangManager {
             return false;
         }
 
-        const medianAugReqs = this.getGangMedianAugReqs();
+        /*const medianAugReqs = this.getGangMedianAugReqs();
         if (medianAugReqs && medianAugReqs > this.ns.singularity.getFactionRep(this.faction)) {
             return false;
-        }
+        }*/
 
         const augCount = getUpgradesByTypeAndMults(UpgradeType.Augmentation, this.getSkills()).length
         for (const memberName of this.gang.getMemberNames()) {
@@ -171,7 +178,7 @@ export class GangManager {
             }
         }
     }
-
+/*
     private getGangMedianAugReqs = (): number|null => {
         const repReqs: number[] = this.ns.singularity.getAugmentationsFromFaction(this.faction)
             .filter(aug => !this.ns.singularity.getOwnedAugmentations(true).includes(aug))
@@ -186,5 +193,5 @@ export class GangManager {
         return (len % 2 === 0) ?
             (repReqs[len / 2 - 1] + repReqs[len / 2]) / 2 :
             repReqs[Math.floor(len / 2)];
-    }
+    }*/
 }

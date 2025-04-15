@@ -5,12 +5,11 @@ const parseArgs = (args: ScriptArg[]) => ({loop: args.includes("--loop") || args
 
 export async function main(ns: NS, args = parseArgs(ns.args)): Promise<void> {
     ns.disableLog("ALL");
-
-    const serverRepository = new ServerRepository(ns);
-    const servers = await serverRepository.getServers();
-    const files = ns.ls("home", ".js");
-
     do {
+        const serverRepository = new ServerRepository(ns);
+        const servers = await serverRepository.getHackedServers();
+        const files = ns.ls("home", ".js");
+
         for (const server of servers) {
             ns.scp(files, server.hostname, "home");
         }

@@ -10,7 +10,7 @@ export async function main(ns: NS, args = parseArgs(ns.args)) {
     try {
         do {
             await broker.actOnBestDeal();
-            await ns.sleep(100);
+            await ns.sleep(10);
         } while (args.loop);
     } catch (e) {
         ns.print(`${e}`);

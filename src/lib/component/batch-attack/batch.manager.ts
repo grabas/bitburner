@@ -10,6 +10,26 @@ import {PrepareBatchDto} from "/lib/component/batch-attack/prepare-batch.dto";
 import {BatchType, IBatch} from "/lib/component/batch-attack/batch.interface";
 import {CLEAR_PORT_MSG} from "/react-component/hooks/use-port-listener";
 import {BatchHackingFormulas} from "/lib/component/batch-attack/batch.formulas";
+import {parseArgs} from "/lib/component/batch-attack/batch.args";
+
+export async function main(ns: NS, args = parseArgs(ns)): Promise<void> {
+    await batchAttack(ns, args.target, args.switchTarget, args.monitor);
+}
+
+export function autocomplete(data: any): string[] {
+    return [...data.servers];
+}
+
+export async function batchAttack(ns: NS, target: string|null|undefined, switchTarget = false, debug = false): Promise<void> {
+    ns.disableLog("ALL");
+
+    ns.ui.openTail();
+    ns.ui.resizeTail(360, 300);
+    ns.ui.moveTail(debug ? 640 : 1160, 25);
+
+    const manager = new BatchManager(ns);
+    await manager.batchAttack(target, switchTarget, debug);
+}
 
 export class BatchManager {
     private readonly ns: NS;

@@ -2,7 +2,7 @@ import { NS } from "@ns";
 import {CrimeType} from "/lib/enum/crime.enum";
 
 export async function main(ns: NS): Promise<void> {
-    const focus = !ns.singularity.getOwnedAugmentations(true).includes("Neuroreceptor Management Implant");
+    const focus = ns.singularity.getOwnedAugmentations(true).includes("Neuroreceptor Management Implant");
 
     ns.singularity.universityCourse("Rothman University", "Algorithms", focus);
     await ns.sleep(1000 * 60 * 3);

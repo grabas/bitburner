@@ -239,7 +239,7 @@ export const InitScripts: InitScripts = {
     },
     BATCH_ATTACK: {
         name: "Batch Attack",
-        path: "/lib/component/batch-attack/batch.daemon.js",
+        path: "/lib/component/batch-attack/batch.manager.js",
         defaultArgs: ["--switch"],
         preTest: {
             name: "Batch attack Test",
@@ -248,7 +248,7 @@ export const InitScripts: InitScripts = {
         postTest: {
             name: "Batch Attack Manager is Running Test",
             path: "/lib/test/tests/is-running.test.js",
-            args: ["/lib/component/batch-attack/batch.daemon.js", "--switch"]
+            args: ["/lib/component/batch-attack/batch.manager.js", "--switch"]
         },
         priority: 100,
     },

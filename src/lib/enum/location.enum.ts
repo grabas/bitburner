@@ -1,3 +1,5 @@
+import {CorpMaterialName, CorpProductData} from "@ns";
+
 export enum CityName {
     Aevum = "Aevum",
     Chongqing = "Chongqing",

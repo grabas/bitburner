@@ -29,8 +29,8 @@ export class PrepareBatchDto implements IBatch {
         if (target.getSecurityLevel() > target.security.min) {
             let weakenThreads = hackingFormulas.calculateWeakenThreads(target, host);
 
-            if (weakenThreads * weakenScript.size > host.getRamAvailable() * 0.5) {
-                weakenThreads = Math.floor(host.getRamAvailable() / weakenScript.size * 0.20);
+            if (weakenThreads * weakenScript.size > host.getRamAvailable()) {
+                weakenThreads = Math.floor(host.getRamAvailable() / weakenScript.size);
             }
 
             this.action.push({
@@ -42,46 +42,46 @@ export class PrepareBatchDto implements IBatch {
         }
 
         if (target.getMoneyAvailable() !== target.money.max) {
-            let growThreads = hackingFormulas.getGrowThreads(target, host, target.getMoneyAvailable());
-
-            if (growThreads * growScript.size > host.getRamAvailable()) {
-                growThreads = Math.floor(host.getRamAvailable() / growScript.size * 0.5);
-            }
-
-            let weakenGrowThreads = hackingFormulas.calculateWeakenThreads(
-                target,
-                host,
-                hackingFormulas.getGrowSecurity(growThreads)
-            ) * 1.5;
-
-            if (weakenGrowThreads * weakenScript.size > host.getRamAvailable() * 0.3) {
-                weakenGrowThreads = Math.floor(host.getRamAvailable() / weakenScript.size * 0.20);
-            }
+            const growThreads = hackingFormulas.getGrowThreads(target, host, target.getMoneyAvailable());
+            const weakenGrowThreads = hackingFormulas.calculateWeakenThreads(target, host, hackingFormulas.getGrowSecurity(growThreads));
 
             this.action.push({
                     script: growScript,
                     sleepTime: hackingFormulas.getGrowSleepTime(target),
-                    threads: Math.ceil(growThreads),
+                    threads: growThreads,
                     duration: hackingFormulas.calculateGrowTime(target)
                 },
                 {
                     script: weakenScript,
                     sleepTime: hackingFormulas.getWeakenSleepTime(2),
-                    threads: Math.ceil(weakenGrowThreads),
+                    threads: weakenGrowThreads,
                     duration: weakenTime
                 });
         }
 
         const availableRam = host.getRamAvailable();
-        const maxAllowedUsage = availableRam * 0.9;
         const totalCost = this.action.reduce((sum, action) => sum + action.threads * action.script.size, 0);
 
-        if (totalCost > maxAllowedUsage) {
-            const scaleFactor = maxAllowedUsage / totalCost;
-            this.action = this.action.map(action => ({
-                ...action,
-                threads: Math.max(1, Math.floor(action.threads * scaleFactor))
-            }));
+        if (totalCost > availableRam) {
+            if (this.action.length === 3) {
+                const weakenAction = this.action[0];
+                const weakenCost = weakenAction.threads * weakenAction.script.size;
+
+                const remainingActions = this.action.slice(1);
+                const remainingCost = remainingActions.reduce((sum, action) => sum + action.threads * action.script.size, 0);
+                const availableForRemaining = availableRam - weakenCost;
+
+                const scaledRemaining = remainingActions.map(action => {
+                    action.threads = Math.max(Math.floor(action.threads * availableForRemaining / remainingCost), 1);
+                    return action;
+                });
+                this.action = [weakenAction, ...scaledRemaining];
+            } else {
+                this.action = this.action.map(action => {
+                    action.threads = Math.floor(action.threads * availableRam / totalCost);
+                    return action;
+                });
+            }
         }
 
         this.ramCost = this.action.reduce((sum, action) => sum + action.threads * action.script.size, 0);
