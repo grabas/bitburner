@@ -21,7 +21,7 @@ export interface ITaskParams {
 export interface IGangTask {
     isCombat: boolean;
     isHacking: boolean;
-    name: string;
+    name: GangTaskNames;
     params: ITaskParams;
 }
 

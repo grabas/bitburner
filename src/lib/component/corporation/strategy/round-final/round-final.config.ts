@@ -49,7 +49,7 @@ const AgroDefaultOfficeConfig = {
     MaxWarehouseLevel: 40,
     InitialNumEmployees: 8,
     MaxNumEmployees: 32,
-    MinResearch: 100,
+    MinResearch: 0,
     ExportMaterials: [{
         importDivision: "Chem",
         material: CorpMaterialName.Plants
@@ -64,9 +64,9 @@ const ChemDefaultOfficeConfig = {
     MaxWarehouseLevel: 40,
 
     InitialNumEmployees: 8,
-    MaxNumEmployees: 32,
+    MaxNumEmployees: 96,
 
-    MinResearch: 100,
+    MinResearch: 0,
     ExportMaterials: [{
         importDivision: "Agro",
         material: CorpMaterialName.Chemicals
@@ -80,7 +80,7 @@ const TobaccoMainOfficeConfig = {
     InitialNumEmployees: 64,
     MaxNumEmployees: Infinity,
 
-    MinResearch: 100,
+    MinResearch: 0,
     ExportMaterials: []
 }
 
@@ -91,7 +91,7 @@ const TobaccoDefaultOfficeConfig = {
     InitialNumEmployees: 64,
     MaxNumEmployees: 128,
 
-    MinResearch: 100,
+    MinResearch: 0,
     ExportMaterials: []
 }
 
@@ -99,6 +99,7 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
     Agro: {
         InitialNumAdverts: 30,
         MaxNumAdverts: 30,
+        PurchaseBoostMaterials: false,
         Research: [
             CorpResearchName.Lab,
             CorpResearchName.AutoBrew,
@@ -125,6 +126,7 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
     Chem: {
         InitialNumAdverts: 5,
         MaxNumAdverts: 5,
+        PurchaseBoostMaterials: true,
         Research: [
             CorpResearchName.Lab,
             CorpResearchName.AutoBrew,
@@ -152,6 +154,7 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
     Tobacco: {
         InitialNumAdverts: 100,
         MaxNumAdverts: Infinity,
+        PurchaseBoostMaterials: true,
         Research: [
            CorpResearchName.Lab,
            CorpResearchName.AutoBrew,
@@ -178,5 +181,5 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
             [CityName.Ishima]: TobaccoDefaultOfficeConfig,
             [CityName.Volhaven]: TobaccoDefaultOfficeConfig,
         },
-    },
+    }
 }

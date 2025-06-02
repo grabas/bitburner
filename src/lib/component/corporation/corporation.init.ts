@@ -10,6 +10,7 @@ export async function main(ns: NS, print = (msg: any) => ns.tprint(JSON.stringif
             ns.getServerMoneyAvailable("home") >= CorporationConfig.CORPORATION_COST
         )) {
             print(setColor("Failed to create corporation", Colors.RED));
+            return
         }
 
         print(setColor("Corporation created.", Colors.GREEN));

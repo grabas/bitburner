@@ -21,7 +21,7 @@ const getPossibleActions = async (ns: NS, monitor = false): Promise<BatchStats[]
 
     return candidates
         .map((target: ServerDto) => new BatchDto(ns, target, host, monitor))
-        .filter((batch: BatchDto) => batch.hackChance >= 0.9 && batch.target.security.access)
+        .filter((batch: BatchDto) => batch.hackChance >= 0.9 && batch.target.security.access && batch.targetAmount)
         .map((batch: BatchDto) => ({
             target: batch.target.hostname,
             income: formulas.getBatchIncomePerSecond(batch.target, host, batch.targetAmountMultiplier, monitor),
@@ -51,10 +51,10 @@ export async function main(ns: NS): Promise<void> {
         .map((action: BatchStats) => {
             return {
                 target: action.target,
-                income: ns.formatNumber(action.income),
+                income: action.income,
                 duration: ns.tFormat(action.duration),
                 prepDuration: ns.tFormat(action.prepDuration),
-                ram: ns.formatNumber(action.ram) + "%"
+                ram: action.ram
             }
         }
     );

@@ -18,7 +18,7 @@ class IsBusyTest extends TestBase {
             throw new Error("No access to singularity");
         }
 
-        if (!this.ns.singularity.isBusy()) {
+        if (!this.ns.singularity.isBusy() && !this.ns.singularity.isFocused()) {
             throw new Error("Player is not busy");
         }
 

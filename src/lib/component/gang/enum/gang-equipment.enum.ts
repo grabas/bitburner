@@ -239,3 +239,11 @@ export function getUpgradesByTypeAndMults(
             multKeys.some(key => upgrade.mults && upgrade.mults[key] !== undefined)
     );
 }
+
+export function getCombatAugmentations(): IMemberUpgrade[] {
+    return getUpgradesByTypeAndMults(UpgradeType.Augmentation, ["str", "def", "dex", "agi", "cha"]);
+}
+
+export function getHackingAugmentations(): IMemberUpgrade[] {
+    return getUpgradesByTypeAndMults(UpgradeType.Augmentation, ["hck", "cha"]);
+}

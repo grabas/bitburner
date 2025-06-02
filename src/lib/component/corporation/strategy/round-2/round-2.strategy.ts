@@ -10,7 +10,7 @@ export class Round2Strategy extends StrategyBase implements IStrategy {
     }
 
     public skip(): boolean {
-        return this.investmentRoundCheck(StrategyConfig);
+        return this.corporation.isPublic()
     }
 
     public async prep(): Promise<void> {
@@ -37,7 +37,7 @@ export class Round2Strategy extends StrategyBase implements IStrategy {
     }
 
     public async purchase(): Promise<void> {
-        //this.purchaseBoostMaterials();
+        this.purchaseBoostMaterials(DivisionConfig);
         this.purchaseRequiredMaterials();
     }
 

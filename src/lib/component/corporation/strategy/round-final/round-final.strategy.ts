@@ -10,7 +10,7 @@ export class RoundFinalStrategy extends StrategyBase implements IStrategy {
     }
 
     public skip(): boolean {
-        return this.investmentRoundCheck(StrategyConfig);
+        return false
     }
 
     public async prep(): Promise<void> {
@@ -21,22 +21,23 @@ export class RoundFinalStrategy extends StrategyBase implements IStrategy {
         this.upgradeOfficeSpace(DivisionConfig, "InitialNumEmployees");
         this.hireEmployees();
         this.purchaseCorpUpgrades(StrategyConfig.PrepCorpUpgrades);
+        this.assignEmployees(DivisionConfig);
         this.buyAdverts(DivisionConfig, "InitialNumAdverts");
     }
 
     public async start(): Promise<void> {
+        this.buyAdverts(DivisionConfig, "MaxNumAdverts");
         this.upgradeWarehouseLevel(DivisionConfig, "MaxWarehouseLevel");
         this.upgradeOfficeSpace(DivisionConfig, "MaxNumEmployees");
         this.hireEmployees();
-        this.assignEmployees(DivisionConfig);
+        //this.assignEmployees(DivisionConfig);
         this.purchaseCorpUpgrades(StrategyConfig.CorpUpgrades);
-        this.buyAdverts(DivisionConfig, "MaxNumAdverts");
         this.buyResearch(DivisionConfig);
         this.handleProduct(DivisionConfig);
     }
 
     public async purchase(): Promise<void> {
-        //this.purchaseBoostMaterials();
+        //this.purchaseBoostMaterials(DivisionConfig);
         this.purchaseRequiredMaterials();
     }
 

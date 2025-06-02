@@ -67,6 +67,7 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
         MaxNumAdverts: 1,
         Research: [],
         ProductCity: null,
+        PurchaseBoostMaterials: true,
         Office: {
             [CityName.Sector12]: AgroDefaultOfficeConfig,
             [CityName.Aevum]: AgroDefaultOfficeConfig,
@@ -81,6 +82,7 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
         MaxNumAdverts: 1,
         Research: [],
         ProductCity: null,
+        PurchaseBoostMaterials: true,
         Office: {
             [CityName.Sector12]: ChemDefaultOfficeConfig,
             [CityName.Aevum]: ChemDefaultOfficeConfig,

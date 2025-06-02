@@ -131,7 +131,7 @@ export class HackingFormulas{
 
     public getGrowThreads = (server: ServerDto, host: ServerDto, startMoney: number, idealistic = false): number => {
         const threads = this.numCycleForGrowthCorrected(server, host, startMoney, idealistic) * 1.05;
-        return Math.max(Math.ceil(threads), 1);
+        return Math.max(Math.ceil(isNaN(threads) ? 0 : threads), 1);
     }
 
     private numCycleForGrowthCorrected(

@@ -1,3 +1,9 @@
+export enum FactionWorkType {
+    hacking = "hacking",
+    field = "field",
+    security = "security",
+}
+
 export enum FactionName {
     Illuminati = "Illuminati",
     Daedalus = "Daedalus",

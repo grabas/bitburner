@@ -8,5 +8,5 @@ export async function main(ns: NS, args = parseActionArgs(ns.args)): Promise<voi
         }
     }
 
-    await ns.hack(args.target, { additionalMsec: args.sleepTime, stock: true });
+    await ns.hack(args.target, { additionalMsec: Math.max(0, args.sleepTime), stock: true });
 }

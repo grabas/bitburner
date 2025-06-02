@@ -63,7 +63,7 @@ const ChemDefaultOfficeConfig = {
     InitialNumEmployees: 8,
     MaxNumEmployees: 64,
 
-    MinResearch: 100,
+    MinResearch: 0,
     ExportMaterials: [{
         importDivision: "Agro",
         material: CorpMaterialName.Chemicals
@@ -77,7 +77,7 @@ const TobaccoMainOfficeConfig = {
     InitialNumEmployees: 64,
     MaxNumEmployees: 128,
 
-    MinResearch: 100,
+    MinResearch: 0,
     ExportMaterials: []
 }
 
@@ -98,6 +98,7 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
         MaxNumAdverts: 30,
         Research: [],
         ProductCity: null,
+        PurchaseBoostMaterials: true,
         Office: {
             [CityName.Sector12]: AgroDefaultOfficeConfig,
             [CityName.Aevum]: AgroDefaultOfficeConfig,
@@ -112,6 +113,7 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
         MaxNumAdverts: 5,
         Research: [],
         ProductCity: null,
+        PurchaseBoostMaterials: true,
         Office: {
             [CityName.Sector12]: ChemDefaultOfficeConfig,
             [CityName.Aevum]: ChemDefaultOfficeConfig,
@@ -130,6 +132,7 @@ export const DivisionConfig: Record<string, DivisionStrategyConfig> = {
             CorpResearchName.MarketTa2,
         ],
         ProductCity: CityName.Aevum,
+        PurchaseBoostMaterials: true,
         Office: {
             [CityName.Sector12]: TobaccoDefaultOfficeConfig,
             [CityName.Aevum]: TobaccoMainOfficeConfig,

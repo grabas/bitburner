@@ -33,7 +33,7 @@ export class InitialStrategy extends StrategyBase implements IStrategy {
     }
 
     public async purchase(): Promise<void> {
-        this.purchaseBoostMaterials();
+        this.purchaseBoostMaterials(DivisionConfig);
         this.purchaseRequiredMaterials();
     }
 

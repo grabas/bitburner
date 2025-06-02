@@ -8,5 +8,5 @@ export async function main(ns: NS, args = parseActionArgs(ns.args)): Promise<voi
         }
     }
 
-    await ns.grow(args.target, {additionalMsec: args.sleepTime, stock: true});
+    await ns.grow(args.target, {additionalMsec: Math.max(0, args.sleepTime), stock: true});
 }

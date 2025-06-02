@@ -4,7 +4,7 @@ import {BatchMonitorLog} from "/lib/component/batch-attack/batch.interface";
 
 export async function main(ns: NS, args = parseActionArgs(ns.args)): Promise<void> {
     const operationsStart = Date.now();
-    await ns.hack(args.target, {additionalMsec: args.sleepTime, stock: true});
+    await ns.hack(args.target, {additionalMsec: Math.max(0, args.sleepTime), stock: true});
     const duration = Date.now() - operationsStart
 
     const log: BatchMonitorLog = {

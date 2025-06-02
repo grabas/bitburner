@@ -1,8 +1,9 @@
-import {GangMemberInfo, NS} from "@ns";
+import {NS} from "@ns";
 import {IMemberUpgrade, IMults, MemberUpdagrades, MemberUpgradeNames, UpgradeType} from "./enum/gang-equipment.enum";
 import {getBitnode} from "/lib/repository/bitnode.repository";
 import {Bitnode} from "/lib/entity/bitnode/bitnode";
 import {GangMemberTasks, IGangTask} from "/lib/component/gang/enum/gang-task.enum";
+import {GangMember} from "/lib/component/gang/gang-member";
 
 export class GangFormulas {
     private readonly ns: NS;
@@ -51,7 +52,7 @@ export class GangFormulas {
         return upgrade.cost / this.getDiscount();
     }
 
-    private getDiscount(): number {
+    public getDiscount(): number {
         const gangInfo = this.ns.gang.getGangInformation();
 
         const power = gangInfo.power
@@ -61,12 +62,16 @@ export class GangFormulas {
         const powerLinearFac = 1e6;
         const discount =
             Math.pow(respect, 0.01) + respect / respectLinearFac + Math.pow(power, 0.01) + power / powerLinearFac - 1;
+
         return Math.max(1, discount);
     }
 
-    public getBestTaskByRespect(memberName: string, hackingFilter = false): IGangTask | null {
-        const member = this.ns.gang.getMemberInformation(memberName)
+    public getDiscountPercentage(): number {
+        const discount = this.getDiscount();
+        return Math.max(0, (1 - 1 / discount));
+    }
 
+    public getBestTaskByRespect(member: GangMember, hackingFilter = false): IGangTask | null {
         let tasks = Object.values(GangMemberTasks);
         tasks = tasks.filter(task => hackingFilter ? task.isHacking : task.isCombat);
 
@@ -91,9 +96,7 @@ export class GangFormulas {
         return bestTask;
     }
 
-    public getBestTaskByMoney(memberName: string, hackingFilter = false): IGangTask | null {
-        const member = this.ns.gang.getMemberInformation(memberName)
-
+    public getBestTaskByMoney(member: GangMember, hackingFilter = false): IGangTask | null {
         let tasks = Object.values(GangMemberTasks);
         tasks = tasks.filter(task => hackingFilter ? task.isHacking : task.isCombat);
 
@@ -118,8 +121,7 @@ export class GangFormulas {
         return bestTask;
     }
 
-    public getTaskWithLowestWantedGain(memberName: string): IGangTask | null {
-        const member = this.ns.gang.getMemberInformation(memberName)
+    public getTaskWithLowestWantedGain(member: GangMember): IGangTask | null {
         const tasks = Object.values(GangMemberTasks)
 
         let bestTask: IGangTask | null = null;
@@ -136,7 +138,7 @@ export class GangFormulas {
         return bestTask;
     }
 
-    public calculateRespectGain(member: GangMemberInfo, task: IGangTask): number {
+    public calculateRespectGain(member: GangMember, task: IGangTask): number {
         const gang = this.ns.gang.getGangInformation()
         if (task.params.baseRespect === 0) return 0;
         let statWeight = this.getStatWeight(member, task);
@@ -149,7 +151,7 @@ export class GangFormulas {
         return Math.pow(11 * task.params.baseRespect * statWeight * territoryMult * respectMult, territoryPenalty);
     }
 
-    public calculateWantedLevelGain(member: GangMemberInfo, task: IGangTask): number {
+    public calculateWantedLevelGain(member: GangMember, task: IGangTask): number {
         const gang = this.ns.gang.getGangInformation()
         if (task.params.baseWanted === 0) return 0;
         let statWeight = this.getStatWeight(member, task);
@@ -165,7 +167,7 @@ export class GangFormulas {
         return Math.min(100, calc);
     }
 
-    public calculateMoneyGain(member: GangMemberInfo, task: IGangTask): number {
+    public calculateMoneyGain(member: GangMember, task: IGangTask): number {
         const gang = this.ns.gang.getGangInformation()
         if (task.params.baseMoney === 0) return 0;
         let statWeight = this.getStatWeight(member, task);
@@ -179,12 +181,13 @@ export class GangFormulas {
         return Math.pow(5 * task.params.baseMoney * statWeight * territoryMult * respectMult, territoryPenalty);
     }
 
-    private getStatWeight(member: GangMemberInfo, task: IGangTask): number {
-        return (task.params.hackWeight / 100) * member.hack +
-            (task.params.strWeight / 100) * member.str +
-            (task.params.defWeight / 100) * member.def +
-            (task.params.dexWeight / 100) * member.dex +
-            (task.params.agiWeight / 100) * member.agi +
-            (task.params.chaWeight / 100) * member.cha;
+    private getStatWeight(member: GangMember, task: IGangTask): number {
+        const memberInfo = member.getMemberInformation();
+        return (task.params.hackWeight / 100) * memberInfo.hack +
+            (task.params.strWeight / 100) * memberInfo.str +
+            (task.params.defWeight / 100) * memberInfo.def +
+            (task.params.dexWeight / 100) * memberInfo.dex +
+            (task.params.agiWeight / 100) * memberInfo.agi +
+            (task.params.chaWeight / 100) * memberInfo.cha;
     }
 }

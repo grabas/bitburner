@@ -32,7 +32,7 @@ export class StrategyBase {
         this.formulas = new CorporationFormulas(ns);
     }
 
-    protected forEachOffice(
+    public forEachOffice(
         divisionConfig: Record<string, DivisionStrategyConfig> | null,
         action: (
             divisionName: string,
@@ -149,7 +149,9 @@ export class StrategyBase {
                 if (hasLeftovers && position === CorpEmployeeJob.RandD) adjustedCount--;
                 if (hasLeftovers && position === CorpEmployeeJob.Business) adjustedCount++;
 
-                this.corporationApi.setAutoJobAssignment(divisionName, city, position, Math.max(adjustedCount, 0));
+                try {
+                    this.corporationApi.setAutoJobAssignment(divisionName, city, position, Math.max(adjustedCount, 0));
+                } catch (error) { continue; }
             }
         });
     }
@@ -178,29 +180,29 @@ export class StrategyBase {
         });
     }
 
-    protected purchaseBoostMaterials(): void {
-        this.forEachOffice(null, (divisionName, city, office) => {
-            if (divisionName === "Chem") {
-                const boostMaterials = this.formulas.getIdealBoostMaterialAmounts(office);
+    public purchaseBoostMaterials(divisionsConfig: Record<string, DivisionStrategyConfig>): void {
+        this.forEachOffice(divisionsConfig, (divisionName, city, office) => {
+            const divisionConfig = divisionsConfig[divisionName];
+            if (!divisionConfig.PurchaseBoostMaterials) return;
 
-                for (const [material, targetAmount] of Object.entries(boostMaterials) as [CorpMaterialName, number][]) {
-                    const currentAmount = office.getMaterialStock(material);
-                    const delta = Math.floor(targetAmount) - currentAmount;
+            const boostMaterials = this.formulas.getIdealBoostMaterialAmounts(office);
+            for (const [material, targetAmount] of Object.entries(boostMaterials) as [CorpMaterialName, number][]) {
+                const currentAmount = office.getMaterialStock(material);
+                const delta = Math.floor(targetAmount) - currentAmount;
 
-                    if (isNaN(delta)) continue;
+                if (isNaN(delta)) continue;
 
-                    const amount = Math.floor(Math.abs(delta) / 10);
+                const amount = Math.floor(Math.abs(delta) / 10);
 
-                    if (delta > 0) {
-                        this.corporationApi.buyMaterial(divisionName, city, material, amount);
-                        this.corporationApi.sellMaterial(divisionName, city, material, "0", "MP");
-                    } else if (delta < 0) {
-                        this.corporationApi.buyMaterial(divisionName, city, material, 0);
-                        this.corporationApi.sellMaterial(divisionName, city, material, amount.toString(), "MP");
-                    } else {
-                        this.corporationApi.sellMaterial(divisionName, city, material, "0", "MP");
-                        this.corporationApi.buyMaterial(divisionName, city, material, 0);
-                    }
+                if (delta > 0) {
+                    this.corporationApi.buyMaterial(divisionName, city, material, amount);
+                    this.corporationApi.sellMaterial(divisionName, city, material, "0", "MP");
+                } else if (delta < 0) {
+                    this.corporationApi.buyMaterial(divisionName, city, material, 0);
+                    this.corporationApi.sellMaterial(divisionName, city, material, amount.toString(), "MP");
+                } else {
+                    this.corporationApi.sellMaterial(divisionName, city, material, "0", "MP");
+                    this.corporationApi.buyMaterial(divisionName, city, material, 0);
                 }
             }
         });
@@ -237,8 +239,6 @@ export class StrategyBase {
                     const stock = importOffice.getMaterialStock(exportData.material) / 10;
                     const amount = Math.max((importOffice.getRequiredMaterialRawAmount(exportData.material) / 10) - stock, 0);
                     const amountSafe = isNaN(amount) ? 0 : amount
-
-                    if (amountSafe <= 0) continue;
 
                     this.corporationApi.cancelExportMaterial(division.name, office.city, exportData.importDivision, office.city, exportData.material);
                     this.corporationApi.exportMaterial(

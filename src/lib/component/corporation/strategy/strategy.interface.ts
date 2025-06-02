@@ -43,6 +43,7 @@ export interface DivisionOfficeCofiguration {
 export interface DivisionStrategyConfig {
     InitialNumAdverts: number;
     MaxNumAdverts: number;
+    PurchaseBoostMaterials: boolean,
     Research: (CorpBaseResearchName|CorpProductResearchName)[];
     Office: DivisionOfficeConfig;
     ProductCity: CityName|null,

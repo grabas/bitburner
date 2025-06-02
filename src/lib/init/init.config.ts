@@ -115,6 +115,22 @@ export const InitScripts: InitScripts = {
         throwOfFailure: true,
         waitForExecution: true,
     },
+    GANG_MANAGER: {
+        name: "Gang Manager",
+        path: "/lib/component/gang/gang.manager.js",
+        defaultArgs: [],
+        preTest: {
+            name: "In Gang Test",
+            path: "/lib/test/tests/in-gang.test.js",
+        },
+        postTest: {
+            name: "Gang manager is Running Test",
+            path: "/lib/test/tests/is-running.test.js",
+            args: ["/lib/component/gang/gang.manager.js"]
+        },
+        priority: 9,
+        waitForExecution: false
+    },
     ACTION_RESOLVER: {
         name: "Resolving Action",
         path: "/lib/command/action-resolver.js",

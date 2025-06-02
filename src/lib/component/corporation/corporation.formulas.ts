@@ -74,7 +74,7 @@ export class CorporationFormulas {
         let bestProduction = 0;
         for (let ops = 0; ops <= totalEmployees; ops++) {
             for (let eng = 0; eng <= totalEmployees - ops; eng++) {
-                for (let bus = 1; bus <= totalEmployees - ops - eng; bus++) {
+                for (let bus = 3; bus <= totalEmployees - ops - eng; bus++) {
                     const mng = totalEmployees - ops - eng - bus;
                     const production = this.getOfficeRawMaterialProduction(ops, eng, mng, office);
 
@@ -416,7 +416,7 @@ export class CorporationFormulas {
                     acc + Math.max(adjustedProduction * ratio, 0) * MaterialInfo[mat as CorpMaterialName].size,
                 0
             );
-            const total = Math.max(producedSize, requiredSize) * 1.30;
+            const total = Math.max(producedSize, requiredSize) * 1.50;
             return { adjustedProduction, multiplier, total };
         };
 
